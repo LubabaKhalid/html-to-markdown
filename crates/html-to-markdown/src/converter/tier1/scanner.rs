@@ -494,7 +494,7 @@ pub fn scan(
                 }
 
                 if spec.is_void || close.1 {
-                    emit_void(&mut state, spec, &attrs, html, options)?;
+                    emit_void(&mut state, spec, name_lower, &attrs, html, options)?;
                     text_start = pos;
                     continue;
                 }
@@ -1105,6 +1105,9 @@ fn emit_open(
     // `Tier1State::last_emitted_was_img`); the `TagKind::Image` arm below
     // re-sets it to true after this reset runs.
     state.last_emitted_was_img = false;
+    if std::mem::take(&mut state.last_closed_block) && is_inline_tag(name_lower) {
+        separate_inline_after_block(state);
+    }
 
     // ~keep Tier-2 wraps these in markers this scanner has no arm for, so emitting them as
     // transparent inline content would silently drop the markers. See
@@ -1748,6 +1751,7 @@ fn open_table_cell(
 fn emit_void(
     state: &mut Tier1State,
     spec: &'static TagSpec,
+    name_lower: &[u8],
     attrs: &[(&[u8], Option<&[u8]>)],
     html: &str,
     options: &ConversionOptions,
@@ -1759,6 +1763,10 @@ fn emit_void(
     // `Tier1State::last_emitted_was_img`); the `TagKind::Image` arm below
     // re-sets it to true after this reset runs.
     state.last_emitted_was_img = false;
+    if std::mem::take(&mut state.last_closed_block) && is_inline_tag(name_lower) {
+        separate_inline_after_block(state);
+    }
+    state.last_closed_block = is_block_tag(name_lower);
 
     match spec.kind {
         TagKind::Hr => {
@@ -2236,6 +2244,7 @@ fn emit_close(
         TagKind::LineBreak | TagKind::Image => {}
         TagKind::RawText(_) | TagKind::Ignored => {}
     }
+    state.last_closed_block = is_block_tag(name_lower);
 
     Ok(())
 }
@@ -3860,6 +3869,30 @@ fn output_ends_with_inline_text(output: &str) -> bool {
     !output_ends_with_inline_close_marker(output)
 }
 
+/// Start a new paragraph for inline content that directly follows a block whose output ends with
+/// a single line break (a list, a table, `<hr>`), so it does not continue the block's last line
+/// (issues #570, #571). Mirrors Tier-2's `continues_block_last_line` in `walk_node`.
+fn separate_inline_after_block(state: &mut Tier1State) {
+    // ~keep `<pre>` sets the CODE bit too, so one test covers code spans and code blocks.
+    if state.in_table_cell() || state.list_depth > 0 || state.escape_ctx.contains(EscapeCtx::CODE) {
+        return;
+    }
+    let dest = state.cell_or_output_mut();
+    if dest.len() > 1 && dest.ends_with('\n') && !dest.ends_with("\n\n") {
+        dest.push('\n');
+    }
+}
+
+/// Tier-2's inline-element test, which decides what counts as inline content after a block.
+fn is_inline_tag(name_lower: &[u8]) -> bool {
+    std::str::from_utf8(name_lower).is_ok_and(crate::converter::main_helpers::is_inline_element)
+}
+
+/// Tier-2's block-level test, which decides what counts as the block before inline content.
+fn is_block_tag(name_lower: &[u8]) -> bool {
+    std::str::from_utf8(name_lower).is_ok_and(crate::converter::utility::content::is_block_level_element)
+}
+
 fn flush_text(
     state: &mut Tier1State,
     raw: &str,
@@ -3908,6 +3941,11 @@ fn flush_text(
             return Ok(());
         }
         return Err(BailReason::Classifier);
+    }
+
+    // ~keep Whitespace-only text between a block and the content after it keeps the window open.
+    if !raw.trim().is_empty() && std::mem::take(&mut state.last_closed_block) {
+        separate_inline_after_block(state);
     }
 
     let in_pre = state.escape_ctx.contains(EscapeCtx::PRE);
