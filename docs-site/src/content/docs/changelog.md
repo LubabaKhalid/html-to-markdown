@@ -144,6 +144,72 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   reference is missing its `;` when the name is known, and keeps the unknown wording for names
   that really are unknown (#586).
 
+- **`base_url` could pick a `<base href>` that a browser ignores.** The document base came from a
+  byte scan for the first `<base` tag in the source, so a `<base>` inside a comment, inside
+  `<title>`, `<textarea>`, `<script>`, `<style>` or another raw-text element, inside `<template>`
+  or SVG, or in a body that a `<frameset>` replaces, set the base for every relative link. The base
+  now comes from the first `<base>` with an `href` in tree order, read from an html5ever parse of
+  the document. The parse stops at the first `<base href>` once no later markup can place a node
+  in front of it or remove it, in `<head>` or in the body, and a page without a `<base` tag is not
+  parsed at all. Found while adopting `base_url` downstream, where the same two mistakes had
+  already been fixed once in a link pre-pass.
+
+- **A `data:` or `javascript:` `<base href>` became the base for relative links.** A browser
+  ignores such a base and resolves against the page's own URL, as the HTML "frozen base URL"
+  steps require. `base_url` now does the same, so relative links on such a page resolve against
+  the caller's `base_url` instead of failing to resolve.
+
+- **The `base` and `canonical` metadata kept the last tag, not the first.** The head extractor
+  overwrote each value when it met another tag, so the reported `base` could differ from the
+  base that `base_url` resolves against. The `base` metadata (and `base_href` in the document
+  metadata) is now the same first `<base href>` in tree order that the document base uses, read
+  once, and the first `<link rel="canonical">` wins.
+
+- **The `<meta>` metadata kept the last tag with a given name.** Each `<meta name>` or
+  `<meta property>` overwrote the value an earlier tag with the same key had stored. The first
+  tag per key now wins on both tiers, as the `base` and `canonical` metadata do.
+
+- **A page without a `<head>` tag reported no `base` metadata.** The parser creates the head
+  itself, so `<base href="https://a.example/"><p>x</p>` sets the document base, but the head
+  extractor looked for a `<head>` tag in the source and found none. The `base` metadata now comes
+  from the same parsed document as the document base on both tiers, with or without a `<head>`
+  tag.
+
+- **A `>` inside a `<base>` attribute value turned off the early stop of the base parse.** The
+  parse is fed in pieces, and a piece could end inside the quoted value, so the `<base>` tag only
+  completed in the next piece, which was never checked. The parse now notes each `<base href>`
+  element when html5ever's tree builder creates it and checks only that element's ancestors, so
+  the parse stops wherever the tag bytes fall, and the cost of the check does not grow with the
+  size of the tree. The document base itself was always correct.
+
+- **The `title` metadata kept the last `<title>`, not the first.** A head with the titles First
+  and Second reported Second, while a browser shows First. The first title now wins on both
+  tiers, as the `base`, `canonical` and `<meta>` metadata already do. An empty first title also
+  wins, as in a browser, so the page reports no title.
+
+- **`<meta>` names that differ only in letter case let the last tag win.** Meta names do not
+  depend on letter case, but `<meta name="Description">` followed by `<meta name="description">`
+  gave the second value in the document metadata, and the frontmatter printed both. The names are
+  now compared in any letter case, and the first tag wins in the frontmatter and the document
+  metadata.
+
+- **A `<head>` tag inside the body gave the two tiers different metadata.** The parser ignores a
+  `<head>` tag once the body has started. Tier 1 read such a stray head when the page had no head
+  of its own, and Tier 2 read it when the real head was empty. Both tiers now read only the first
+  head before the body. The body starts at a `<body>` tag, at text, or at any tag other than the
+  ones a head can hold, so `<p>x</p><head><title>Stray</title></head>` has no title. The
+  document structure gives a metadata block only for the head the metadata reads. A leading
+  UTF-8 byte order mark is dropped first, as a browser's decoder drops it, so it does not start
+  the body and no longer appears at the start of the output.
+
+- **A `<meta>` tag named `title`, `base` or `canonical` replaced the document's title, base and
+  canonical link.** `<meta name="base" content="/meta/">` next to `<base href="/real/">` set
+  `base_href` in the document metadata to `/meta/`, while the links resolved against `/real/`, and
+  `<meta name="title">` replaced the `<title>` text. The `base_href` and `canonical_url` fields
+  now come only from the `<base>` element and `<link rel="canonical">`, and such a meta tag is an
+  ordinary entry in `meta_tags`. A `<meta name="title">` still gives the `title` of a page without
+  a `<title>` element, but it no longer replaces the text of one.
+
 ## [3.15.1] - 2026-09-27
 
 ### Fixed

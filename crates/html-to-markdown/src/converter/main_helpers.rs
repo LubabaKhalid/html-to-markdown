@@ -3,7 +3,7 @@
 //! This module contains utility functions used by the main conversion pipeline,
 //! including preprocessing helpers, HTML repair, and metadata formatting.
 
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, HashSet};
 use std::sync::OnceLock;
 
 use crate::options::ConversionOptions;
@@ -520,11 +520,18 @@ pub fn repair_with_html5ever(input: &str) -> Option<String> {
 
 /// Format metadata as YAML frontmatter.
 ///
+/// ~keep The `title` key is present whenever a title element was seen, even an empty one, so
+/// ~keep `extract_document_metadata` can tell "no title element" from "an empty one" (#527). An
+/// ~keep empty title carries no frontmatter line either way, so it is the one key skipped here.
+///
 /// Keys and values come from the page, so each is written as one YAML scalar (#544): a
 /// newline, `: ` or a leading indicator would otherwise end the line or change what YAML reads.
 pub fn format_metadata_frontmatter(metadata: &BTreeMap<String, String>) -> String {
     let mut result = String::from("---\n");
     for (key, value) in metadata {
+        if key == "title" && value.is_empty() {
+            continue;
+        }
         push_yaml_scalar(&mut result, key);
         result.push_str(": ");
         push_yaml_scalar(&mut result, value);
@@ -623,12 +630,13 @@ const fn is_yaml_printable(c: char) -> bool {
 }
 
 /// Record `<meta name>`/`<meta property>` content into `metadata`, honoring `strip_tags`/
-/// `preserve_tags` for `"meta"`. Extracted from `extract_head_metadata` — same tag-name,
-/// attribute-lookup, and key-formatting logic, unchanged.
+/// `preserve_tags` for `"meta"`. The first tag per key wins, comparing keys in any letter case;
+/// `seen` holds the lower-cased keys recorded so far.
 fn collect_meta_head_metadata(
     child_tag: &tl::HTMLTag,
     options: &ConversionOptions,
     metadata: &mut BTreeMap<String, String>,
+    seen: &mut HashSet<String>,
 ) {
     if !child_tag.name().as_utf8_str().eq_ignore_ascii_case("meta")
         || options.strip_tags.iter().any(|t| t == "meta")
@@ -644,27 +652,38 @@ fn collect_meta_head_metadata(
         child_tag.attributes().get("name").flatten(),
         crate::converter::utility::attributes::decoded_attribute(child_tag, "content"),
     ) {
-        let name_str = name.as_utf8_str();
-        metadata.insert(format!("meta-{name_str}"), content.into_owned());
+        let key = format!("meta-{}", name.as_utf8_str());
+        if seen.insert(key.to_ascii_lowercase()) {
+            metadata.insert(key, content.into_owned());
+        }
     }
     if let (Some(property), Some(content)) = (
         child_tag.attributes().get("property").flatten(),
         crate::converter::utility::attributes::decoded_attribute(child_tag, "content"),
     ) {
-        let property_str = property.as_utf8_str();
-        metadata.insert(format!("meta-{property_str}"), content.into_owned());
+        let key = format!("meta-{}", property.as_utf8_str());
+        if seen.insert(key.to_ascii_lowercase()) {
+            metadata.insert(key, content.into_owned());
+        }
     }
 }
 
 /// Record the trimmed, decoded `<title>` text into `metadata`, honoring `strip_tags`/
-/// `preserve_tags` for `"title"`.
+/// `preserve_tags` for `"title"`. The first title wins, as in a browser; an empty one still
+/// records the `title` key, empty, so the element's presence survives even though its text does
+/// not (#527). `seen_title` is whether a title came before.
 fn collect_title_head_metadata(
     child_tag: &tl::HTMLTag,
     parser: &tl::Parser,
     options: &ConversionOptions,
     metadata: &mut BTreeMap<String, String>,
+    seen_title: &mut bool,
 ) {
-    if !child_tag.name().as_utf8_str().eq_ignore_ascii_case("title")
+    if !child_tag.name().as_utf8_str().eq_ignore_ascii_case("title") {
+        return;
+    }
+    let later_title = std::mem::replace(seen_title, true);
+    if later_title
         || options.strip_tags.iter().any(|t| t == "title")
         || options.preserve_tags.iter().any(|t| t == "title")
     {
@@ -680,12 +699,10 @@ fn collect_title_head_metadata(
     }
     // ~keep The title is text and carries character references like any other text (#509).
     let title_content = crate::text::decode_html_entities_cow(title_content.trim()).into_owned();
-    if !title_content.is_empty() {
-        metadata.insert("title".to_string(), title_content);
-    }
+    metadata.insert("title".to_string(), title_content);
 }
 
-/// Record the decoded href of a `<link rel="canonical">` into `metadata`.
+/// Record the decoded href of the first `<link rel="canonical">` into `metadata`.
 fn collect_link_head_metadata(child_tag: &tl::HTMLTag, metadata: &mut BTreeMap<String, String>) {
     if !child_tag.name().as_utf8_str().eq_ignore_ascii_case("link") {
         return;
@@ -700,59 +717,93 @@ fn collect_link_head_metadata(child_tag: &tl::HTMLTag, metadata: &mut BTreeMap<S
     let Some(href) = crate::converter::utility::attributes::decoded_attribute(child_tag, "href") else {
         return;
     };
-    metadata.insert("canonical".to_string(), href.into_owned());
+    metadata
+        .entry("canonical".to_string())
+        .or_insert_with(|| href.into_owned());
 }
 
-/// Record the decoded `<base href>` into `metadata`.
-fn collect_base_head_metadata(child_tag: &tl::HTMLTag, metadata: &mut BTreeMap<String, String>) {
-    if !child_tag.name().as_utf8_str().eq_ignore_ascii_case("base") {
-        return;
-    }
-    let Some(href) = crate::converter::utility::attributes::decoded_attribute(child_tag, "href") else {
-        return;
-    };
-    metadata.insert("base".to_string(), href.into_owned());
-}
-
-/// Extract metadata from the head element.
+/// Extract metadata from the head element below `roots`, recording `document_base_href` as
+/// `base` whether or not the source has a `<head>` tag.
 pub fn extract_head_metadata(
-    node_handle: &tl::NodeHandle,
+    roots: &[tl::NodeHandle],
+    parser: &tl::Parser,
+    options: &ConversionOptions,
+    document_base_href: Option<&str>,
+) -> BTreeMap<String, String> {
+    let mut metadata = head_element_metadata(roots, parser, options);
+    if let Some(href) = document_base_href {
+        metadata.insert("base".to_string(), href.to_string());
+    }
+    metadata
+}
+
+/// The title, meta and canonical link fields of the [`document_head`] below `roots`.
+fn head_element_metadata(
+    roots: &[tl::NodeHandle],
     parser: &tl::Parser,
     options: &ConversionOptions,
 ) -> BTreeMap<String, String> {
-    let mut work = vec![*node_handle];
-    while let Some(handle) = work.pop() {
-        let Some(tl::Node::Tag(tag)) = handle.get(parser) else {
-            continue;
-        };
-
-        if !tag.name().as_utf8_str().eq_ignore_ascii_case("head") {
-            let children: Vec<_> = tag.children().top().iter().copied().collect();
-            for child_handle in children.into_iter().rev() {
-                work.push(child_handle);
-            }
-            continue;
-        }
-
-        let mut metadata = BTreeMap::new();
-        {
-            let children = tag.children();
-            for child_handle in children.top().iter() {
-                if let Some(tl::Node::Tag(child_tag)) = child_handle.get(parser) {
-                    collect_meta_head_metadata(child_tag, options, &mut metadata);
-                    collect_title_head_metadata(child_tag, parser, options, &mut metadata);
-                    collect_link_head_metadata(child_tag, &mut metadata);
-                    collect_base_head_metadata(child_tag, &mut metadata);
-                }
-            }
-        }
-
-        if !metadata.is_empty() {
-            return metadata;
+    let mut metadata = BTreeMap::new();
+    let Some(tl::Node::Tag(head)) = document_head(roots, parser).and_then(|handle| handle.get(parser)) else {
+        return metadata;
+    };
+    let mut seen_meta = HashSet::new();
+    let mut seen_title = false;
+    for child_handle in head.children().top().iter() {
+        if let Some(tl::Node::Tag(child_tag)) = child_handle.get(parser) {
+            collect_meta_head_metadata(child_tag, options, &mut metadata, &mut seen_meta);
+            collect_title_head_metadata(child_tag, parser, options, &mut metadata, &mut seen_title);
+            collect_link_head_metadata(child_tag, &mut metadata);
         }
     }
+    metadata
+}
 
-    BTreeMap::new()
+/// The first `<head>` element below `roots` before the body starts. A browser's parser ignores
+/// a `<head>` tag once the body has started, at text or at a tag that [`starts_body`].
+pub fn document_head(roots: &[tl::NodeHandle], parser: &tl::Parser) -> Option<tl::NodeHandle> {
+    let mut work: Vec<_> = roots.iter().rev().copied().collect();
+    while let Some(handle) = work.pop() {
+        match handle.get(parser) {
+            Some(tl::Node::Raw(text)) if !text.as_bytes().iter().all(u8::is_ascii_whitespace) => return None,
+            Some(tl::Node::Tag(tag)) => {
+                let name = tag.name().as_bytes().to_ascii_lowercase();
+                match name.as_slice() {
+                    b"head" => return Some(handle),
+                    b"html" => {
+                        let first = work.len();
+                        work.extend(tag.children().top().iter().copied());
+                        work[first..].reverse();
+                    }
+                    name if starts_body(name) => return None,
+                    _ => {}
+                }
+            }
+            _ => {}
+        }
+    }
+    None
+}
+
+/// Whether a start tag named `name` (lower case) starts the body when no body has started:
+/// every tag except the ones the HTML parser's "in head" insertion mode keeps in the head.
+pub fn starts_body(name: &[u8]) -> bool {
+    !matches!(
+        name,
+        b"html"
+            | b"head"
+            | b"base"
+            | b"basefont"
+            | b"bgsound"
+            | b"link"
+            | b"meta"
+            | b"noframes"
+            | b"noscript"
+            | b"script"
+            | b"style"
+            | b"template"
+            | b"title"
+    )
 }
 
 /// Check if text has more than one character.

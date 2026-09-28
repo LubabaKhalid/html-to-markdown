@@ -11,7 +11,7 @@
 )]
 
 use std::borrow::Cow;
-use std::collections::{BTreeMap, HashSet};
+use std::collections::HashSet;
 
 use crate::converter::dom_context::DomContext;
 use crate::converter::main_helpers::{
@@ -63,6 +63,7 @@ pub fn convert_html_impl(
     #[cfg(not(feature = "visitor"))] _visitor: Option<()>,
     structure_collector: Option<StructureCollectorHandle>,
     base_url: Option<std::rc::Rc<url::Url>>,
+    document_base_href: Option<&str>,
 ) -> Result<ConversionOutput> {
     let stripped = strip_script_and_style_tags(html);
     // ~keep Before anything else looks for tags: an HTML5 bogus comment (`<?php … ?>`,
@@ -181,21 +182,14 @@ pub fn convert_html_impl(
     let wants_document = false;
 
     if wants_frontmatter || wants_document {
-        let mut head_metadata: Option<BTreeMap<String, String>> = None;
+        let head_metadata = extract_head_metadata(dom.children(), parser, options, document_base_href);
         #[cfg(feature = "metadata")]
         let mut document_lang: Option<String> = None;
         #[cfg(feature = "metadata")]
         let mut document_dir: Option<String> = None;
 
+        #[cfg(feature = "metadata")]
         for child_handle in dom.children() {
-            if head_metadata.is_none() {
-                let metadata = extract_head_metadata(child_handle, parser, options);
-                if !metadata.is_empty() {
-                    head_metadata = Some(metadata);
-                }
-            }
-
-            #[cfg(feature = "metadata")]
             if wants_document {
                 if let Some(tl::Node::Tag(tag)) = child_handle.get(parser) {
                     let tag_name = tag.name().as_utf8_str();
@@ -215,22 +209,15 @@ pub fn convert_html_impl(
             }
         }
 
-        if wants_frontmatter {
-            if let Some(metadata) = head_metadata.as_ref() {
-                if !metadata.is_empty() {
-                    let metadata_frontmatter = format_metadata_frontmatter(metadata);
-                    output.push_str(&metadata_frontmatter);
-                }
-            }
+        if wants_frontmatter && !head_metadata.is_empty() {
+            output.push_str(&format_metadata_frontmatter(&head_metadata));
         }
 
         #[cfg(feature = "metadata")]
         if wants_document {
             if let Some(ref collector) = metadata_collector {
-                if let Some(metadata) = head_metadata {
-                    if !metadata.is_empty() {
-                        collector.borrow_mut().set_head_metadata(metadata);
-                    }
+                if !head_metadata.is_empty() {
+                    collector.borrow_mut().set_head_metadata(head_metadata);
                 }
                 if let Some(lang) = document_lang {
                     collector.borrow_mut().set_language(lang);
