@@ -52,6 +52,35 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **A rule inside bold, italic, a summary or a caption split the emphasis markers (#603).** The
+  rule was written after a blank line, which ended the paragraph between the markers, so the
+  markers showed as literal text: `<summary>t<hr></summary>` gave `**t\n\n---**`, and a
+  definition list that starts its definition with a rule did the same inside a caption, `<b>` or
+  `<em>`. Markdown has no rule inside emphasis, so the rule is now the text `---` in the running
+  line, as it already was in a link: `**t ---**`. This covers `<b>`, `<strong>`, `<em>`, `<i>`,
+  `<summary>`, `<figcaption>`, a table caption, `<del>`, `<s>`, `<strike>`, `<ins>`, `<mark>`,
+  `<var>`, `<dfn>`, `<q>`, and `<sub>` and `<sup>` when they write a symbol.
+- **A list item took the checkbox of an item in its nested list (#604).**
+  `<ul><li>X<ul><li><input type="checkbox" checked> A</li></ul>ZZ</li></ul>` gave `- [x] X AZZ`:
+  the outer item became a task item and the nested list was joined into its text. A checkbox in a
+  nested list now belongs to that list's item, so the output is `- X`, the nested `- [x] A` and
+  then `ZZ`.
+- **Wrap mode joined a rule or a heading underline to the text next to it (#607).** With `wrap`
+  on, a `---` line followed by text became one line of text, `--- B`, and the rule was lost. The
+  underline of an underlined heading was joined to the heading text (`Heading -------`), or cut
+  off from it by a blank line for `=======`, so the heading was lost too. A rule now stays on its
+  own line, and an underline stays right under its heading text, which is not reflowed, as with a
+  `#` heading. Both hold inside a quote too.
+- **Wrap mode joined the keys of the frontmatter into one line.** With `wrap` on and metadata
+  extraction on, the YAML frontmatter went through the reflow like body text, so
+  `---\ntitle: My Page\n---` became `--- title: My Page ---` and the frontmatter was lost. Only
+  the text after the frontmatter is wrapped now.
+- **Wrap mode folded list items, code fences, headings and table rows inside a quote into text.**
+  With `wrap` on, `<blockquote><ul><li>alpha</li><li>beta</li></ul></blockquote>` gave
+  `> - alpha - beta`, one item, and a code block inside a quote lost its code. Outside a quote, a
+  `~~~` code block was reflowed like a paragraph. Every line that starts a block now keeps its own
+  line in and out of a quote, and a code block ends only at a fence that closes it.
+
 - **A page whose bytes open with a mangled byte order mark lost its whole head.** A real leading
   U+FEFF is stripped before parsing, but one a wrong encoding guess mangles beyond recognition
   reads as ordinary text by the time #527's head search sees it, and that search treated any such
@@ -146,8 +175,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **A newline in a head value started a new frontmatter key.** The frontmatter wrote each
   `key: value` line as it was, so a `<title>` or `<meta content>` holding a newline, literal or
   written as `&#10;`, could add or override a key. Each key and value is now one YAML scalar: a
-  value that plain YAML would misread (a newline, `: `, ` #`, a leading `-`, `#` or `@`, a
-  control character) is written in double quotes with YAML escapes. Other values stay unquoted.
+  value that plain YAML would misread (a newline, `: `, a space before `#`, a leading `-`, `#` or
+  `@`, a control character) is written in double quotes with YAML escapes. Other values stay
+  unquoted.
 - **Legacy named references without a semicolon were not decoded.** The spec lets about a hundred
   names such as `&copy`, `&amp` and `&eacute` close without `;`, and browsers decode them in text:
   `&copy 2024` is `© 2024`. The converter kept them as written. They now decode on both tiers,

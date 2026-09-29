@@ -1813,10 +1813,14 @@ fn emit_void(
             key.eq_ignore_ascii_case(b"type") && value.is_some_and(|v| v.eq_ignore_ascii_case(b"checkbox"))
         })
     {
-        for frame in &mut state.stack {
-            if matches!(frame.spec.kind, TagKind::ListItem) {
-                frame.holds_checkbox = true;
-            }
+        // ~keep Only the innermost item owns the checkbox; an outer item stays a plain item (#604).
+        if let Some(frame) = state
+            .stack
+            .iter_mut()
+            .rev()
+            .find(|frame| matches!(frame.spec.kind, TagKind::ListItem))
+        {
+            frame.holds_checkbox = true;
         }
     }
     // ~keep Closes the "just emitted an <img>" window too (see
@@ -1830,6 +1834,17 @@ fn emit_void(
 
     match spec.kind {
         TagKind::Hr => {
+            if state.in_summary()
+                || state.in_table_caption()
+                || state.stack.iter().any(|frame| {
+                    matches!(
+                        frame.spec.kind,
+                        TagKind::Strong | TagKind::Emphasis | TagKind::Strikethrough | TagKind::Inserted
+                    )
+                })
+            {
+                return Err(BailReason::RuleBetweenInlineMarkers);
+            }
             // ~keep Tier-2 starts a rule after an item's content at the item's content column
             // ~keep (issue #583); see `BailReason::ListItemUnsupportedBlockChild`.
             if !state.in_table_cell()

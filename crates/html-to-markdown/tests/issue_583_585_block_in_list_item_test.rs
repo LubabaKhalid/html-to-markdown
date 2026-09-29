@@ -575,19 +575,24 @@ fn should_not_write_the_content_column_inside_a_container_once_the_item_has_ende
     // ~keep A list inside an inline wrapper, a summary or a caption is not a list once the
     // ~keep markers are added, so nothing in it gets a column that a tab would turn into code.
     for (html, expected) in [
-        ("<b><ul><li>x<dl><dd><hr></dd></dl></li></ul></b>", "**- x\n\n---**\n"),
+        ("<b><ul><li>x<dl><dd><hr></dd></dl></li></ul></b>", "**- x ---**\n"),
+        ("<b><ul><li>x<p>p</p>t</li></ul></b>", "**- x\n\np\n\nt**\n"),
+        (
+            "<details><summary><ul><li>x<dl><dd>d</dd></dl>t</li></ul></summary></details>",
+            "**- x\n\nd\n\nt**\n",
+        ),
         (
             "<details><summary><ul><li>x<dl><dd><hr></dd></dl></li></ul></summary></details>",
-            "**- x\n\n---**\n",
+            "**- x ---**\n",
         ),
         (
             "<figure><figcaption><ul><li>x<dl><dd><hr></dd></dl></li></ul></figcaption></figure>",
-            "*- x\n\n---*\n",
+            "*- x ---*\n",
         ),
-        ("<q><ul><li>x<dl><dd><hr></dd></dl></li></ul></q>", "\"- x\n\n---\"\n"),
+        ("<q><ul><li>x<dl><dd><hr></dd></dl></li></ul></q>", "\"- x ---\"\n"),
         (
             "<table><caption><ul><li>x<dl><dd><hr></dd></dl></li></ul></caption></table>",
-            "*\\- x\n\n\\-\\-\\-*\n",
+            "*\\- x \\-\\-\\-*\n",
         ),
         // ~keep A rule at the marker ends the item; the text after it gets the column from the
         // ~keep text node, and a rule after that text must not follow it into the code block.
@@ -698,9 +703,9 @@ fn should_keep_the_marker_line_before_a_container_that_starts_with_a_rule() {
 }
 
 #[test]
-fn should_keep_text_after_a_nested_task_list_on_the_fast_path() {
-    // ~keep The full converter turns the whole item into a task item and joins its text (a filed
-    // ~keep gap); the fast path's output is the one from before issue #583.
+fn should_hand_text_after_a_nested_task_list_to_the_full_converter() {
+    // ~keep The checkbox belongs to the nested item, so the outer item is a plain item whose text
+    // ~keep after the nested list gets the content column, which only the full converter writes.
     let auto = ConversionOptions {
         tier_strategy: TierStrategy::Auto,
         ..tier2_options()
@@ -708,26 +713,15 @@ fn should_keep_text_after_a_nested_task_list_on_the_fast_path() {
     for (html, expected) in [
         (
             r#"<ul><li>X<ul><li><input type="checkbox" checked> A</li></ul>ZZ</li></ul>"#,
-            "- X\n  * A\n  ZZ\n",
+            "- X\n  - [x] A\n\n  ZZ\n",
         ),
         (
             r#"<ul><li>X<ul><li><input type="checkbox"> A</li></ul>ZZ</li></ul>"#,
-            "- X\n  * A\n  ZZ\n",
+            "- X\n  - [ ] A\n\n  ZZ\n",
         ),
+        ("<ul><li>X<ul><li>A</li></ul>ZZ</li></ul>", "- X\n  * A\n\n  ZZ\n"),
     ] {
-        assert_eq!(
-            tier1(html).as_deref(),
-            Some(expected),
-            "Tier 1 handed {html:?} to Tier 2"
-        );
-        assert_eq!(
-            convert_with(html, auto.clone()),
-            expected,
-            "auto mode differs on {html:?}"
-        );
+        assert!(tier1(html).is_none(), "Tier 1 converted {html:?}");
+        assert_eq!(convert_with(html, auto.clone()), expected, "auto mode on {html:?}");
     }
-    assert!(
-        tier1("<ul><li>X<ul><li>A</li></ul>ZZ</li></ul>").is_none(),
-        "Tier 1 converted a nested list without a checkbox"
-    );
 }
