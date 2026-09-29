@@ -98,6 +98,25 @@ pub fn handle(
         };
 
         if let Some(heading_text) = heading_output {
+            // ~keep A setext heading's text line after a line of the item would continue that
+            // ~keep line's paragraph, so it starts after a blank line (issue #635).
+            let line_start = output.rfind('\n').map_or(0, |pos| pos + 1);
+            if ctx.in_list_item
+                && options.heading_style == HeadingStyle::Underlined
+                && level <= 2
+                && line_start > 0
+                && output[line_start..].trim().is_empty()
+                && !output[..line_start - 1]
+                    .rsplit('\n')
+                    .next()
+                    .unwrap_or_default()
+                    .trim()
+                    .is_empty()
+            {
+                let indent = output.split_off(line_start);
+                output.push('\n');
+                output.push_str(&indent);
+            }
             output.push_str(&heading_text);
         }
 
@@ -226,16 +245,38 @@ pub fn push_heading(output: &mut String, ctx: &Context, options: &ConversionOpti
 
     match options.heading_style {
         HeadingStyle::Underlined => {
+            // ~keep The underline is a line of the item like every quote line, so it gets the
+            // ~keep item's continuation indent; at column 0 a `-` underline is a new list item
+            // ~keep (issue #635). In a quote, only the items inside the quote count: the quote
+            // ~keep writes the indent of the items around it on each of its lines.
+            let underline_indent = if ctx.in_list_item {
+                crate::converter::list::utils::continuation_indent_string(
+                    ctx.list_indent_columns.saturating_sub(ctx.quote_list_columns),
+                    options,
+                )
+            } else {
+                None
+            };
             if level == 1 {
                 output.push_str(text);
                 output.push('\n');
+                output.push_str(underline_indent.as_deref().unwrap_or_default());
                 for _ in 0..text.len() {
                     output.push('=');
                 }
             } else if level == 2 {
                 output.push_str(text);
                 output.push('\n');
-                for _ in 0..text.len() {
+                output.push_str(underline_indent.as_deref().unwrap_or_default());
+                // ~keep In a list item a lone `-` line reads as an empty item marker, both to
+                // ~keep `CommonMark` after a blank line and to the item's own marker checks, so the
+                // ~keep underline there has at least two dashes (issue #635).
+                let width = if ctx.in_list_item {
+                    text.len().max(2)
+                } else {
+                    text.len()
+                };
+                for _ in 0..width {
                     output.push('-');
                 }
             } else {

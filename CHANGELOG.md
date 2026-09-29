@@ -101,6 +101,43 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **A rule that starts a list item rendered outside the item (#623).**
   `<ul><li><hr></li></ul>` gave `-\n\n---`, an empty item and a rule after the list. The rule is
   now `___` on the marker line, `- ___`: `- ---` is a rule of its own.
+- **Text inside a list before an item joined the item's marker (#625).** `<ul>how<li>do</li></ul>`
+  gave `how- do`, one line of text, and the item was lost. The item now starts its own line,
+  `how\n- do`. When its marker cannot interrupt the text above it, as with `3.`, a blank line
+  comes first: `how\n\n3. do`.
+- **Text after a quote stayed in the quote for a later item of a list inside bold or italic
+  (#633).** `<b><ul><li>a<ol><li>x</li><li>y<blockquote>q</blockquote>t</li></ol></li></ul></b>`
+  gave `**- a\n  1. x\n  2. y\n     > q\n     t**`, and `t**` continued the quote. The marker
+  `2.` cannot interrupt a paragraph, but after the real item `1. x` no paragraph is open, so `2.`
+  starts an item. The same holds after a quote of the enclosing item. Text
+  after the quote now starts after a blank line: `**- a\n  1. x\n  2. y\n     > q\n\n     t**`.
+- **Some first blocks of a task item still became the task's text (#634).** An ordered list that
+  starts at a number other than 1 and a code block in the indented style cannot interrupt the
+  checkbox line, so they now start after a blank line: `- [ ]\n\n  3. x` and `- [ ]\n\n      c`.
+  The code block keeps its indent; before, `- [ ]\n  c` lost the code. A quote after an empty
+  inline element, such as `<span></span>`, now starts on the next line like a quote right after
+  the checkbox. An image before the quote is still text on the checkbox line, and so is an empty
+  element that `preserve_tags` writes as HTML. An empty list, heading or code block writes
+  nothing, so text after it stays on the checkbox line: `- [ ] t`. A fenced code block that holds
+  only whitespace still writes its fences, so it starts on the next line and the text after it
+  stays out of the code.
+- **A quote after a line break in a task item stayed on the checkbox line (#650).**
+  `<ul><li><input type="checkbox"><br><blockquote>q</blockquote></li></ul>` gave `- [ ] > q`, and
+  the quote was text. The converter's own output now decides which element writes first, also
+  inside a `<div>` or a `<section>`. A line break, a `&nbsp;`, a `<template>`, a `<noscript>`, an
+  `<input>` that is not the checkbox, an empty `<picture>` or an image with `skip_images` writes
+  nothing there, so the quote now starts on the next line: `- [ ]\n  > q`.
+- **An underlined heading ended its list item (#635).** With `heading_style` set to `underlined`,
+  the underline of a heading in a list item was written at column 0: `<ul><li><h2>q</h2></li></ul>`
+  gave `- q\n-`, an item and an empty item. The underline now gets the item's content column,
+  `- q\n  --`. After a line of the item, the heading starts after a blank line, so it does not
+  continue that line's paragraph: `- a\n\n  q\n  --`. A block after a heading of one letter starts
+  its own paragraph: `<ul><li><h2>q</h2><p>t</p></li></ul>` gives `- q\n  --\n\n  t`. In a list
+  item the underline has at least two dashes, since a lone `-` line reads as an empty item.
+- **Many blocks in one list item took quadratic time (#649).** Each block checked every earlier
+  line of the item to see whether the item was still open, and each item of a list inside bold or
+  italic checked every earlier item. `<ul><li>` with 5000 headings after text took seconds. Each
+  check now reads only the lines written since the last one, so the time grows linearly.
 - **Wrap mode joined a rule or a heading underline to the text next to it (#607).** With `wrap`
   on, a `---` line followed by text became one line of text, `--- B`, and the rule was lost. The
   underline of an underlined heading was joined to the heading text (`Heading -------`), or cut

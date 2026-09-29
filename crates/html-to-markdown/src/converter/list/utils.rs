@@ -266,25 +266,124 @@ pub fn indent_column(list_indent_columns: usize, options: &ConversionOptions) ->
 /// ~keep The marker must start its own line: the buffer's first line follows the opening
 /// ~keep marker. Measured from the enclosing item's content column, the marker line with the
 /// ~keep item's content after it must open a block that can interrupt a paragraph (the check
-/// ~keep that escapes a link label's continuation lines). After a blank line no paragraph is
-/// ~keep open, so any marker within 3 columns starts an item.
+/// ~keep that escapes a link label's continuation lines). Where no paragraph is open, any
+/// ~keep marker within 3 columns starts an item.
 pub fn marker_starts_item(
     output: &str,
     marker_line_start: Option<usize>,
     marker: &str,
     enclosing_columns: usize,
+    previous: (&PreviousMarker, usize),
     options: &ConversionOptions,
 ) -> bool {
     let Some(line_start) = marker_line_start else {
         return false;
     };
+    let enclosing_column = indent_column(enclosing_columns, options);
     let marker_column = crate::converter::utility::escaping::leading_indent(&output[line_start..]).1;
-    let column = marker_column.saturating_sub(indent_column(enclosing_columns, options));
-    if output[..line_start].ends_with("\n\n") {
+    let column = marker_column.saturating_sub(enclosing_column);
+    let (previous, buffer) = previous;
+    let open = paragraph_is_open(
+        &output[..line_start],
+        enclosing_column,
+        previous.get(buffer, output, enclosing_column),
+    );
+    previous.set(buffer, output, line_start, enclosing_column, open);
+    if !open {
         return column < 4;
     }
     let line = format!("{}{marker}x", " ".repeat(column));
     crate::converter::utility::escaping::line_opens_block(&line)
+}
+
+/// Whether a paragraph is open at the end of `output` in the item whose content starts at
+/// `enclosing_column`: only then must a marker line interrupt it to start a list item.
+///
+/// ~keep `CommonMark` checks the interrupt rule only when the deepest open block a line reaches
+/// ~keep is a paragraph (issue #633). The lines within 3 columns of the item's content column
+/// ~keep decide it; a deeper line is inside the block above it. A blank line, or a line that
+/// ~keep opens a block, leaves no paragraph open: after a list item's line the open block is
+/// ~keep the list.
+/// ~keep A marker line that cannot interrupt a paragraph is an item only when none was open
+/// ~keep before it, so the walk looks past it. Any other line is paragraph text, and so is the
+/// ~keep buffer's first line, which follows the opening marker.
+fn paragraph_is_open(output: &str, enclosing_column: usize, previous: Option<(usize, bool)>) -> bool {
+    use crate::converter::utility::escaping::{leading_indent, opens_block};
+    let text = output.strip_suffix('\n').unwrap_or(output);
+    let mut end = text.len();
+    loop {
+        let start = text[..end].rfind('\n').map_or(0, |pos| pos + 1);
+        if start == 0 {
+            return true;
+        }
+        let line = &text[start..end];
+        end = start - 1;
+        if line.trim().is_empty() {
+            return false;
+        }
+        let (indent, column) = leading_indent(line);
+        if column < enclosing_column {
+            return true;
+        }
+        if column - enclosing_column >= 4 {
+            continue;
+        }
+        let rest = &line[indent..];
+        if opens_block(rest) {
+            return false;
+        }
+        if strip_leading_bare_marker(rest).is_none() {
+            return true;
+        }
+        // ~keep The previous marker line of this item's lists: its own check already walked
+        // ~keep back from here, so the walk stays linear in the number of items.
+        if let Some((_, open)) = previous.filter(|&(line_start, _)| line_start == start) {
+            return open;
+        }
+    }
+}
+
+/// The answer of the paragraph check at the previous marker line of an item's lists: the address
+/// of the buffer, the line start, the line before it, the enclosing content column and whether a
+/// paragraph was open before the line.
+///
+/// ~keep The lists share it through the context. The buffer address, the enclosing content column
+/// ~keep and the line before the marker line must match: in another buffer, in a list at another
+/// ~keep depth, or after a write that changed the end of the buffer, the line start means nothing.
+#[derive(Clone, Default)]
+pub struct PreviousMarker(std::rc::Rc<std::cell::RefCell<Option<PreviousMarkerState>>>);
+
+struct PreviousMarkerState {
+    buffer: usize,
+    line_start: usize,
+    line_before: String,
+    enclosing_column: usize,
+    open: bool,
+}
+
+impl PreviousMarker {
+    fn get(&self, buffer: usize, output: &str, enclosing_column: usize) -> Option<(usize, bool)> {
+        let state = self.0.borrow();
+        let state = state.as_ref()?;
+        (state.buffer == buffer
+            && state.enclosing_column == enclosing_column
+            && output
+                .get(..state.line_start)
+                .is_some_and(|before| before.ends_with(state.line_before.as_str())))
+        .then_some((state.line_start, state.open))
+    }
+
+    fn set(&self, buffer: usize, output: &str, line_start: usize, enclosing_column: usize, open: bool) {
+        let before = &output[..line_start];
+        let line_before = &before[before.trim_end_matches('\n').rfind('\n').map_or(0, |pos| pos + 1)..];
+        *self.0.borrow_mut() = Some(PreviousMarkerState {
+            buffer,
+            line_start,
+            line_before: line_before.to_string(),
+            enclosing_column,
+            open,
+        });
+    }
 }
 
 /// If this list is immediately preceded by an HTML comment whose own immediately preceding
@@ -411,23 +510,111 @@ pub fn line_is_bare_list_marker(output: &str) -> bool {
 /// ~keep A line at a shallower column is a block that already left the item, and nothing
 /// ~keep reopens it. Writing the content column after it opens an indented code block once the
 /// ~keep column is 4 or more (issue #583).
+/// ~keep Each block of an item asks this, so the answer for the lines before the last one is
+/// ~keep kept in the item's context and the next check reads only the lines written since
+/// ~keep (issue #649).
 pub fn item_is_open(output: &str, indent: &str, ctx: &Context) -> bool {
     if !ctx.list_item_open {
         return false;
     }
-    let mut lines = output.rsplit('\n').filter(|line| !line.trim().is_empty()).peekable();
-    while let Some(line) = lines.next() {
-        if strip_leading_bare_marker(line.trim_start_matches([' ', '\t'])).is_some() {
-            return true;
-        }
-        if lines.peek().is_none() {
-            return true;
-        }
-        if indent.is_empty() || !line.starts_with(indent) {
-            return false;
-        }
+    let content = output.trim_end();
+    if content.is_empty() {
+        return true;
     }
-    true
+    let last_start = content.rfind('\n').map_or(0, |pos| pos + 1);
+    let before = lines_are_open(&output[..last_start], indent, &ctx.item_lines);
+    let last = output[last_start..].split('\n').next().unwrap_or_default();
+    match before {
+        _ if strip_leading_bare_marker(last.trim_start_matches([' ', '\t'])).is_some() => true,
+        None => true,
+        Some(_) if indent.is_empty() || !last.starts_with(indent) => false,
+        Some(open) => open,
+    }
+}
+
+/// Whether the item is open after the complete lines `output` (it ends at a line start), or
+/// `None` when they are all blank. Stores the answer in `scan` for the next check.
+fn lines_are_open(output: &str, indent: &str, scan: &ItemLineScan) -> Option<bool> {
+    let buffer = output.as_ptr() as usize;
+    let (start, below) = scan
+        .read(buffer, indent, output)
+        .unwrap_or_else(|| (last_marker_line_start(output), None));
+    let mut open = below;
+    for line in output[start..].split('\n').filter(|line| !line.trim().is_empty()) {
+        open = Some(match open {
+            _ if strip_leading_bare_marker(line.trim_start_matches([' ', '\t'])).is_some() => true,
+            None => true,
+            Some(_) if indent.is_empty() || !line.starts_with(indent) => false,
+            Some(open) => open,
+        });
+    }
+    scan.write(buffer, indent, output, open);
+    open
+}
+
+/// The start of the last line of `output` that is a bare list marker line, or 0 when there is none.
+///
+/// ~keep A marker line opens the item whatever the lines before it say, so a check with no stored
+/// ~keep answer reads forward from there: it reads the lines of the innermost item, not the buffer.
+fn last_marker_line_start(output: &str) -> usize {
+    let mut end = output.len();
+    while end > 0 {
+        let start = output[..end - 1].rfind('\n').map_or(0, |pos| pos + 1);
+        if strip_leading_bare_marker(output[start..end].trim_start_matches([' ', '\t'])).is_some() {
+            return start;
+        }
+        end = start;
+    }
+    0
+}
+
+/// The answer of the last check of an item's lines in one buffer: the buffer address, the
+/// indent, the end of the lines it covers, the last of those lines, and the answer.
+///
+/// ~keep The walk reads lines forward from the item's start, so the answer after a line depends
+/// ~keep only on the answer before it and the line itself; the next check starts from the stored
+/// ~keep end. Only the end of a buffer changes after it is written, and it changes by whitespace
+/// ~keep and line breaks. The stored last line must still be there: a later write that removed
+/// ~keep it removed the end the answer covers.
+#[derive(Clone, Default)]
+pub struct ItemLineScan(std::rc::Rc<std::cell::RefCell<Option<ItemLineScanState>>>);
+
+struct ItemLineScanState {
+    buffer: usize,
+    indent: String,
+    end: usize,
+    last_line_start: usize,
+    last_line: String,
+    open: Option<bool>,
+}
+
+impl ItemLineScan {
+    /// A scan for a quote or a container that writes a buffer of its own: the answer kept for
+    /// the enclosing buffer stays.
+    pub fn new_item() -> Self {
+        Self::default()
+    }
+
+    fn read(&self, buffer: usize, indent: &str, output: &str) -> Option<(usize, Option<bool>)> {
+        let state = self.0.borrow();
+        let state = state.as_ref()?;
+        (state.buffer == buffer
+            && state.indent == indent
+            && output.get(state.last_line_start..state.end) == Some(state.last_line.as_str()))
+        .then_some((state.end, state.open))
+    }
+
+    fn write(&self, buffer: usize, indent: &str, output: &str, open: Option<bool>) {
+        let last_line_start = output.trim_end().rfind('\n').map_or(0, |pos| pos + 1);
+        *self.0.borrow_mut() = Some(ItemLineScanState {
+            buffer,
+            indent: indent.to_string(),
+            end: output.len(),
+            last_line_start,
+            last_line: output[last_line_start..].to_string(),
+            open,
+        });
+    }
 }
 
 /// The context for the children of a container that renders them into a buffer of its own:
@@ -436,6 +623,7 @@ pub fn nested_block_context(output: &str, ctx: &Context, options: &ConversionOpt
     let indent = continuation_indent_string(ctx.list_indent_columns, options).unwrap_or_default();
     Context {
         list_item_open: item_is_open(output, &indent, ctx),
+        item_lines: ItemLineScan::new_item(),
         ..ctx.clone()
     }
 }
@@ -657,5 +845,47 @@ pub fn process_list_children(
                 }
             }
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn item_line_scan_reads_the_lines_again_after_its_last_line_changed() {
+        let scan = ItemLineScan::new_item();
+        let mut output = String::from("- a\n  b\n");
+        assert_eq!(lines_are_open(&output, "  ", &scan), Some(true));
+        output.clear();
+        output.push_str("a\nb\nzzz\n");
+        assert_eq!(lines_are_open(&output, "  ", &scan), Some(false));
+    }
+
+    #[test]
+    fn item_line_scan_reads_the_lines_of_another_buffer_again() {
+        let scan = ItemLineScan::new_item();
+        let first = String::from("- a\n  b\n");
+        let second = String::from("a\nb\n  b\n");
+        assert_eq!(lines_are_open(&first, "  ", &scan), Some(true));
+        assert_eq!(lines_are_open(&second, "  ", &scan), Some(false));
+    }
+
+    #[test]
+    fn item_line_scan_reads_the_lines_again_for_another_indent() {
+        let scan = ItemLineScan::new_item();
+        let output = String::from("- a\n  b\n");
+        assert_eq!(lines_are_open(&output, "  ", &scan), Some(true));
+        assert_eq!(lines_are_open(&output, "    ", &scan), Some(false));
+    }
+
+    #[test]
+    fn previous_marker_answers_only_for_its_buffer_column_and_line_before_its_marker_line() {
+        let previous = PreviousMarker::default();
+        previous.set(1, "p\n- a\n", 2, 0, true);
+        assert_eq!(previous.get(1, "p\n- a\n- b\n", 0), Some((2, true)));
+        assert_eq!(previous.get(1, "p\n- a\n- b\n", 2), None);
+        assert_eq!(previous.get(2, "p\n- a\n- b\n", 0), None);
+        assert_eq!(previous.get(1, "q\n- a\n- b\n", 0), None);
     }
 }

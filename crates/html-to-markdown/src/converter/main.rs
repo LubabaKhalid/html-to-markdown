@@ -557,10 +557,33 @@ fn parent_is_list(node_handle: &tl::NodeHandle, parser: &tl::Parser, dom_ctx: &D
 }
 
 /// Recursively walk DOM nodes and convert to Markdown.
+#[allow(clippy::trivially_copy_pass_by_ref)]
+pub fn walk_node(
+    node_handle: &tl::NodeHandle,
+    parser: &tl::Parser,
+    output: &mut String,
+    options: &ConversionOptions,
+    ctx: &Context,
+    depth: usize,
+    dom_ctx: &DomContext,
+) {
+    // ~keep In a task item, the render of each node before the first content reports whether
+    // ~keep it wrote, so the item knows which element wrote first (issue #650).
+    match ctx.first_writer.as_ref().filter(|first_writer| first_writer.is_open()) {
+        Some(first_writer) => {
+            let start = output.len();
+            convert_node(node_handle, parser, output, options, ctx, depth, dom_ctx);
+            first_writer.record(*node_handle, parser, output.get(start..));
+        }
+        None => convert_node(node_handle, parser, output, options, ctx, depth, dom_ctx),
+    }
+}
+
+/// Convert one DOM node and its children to Markdown.
 #[allow(clippy::only_used_in_recursion)]
 #[allow(clippy::trivially_copy_pass_by_ref)]
 #[allow(clippy::cast_possible_truncation)]
-pub fn walk_node(
+fn convert_node(
     node_handle: &tl::NodeHandle,
     parser: &tl::Parser,
     output: &mut String,
