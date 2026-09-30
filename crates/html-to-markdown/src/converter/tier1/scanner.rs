@@ -147,13 +147,22 @@ pub fn scan(
                     // `trailing_single_newline_join`'s doc comment for why that one
                     // tag is special-cased.
                     let next_tag_is_span = upcoming_tag_is_named(bytes, pos, b"span");
+                    // ~keep Same bare-`\n` join, the other exception: a following `<br>`
+                    // ends this text's line itself (issue #683). The lookahead walks past
+                    // comments, so it runs only for text the join applies to: whitespace-only
+                    // text between comments would otherwise rescan every comment after it.
+                    let text = &html[text_start..pos];
+                    let next_tag_is_br = text.ends_with(['\n', '\r'])
+                        && !text.trim_ascii().is_empty()
+                        && upcoming_element_is_br(bytes, pos);
                     flush_text(
                         &mut state,
-                        &html[text_start..pos],
+                        text,
                         text_start,
                         next_tag_is_list,
                         next_tag_is_img,
                         next_tag_is_span,
+                        next_tag_is_br,
                     )?;
                 }
 
@@ -202,7 +211,7 @@ pub fn scan(
                 // bare `<x` as a text node). Emit the `<` and continue so
                 // we don't bail on commonly-unescaped source like `x < 5`.
                 if !parse::is_tag_name_start(next) {
-                    flush_text(&mut state, "<", pos, false, false, false)?;
+                    flush_text(&mut state, "<", pos, false, false, false, false)?;
                     pos += 1;
                     text_start = pos;
                     continue;
@@ -688,7 +697,15 @@ pub fn scan(
     }
 
     if text_start < pos {
-        flush_text(&mut state, &html[text_start..pos], text_start, false, false, false)?;
+        flush_text(
+            &mut state,
+            &html[text_start..pos],
+            text_start,
+            false,
+            false,
+            false,
+            false,
+        )?;
     }
 
     // ~keep Phase N2: implicitly close all remaining open elements at EOF.
@@ -1780,8 +1797,8 @@ fn emit_void(
         }
 
         TagKind::LineBreak => {
-            // ~keep `<br>` outside any block context emits nothing (Tier-2 behaviour).
-            // Three context-dependent emissions:
+            // ~keep A top-level `<br>` with nothing before it emits nothing; after content it
+            // is a hard break (see the top-level arm below). Context-dependent emissions:
             //   - Inside a link (anywhere): `"  \n"`, unmodified, UNLESS the link's
             //     body is still empty (nothing emitted since the `<a>`/wrapper
             //     opened), in which case nothing is emitted at all. Tier-2's
@@ -1884,8 +1901,11 @@ fn emit_void(
                 // literal line ending is folded to a space before it ever reaches
                 // this buffer (`flush_text`'s `in_code && !in_pre` branch).
                 state.cell_or_output_mut().push('\n');
-            } else if state.stack.is_empty() {
-                // ~keep bare `<br>` at top level — Tier-2 emits nothing
+            } else if state.stack.is_empty() && state.output.is_empty() {
+                // ~keep A top-level `<br>` with nothing before it has no line to break.
+                // ~keep After text it is a hard break like any other: Tier-2's
+                // ~keep `line_break.rs` no-ops only at the start of the block, so
+                // ~keep `First<br>Second` must not weld into `FirstSecond` (issue #683).
             } else {
                 let dest = state.cell_or_output_mut();
                 crate::converter::main_helpers::trim_trailing_whitespace(dest);
@@ -3871,6 +3891,7 @@ fn flush_text(
     next_tag_is_list: bool,
     next_tag_is_img: bool,
     next_tag_is_span: bool,
+    next_tag_is_br: bool,
 ) -> Result<(), BailReason> {
     if raw.is_empty() {
         return Ok(());
@@ -4317,6 +4338,10 @@ fn flush_text(
     // break, `bar`'s leading space must not survive, or Tier-1 emits
     // `[foo  \n bar]` where Tier-2 emits `[foo  \nbar]`.
     let after_link_hard_break = in_link_frame && state.cell_or_output_mut().ends_with('\n');
+    // ~keep The same `skip_prefix` arm outside a link: a `<br>` on its own source line
+    // leaves `"  \n"` behind, and the next line's leading space must not survive it
+    // (issue #683), or Tier-1 emits `First  \n Second` where Tier-2 emits `First  \nSecond`.
+    let after_hard_break = state.cell_or_output_mut().ends_with("  \n");
     // ~keep Distinct from `at_inline_frame_start` above (whose unconditional strip is reserved
     // for Link/Strong/Emphasis/Code -- kinds with their own always-on trim wrapper in
     // Tier-2: link-label normalization, `chomp_inline`'s marker migration, code's verbatim
@@ -4361,6 +4386,7 @@ fn flush_text(
             || block_separator_after
             || document_start_strip
             || after_link_hard_break
+            || after_hard_break
             || bare_inline_frame_start_after_space)
     {
         let trimmed = raw.trim_start_matches([' ', '\t', '\n', '\r']);
@@ -4475,7 +4501,7 @@ fn flush_text(
                 } else if trailing.bytes().any(|b| b == b' ' || b == b'\t') {
                     " "
                 } else if trail_has_nl {
-                    trailing_single_newline_join(state, next_tag_is_span)
+                    trailing_single_newline_join(state, next_tag_is_span, next_tag_is_br)
                 } else {
                     trailing
                 };
@@ -5527,6 +5553,58 @@ fn upcoming_open_tag_name<'b>(bytes: &[u8], lt_pos: usize, buf: &'b mut [u8; MAX
     Some(lowercase_into(&bytes[name_start..name_end], buf))
 }
 
+/// Peek whether the next element at or after `bytes[lt_pos]` is a `<br>`, looking
+/// past what Tier-2 looks past to find it: comments and whitespace-only text
+/// (`DomContext::next_tag_name`), and the closing tags of inline wrappers Tier-2 renders
+/// transparently, such as `<span>` (`text_node.rs`'s climb through inline ancestors).
+/// See `trailing_single_newline_join` for why the `<br>` matters (issue #683).
+fn upcoming_element_is_br(bytes: &[u8], mut pos: usize) -> bool {
+    loop {
+        while bytes.get(pos).is_some_and(u8::is_ascii_whitespace) {
+            pos += 1;
+        }
+        let rest = bytes.get(pos..).unwrap_or_default();
+        if rest.starts_with(b"<!--") {
+            let Some(end) = rest[4..].windows(3).position(|window| window == b"-->") else {
+                return false;
+            };
+            pos += 4 + end + 3;
+        } else if rest.starts_with(b"</") {
+            let name_start = pos + 2;
+            let name_end = parse::scan_tag_name(bytes, name_start);
+            let mut name_buf = [0u8; MAX_TAG_NAME_BYTES];
+            let name = lowercase_into(&bytes[name_start..name_end], &mut name_buf);
+            // ~keep Not every `TagKind::Inline` tag: Tier-2 ends `<label>`, the other form
+            // controls and `<canvas>` with a block separator of their own, so a `<br>` after
+            // one never shares this text's line.
+            if !matches!(
+                name,
+                b"span"
+                    | b"u"
+                    | b"mark"
+                    | b"small"
+                    | b"abbr"
+                    | b"sub"
+                    | b"sup"
+                    | b"cite"
+                    | b"time"
+                    | b"bdi"
+                    | b"bdo"
+                    | b"data"
+                    | b"map"
+            ) {
+                return false;
+            }
+            let Some(close) = memchr::memchr(b'>', &bytes[name_end..]) else {
+                return false;
+            };
+            pos = name_end + close + 1;
+        } else {
+            return upcoming_tag_is_named(bytes, pos, b"br");
+        }
+    }
+}
+
 /// Decide what a text node's trailing *bare* `\n` (no accompanying space/tab,
 /// not part of a `\n\n` run) collapses to.
 ///
@@ -5541,6 +5619,8 @@ fn upcoming_open_tag_name<'b>(bytes: &[u8], lt_pos: usize, buf: &'b mut [u8; MAX
 /// guarantees is `state.output` too).
 ///
 /// - `<span>` is a hardcoded exception in Tier-2's source: no join at all.
+/// - So is `<br>`: the break ends this line itself, and a `\n` join here would
+///   strand its hard-break marker on a line of its own (issue #683).
 /// - Otherwise: a blank-line break already in place needs nothing either. The
 ///   "already" is scoped to the enclosing `<p>`/`<div>`'s OWN content (Tier-2's
 ///   `ctx.block_content_start`, i.e. `nearest_block_content_start` here) —
@@ -5552,8 +5632,8 @@ fn upcoming_open_tag_name<'b>(bytes: &[u8], lt_pos: usize, buf: &'b mut [u8; MAX
 /// - Otherwise: a paragraph ancestor, or a `<strong>`/`<em>` (Tier-2's
 ///   `inline_depth`-incrementing wrappers) ancestor, joins with a single
 ///   space; anything else (e.g. a bare `<div>`) joins with a literal newline.
-fn trailing_single_newline_join(state: &Tier1State, next_tag_is_span: bool) -> &'static str {
-    if next_tag_is_span {
+fn trailing_single_newline_join(state: &Tier1State, next_tag_is_span: bool, next_tag_is_br: bool) -> &'static str {
+    if next_tag_is_span || next_tag_is_br {
         return "";
     }
     let block_start = clamp_to_char_boundary(&state.output, nearest_block_content_start(state));

@@ -379,6 +379,11 @@ pub fn process_text_node(
                     final_text.push('\n');
                 } else if let Some(next_tag) = get_next_sibling_tag(node_handle, parser, dom_ctx) {
                     if matches!(next_tag, "span") {
+                    } else if next_tag == "br" {
+                        // ~keep The <br> that follows is this line's ending: its hard-break
+                        // ~keep marker must attach to this text. A '\n' pushed here would
+                        // ~keep strand the marker on a line of its own, which cleanup then
+                        // ~keep turns into a paragraph break (issue #683).
                     } else if ctx.inline_depth > 0 || ctx.convert_as_inline || ctx.in_paragraph {
                         final_text.push(' ');
                     } else {
@@ -386,7 +391,7 @@ pub fn process_text_node(
                     }
                 } else if ctx.inline_depth > 0 || ctx.convert_as_inline || ctx.in_paragraph {
                     final_text.push(' ');
-                } else {
+                } else if !inline_ancestor_ends_before_br(node_handle, parser, dom_ctx) {
                     final_text.push('\n');
                 }
             }
@@ -476,6 +481,32 @@ pub fn process_text_node(
         }
     } else {
         output.push_str(&final_text);
+    }
+}
+
+/// Whether the text node is the last content of an inline wrapper that a `<br>` follows, as in
+/// `<span>First\n</span><br>Second`: that `<br>` ends this text's line just as a `<br>` sibling
+/// does, so no '\n' may be pushed ahead of its marker (issue #683). Climbs through inline
+/// ancestors with nothing after them, exactly as `newline_span_needs_separating_space` does.
+fn inline_ancestor_ends_before_br(node_handle: &tl::NodeHandle, parser: &tl::Parser, dom_ctx: &DomContext) -> bool {
+    let mut node_id = node_handle.get_inner();
+    loop {
+        let Some(parent_id) = dom_ctx.parent_of(node_id) else {
+            return false;
+        };
+        let parent_is_inline = dom_ctx
+            .tag_info(parent_id, parser)
+            .is_some_and(|info| info.is_inline_like);
+        if !parent_is_inline {
+            return false;
+        }
+        if !matches!(
+            following_sibling_content(parent_id, parser, dom_ctx),
+            FollowingContent::Absent
+        ) {
+            return dom_ctx.next_tag_name(tl::NodeHandle::new(parent_id), parser) == Some("br");
+        }
+        node_id = parent_id;
     }
 }
 

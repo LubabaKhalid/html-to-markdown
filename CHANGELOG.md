@@ -44,6 +44,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   two lines rendering as indented code blocks. Only `output_bytes` changes; the calibrated timings
   stay as measured. `gh-190/plusblog` stays unblessed, because c5b8d1baa moved a body paragraph
   into the preceding list item there, so the guardrail keeps reporting it until that is fixed.
+- **A `<br>` on its own source line became a paragraph break** (#683). When the source put the
+  `<br>` on a line of its own (`First`, `<br>`, `Second` on three lines), the newline before it
+  was kept, so the hard break landed on an empty line and `First` and `Second` rendered as two
+  paragraphs. This also happened inside a `<div>`, `<li>` or `<blockquote>`, after a comment,
+  with a run of `<br>`, and after text that ends a `<span>`. Both tiers now render `First` and
+  `Second` on consecutive lines joined by a hard break, in either newline style. Tier 1 also
+  dropped a top-level `<br>` that followed text, joining `First<br>Second` into `FirstSecond`,
+  and kept a stray leading space on the line after a `<br>`. Both are fixed.
 
 ## [3.15.1] - 2026-09-27
 

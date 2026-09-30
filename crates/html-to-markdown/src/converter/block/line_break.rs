@@ -161,11 +161,11 @@ pub fn handle(
         // ~keep first" check (`output.ends_with('\n')`), which also matched — and silently
         // ~keep collapsed — a run of *consecutive* breaks with real content before them.
         // ~keep Unguarded by `ctx.in_paragraph` (unlike `text_node.rs`'s identical-looking
-        // ~keep check): a bare top-level <br> with no enclosing paragraph/div must also
-        // ~keep no-op here, matching Tier-1's explicit "bare <br> at top level emits
-        // ~keep nothing" contract (`tier1/scanner.rs`'s `TagKind::LineBreak` arm) — the
-        // ~keep default `block_content_start: 0` from a fresh `Context` still equals
-        // ~keep `output.len()` at true document start, so this stays correct there.
+        // ~keep check): a bare top-level <br> at document start, with no enclosing
+        // ~keep paragraph/div, lands here too -- the default `block_content_start: 0` from a
+        // ~keep fresh `Context` still equals `output.len()` there. A top-level <br> after
+        // ~keep content is an ordinary hard break, as in Tier-1's `TagKind::LineBreak` arm
+        // ~keep (`tier1/scanner.rs`), which likewise no-ops only on empty output (issue #683).
         //
         // ~keep The bare `\n` (rather than no output at all) is load-bearing and predates
         // ~keep #464: `integration_test.rs::test_breaks_and_newlines_issue_112` pins that a
