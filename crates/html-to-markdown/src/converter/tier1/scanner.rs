@@ -194,7 +194,30 @@ pub fn scan(
                         parse::find_tag_close(bytes, name_end).ok_or(BailReason::LiteralLt { offset: pos })?;
 
                     let tag_name_bytes = &bytes[name_start..name_end];
+                    let len_before_close = state.cell_or_output_mut().len();
+                    let join_open = state.pending_newline_join == Some(len_before_close);
                     emit_close(&mut state, tag_name_bytes, options, &mut table_probes)?;
+                    // ~keep Tier-2 ends a block and the form elements its form handlers write with a
+                    // ~keep line of their own before the `<br>`. An inline close can write its marker
+                    // ~keep before the join (`~~First~~\n`), so the join is followed to the new end.
+                    let mut name_buf = [0u8; MAX_TAG_NAME_BYTES];
+                    let name_lower = lowercase_into(tag_name_bytes, &mut name_buf);
+                    let ends_own_line = tier1::lookup(name_lower).is_some_and(|spec| spec.is_block)
+                        || matches!(
+                            name_lower,
+                            b"label"
+                                | b"select"
+                                | b"option"
+                                | b"optgroup"
+                                | b"button"
+                                | b"progress"
+                                | b"meter"
+                                | b"output"
+                                | b"datalist"
+                        );
+                    let dest = state.cell_or_output_mut();
+                    let (dest_len, ends_in_newline) = (dest.len(), dest.ends_with('\n'));
+                    state.pending_newline_join = (join_open && ends_in_newline && !ends_own_line).then_some(dest_len);
 
                     pos = close_bracket.0 + 1;
                     text_start = pos;
@@ -219,6 +242,11 @@ pub fn scan(
 
                 let mut name_buf = [0u8; MAX_TAG_NAME_BYTES];
                 let name_lower = lowercase_into(tag_name_bytes, &mut name_buf);
+                // ~keep Tier-2 strips `<script>` and `<style>` before parsing, so only a `<br>`
+                // ~keep keeps a text's newline join open for removal (issue #683).
+                if !matches!(name_lower, b"br" | b"script" | b"style") {
+                    state.pending_newline_join = None;
+                }
 
                 // ~keep Audit #12 follow-up: `strip_hidden_elements`
                 // (converter/utility/preprocessing.rs, outside tier1/) removes any
@@ -361,6 +389,19 @@ pub fn scan(
                     // mirror below still covers the common case.
                     if is_adjacent_rawtext_ignored_open(bytes, pos) {
                         return Err(BailReason::AdjacentRawTextTags { offset: pos });
+                    }
+                    // ~keep Tier-2 reads the whitespace on both sides of the removed element as one
+                    // ~keep text, so `First\n<script>x</script>\n<br>` ends in a blank line, as
+                    // ~keep `First\n\n<br>` does: the `<br>` must not remove the join (issue #683).
+                    let after = &bytes[pos..];
+                    let after_ws = &after[..after
+                        .iter()
+                        .position(|b| !b.is_ascii_whitespace())
+                        .unwrap_or(after.len())];
+                    let newline_before = name_start >= 2 && bytes[name_start - 2] == b'\n';
+                    if (newline_before && after_ws.first() == Some(&b'\n')) || after_ws.windows(2).any(|w| w == b"\n\n")
+                    {
+                        state.pending_newline_join = None;
                     }
 
                     text_start = pos;
@@ -1878,6 +1919,16 @@ fn emit_void(
     // `Tier1State::last_emitted_was_img`); the `TagKind::Image` arm below
     // re-sets it to true after this reset runs.
     state.last_emitted_was_img = false;
+    // ~keep A `<br>` ends the line of the text before it: a `'\n'` join still at the end would put
+    // ~keep the marker on a line of its own, which cleanup turns into a paragraph break (issue
+    // ~keep #683). The join goes before the block check below, which must not see a line end
+    // ~keep Tier-2 never wrote (`<canvas>First\n</canvas><br>`).
+    if let Some(join_end) = state.pending_newline_join.take() {
+        let dest = state.cell_or_output_mut();
+        if matches!(spec.kind, TagKind::LineBreak) && join_end == dest.len() {
+            dest.pop();
+        }
+    }
     // ~keep In a cell a line break is a break of its own (issue #645).
     if std::mem::take(&mut state.last_closed_block)
         && is_inline_tag(name_lower)
@@ -4941,6 +4992,7 @@ fn flush_text(
     // `decode_and_collapse_into_inline` and handle `\n` collapse already),
     // outside `<pre>` (verbatim), and outside table cells (which run
     // `normalize_whitespace_cow` directly).
+    let mut ends_in_newline_join = false;
     let raw_owned;
     let raw = if !inside_inline && !state.in_table_cell() {
         let trim_chars: &[char] = &['\n', '\r', ' ', '\t'];
@@ -4966,7 +5018,9 @@ fn flush_text(
                 } else if trailing.bytes().any(|b| b == b' ' || b == b'\t') {
                     " "
                 } else if trail_has_nl {
-                    trailing_single_newline_join(state, next_tag_is_span)
+                    let join = trailing_single_newline_join(state, next_tag_is_span);
+                    ends_in_newline_join = join == "\n";
+                    join
                 } else {
                     trailing
                 };
@@ -5051,6 +5105,10 @@ fn flush_text(
     escape_backslash_run(dest, emitted_from, in_cell);
     if !folds_lines {
         crate::converter::utility::escaping::escape_continuation_line_start(dest, emitted_from);
+    }
+    if ends_in_newline_join {
+        let join_end = dest.len();
+        state.pending_newline_join = Some(join_end);
     }
     Ok(())
 }
@@ -6051,7 +6109,8 @@ fn upcoming_open_tag_name<'b>(bytes: &[u8], lt_pos: usize, buf: &'b mut [u8; MAX
 ///   blank line" and wrongly swallowing the join.
 /// - Otherwise: a paragraph ancestor, or a `<strong>`/`<em>` (Tier-2's
 ///   `inline_depth`-incrementing wrappers) ancestor, joins with a single
-///   space; anything else (e.g. a bare `<div>`) joins with a literal newline.
+///   space; anything else (e.g. a bare `<div>`) joins with a literal newline,
+///   which a `<br>` that follows removes again (`Tier1State::pending_newline_join`).
 fn trailing_single_newline_join(state: &Tier1State, next_tag_is_span: bool) -> &'static str {
     if next_tag_is_span {
         return "";

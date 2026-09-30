@@ -52,6 +52,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **A line break on its own source line became a paragraph break (#683).** `First\n<br>\nSecond`
+  gave `First\n\nSecond`, two paragraphs: the newline before the `<br>` put its hard-break marker
+  on a line of its own, and an empty line ends a paragraph. The break now ends the line of the text
+  before it, `First  \nSecond`, in both converters and with both newline styles. This also holds
+  when that text ends inside an element that writes no line end, such as `<span>`, `<font>` or a
+  custom element: `<span>First\n</span><br>Second`.
 - **A table cell ignored `escape_underscores` and `escape_asterisks` (#638).**
   The full converter always escaped `_` and `*` in a cell, so
   `<table><tr><td>sample_value</td></tr></table>` gave `sample\_value` while
