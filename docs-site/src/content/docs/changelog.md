@@ -60,6 +60,270 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   before it, `First  \nSecond`, in both converters and with both newline styles. This also holds
   when that text ends inside an element that writes no line end, such as `<span>`, `<font>` or a
   custom element: `<span>First\n</span><br>Second`.
+- **A table cell ignored `escape_underscores` and `escape_asterisks` (#638).**
+  The full converter always escaped `_` and `*` in a cell, so
+  `<table><tr><td>sample_value</td></tr></table>` gave `sample\_value` while
+  `<p>sample_value</p>` gave `sample_value`. Every escape option now acts the same in a cell as
+  anywhere else. A `|` in a cell is still escaped whatever the options say, and with
+  `escape_ascii` on and `escape_misc` off it is now escaped once, as `\|`, instead of as `\\|`,
+  which some renderers show with a stray backslash.
+- **A `|` in a code span, link or image in a table cell broke the table.**
+  `<table><tr><td><code>a|b</code></td></tr></table>` gave ``| `a|b` |``. GFM splits a row on
+  a pipe in a code span too, so the row no longer matched the delimiter row and the whole table
+  became a paragraph. A pipe in a link destination or title, an image description, preformatted
+  text or a code span in a nested table did the same. In Markdown output every pipe in a cell is
+  now escaped as `\|`, which GFM reads as `|` in a code span too. In Djot output a pipe in a
+  link or an image in a cell is now escaped as `\|`, and a pipe in a verbatim span stays bare,
+  because Djot does not split a row there.
+- **An empty task item lost its checkbox on GitHub.** `<ul><li><input type="checkbox"></li></ul>`
+  gave `- [ ]`. GFM reads a checkbox only when content follows it, so cmark-gfm and markdown-it
+  showed the text `[ ]`. It now gives `- [ ] &#32;`, a checkbox: the character reference renders
+  as a space. Djot output does not change.
+- **Text next to a paragraph, heading or other block in a table cell joined it (#645).**
+  `<table><tr><td><p>a</p>b</td></tr></table>` gave `| ab |`, and so did a heading, a `<div>`,
+  a list or a code block before the text. Text before a heading or a code block joined it too.
+  A block in a cell is now separated from the cell content before and after it by the cell break:
+  `| a b |`, or `| a<br>b |` with `br_in_tables` on. A block at the start of bold, a code span or
+  another inline element still joins the text before that element, and a block inside a heading
+  still joins the text next to it.
+- **The two converters wrote a quote or a paragraph in a table cell differently (#647).** A quote
+  in a cell now has no `>` marker in either converter, as a heading, a list and a code block in a
+  cell have none: `<blockquote>a</blockquote>b` gives `| a b |`. The fast converter wrote a
+  paragraph after other cell content as `<br>` with `br_in_tables` off; it now writes a space, as
+  the full converter does.
+- **The fast converter dropped a line break that no element encloses (#679).**
+  `a<br>1) t` gave `a1) t`, so the two lines joined. The fast converter now writes the break as
+  the full converter does, `a  \n1\) t`, the same as when the input sits in `<body>`. The line
+  after a hard break also no longer keeps a leading space: `<div>a<br> b</div>` gives `a  \nb` in
+  both converters.
+- **Hard breaks that differed between the converters or lost their place.**
+  A whitespace character reference after a break (`a<br>&#10;b`) no longer makes a paragraph
+  break in the fast converter. A break in a heading followed by a space
+  gives one space (`## a b`). With the backslash newline style, a line in a list item that holds
+  only a break keeps the item's indent (#681). Wrap no longer cuts a list item's text at a `===`
+  line left of the item's column, which dropped the hard breaks after it (#680), and keeps a
+  hard break right before such a line.
+- **Two ordered lists next to each other became one list (#666).**
+  `<ol><li>a</li></ol><ol><li>b</li></ol>` gave `1. a\n\n1. b`, which CommonMark and Djot read
+  as one list, because a blank line does not end a list. An ordered list that follows an ordered
+  list with only blank lines between them now writes the other delimiter, so it gives
+  `1. a\n\n1) b`, also when a section, article, figure or similar element wraps either list. A
+  list written as text, in a heading or between inline markers, keeps `.`.
+- **In Djot output a nested list directly under its item's text was text (#670).**
+  Djot needs a blank line before a list that follows text, so `- a\n  * b` is one paragraph
+  there. A nested list after its item's text now starts after a blank line in Djot output:
+  `- a\n\n  * b`.
+- **An empty nested list item after text turned the text into a heading (#667).**
+  `<ol><li>a<ul><li></li></ul></li></ol>` gave `1. a\n   -\n`: an empty item cannot interrupt a
+  paragraph, so the lone `-` read as a heading underline and the item was lost. A nested list whose
+  first item writes nothing on its marker line now starts after a blank line: `1. a\n\n   -\n`.
+  An empty item after text directly inside its list does the same: `<ul>t<li></li></ul>` gives
+  `t\n\n-\n`, not `t\n-\n`. A list between inline markers, such as a highlight, is text and
+  does not change. With custom `bullets` such as `-`, nested single-item lists that end in an
+  empty item wrote `- - -`, a thematic break. The empty item's marker now starts the next line,
+  at the column it had on the line of markers: `- -\n    -`.
+- **A task item in an ordered list lost its number (#659).**
+  `<ol><li><input type="checkbox">p</li></ol>` gave `- [ ] p`, a bullet list. A task item now
+  writes the marker of its own list, so it gives `1. [ ] p`, and its content column follows the
+  width of that number. Djot output keeps `- [ ] p`, because Djot has task items only in bullet
+  lists.
+- **A nested ordered list that does not start at 1 joined the text before it (#662).**
+  CommonMark lets only a list that starts at 1 interrupt a paragraph, so in
+  `<ol start="10"><li>a<ol start="100"><li>q</li></ol></li></ol>` the line `100. q` was part of
+  the paragraph `a`. Such a list now starts after a blank line when a paragraph is open before
+  it: `10. a\n\n    100. q`. The blank line makes the outer list loose.
+- **Text after a line break became a list, quote or heading (#651).** `<p>a<br>1) t</p>` gave
+  `a  \n1) t`, so `1) t` became a list item; in bold, in a list item, in a quote and at the top
+  level alike. Text that starts the line after a hard break and would interrupt the paragraph
+  (`1.`, `1)`, `01.`, `-`, `+`, `*`, `>`, `#`, a rule, a fence or an underline) now has that
+  character escaped, `1\) t`, in both converters. A line that cannot interrupt a paragraph, like
+  `2. t`, is left as it is.
+- **Heading text that reads as a closing `#` or a link definition lost the heading (#661).**
+  `<h1>#</h1>` gave `# #`, an empty heading, because CommonMark reads a `#` run at the end of the
+  line as the heading's closing sequence; `a #` and `##` lost their `#` the same way. Such a run
+  now has its first `#` escaped, `# \#`, in both converters. With `heading_style: underlined`,
+  `<h1>[a]: b</h1>` gave `[a]: b` over its underline, which is a link reference definition, so
+  the heading was lost. Text that starts a definition now has its `[` escaped, `\[a]: b`. A Djot
+  heading and a closed ATX heading keep their `#` run as it is, and plain heading text is
+  unchanged.
+- **A table that starts a task item became the task's text (#630).**
+  `<ul><li><input type="checkbox"><table><tr><td>c</td></tr></table></li></ul>` gave
+  `- [ ] | c |`, so the header row was the task's text and the table was lost. A table that is a
+  task item's first content now starts after a blank line at the content column, also inside a
+  `<div>` or `<section>`. A block in an element that writes nothing before it, like a `<span>` or
+  an `<hgroup>`, now also starts below the checkbox; in bold or a link it stays text on the
+  checkbox line.
+- **The fast converter dropped a task item's checkbox (#632).** With the fast converter forced,
+  `<ul><li><input type="checkbox"><p>p</p></li></ul>` gave `- p`. A list item that holds a
+  checkbox now goes to the full converter, which writes `- [ ] p`. The full converter also reads
+  `type="CHECKBOX"` as a checkbox now, as a browser does.
+- **Content after an HTML block that `preserve_tags` keeps joined the block (#655).**
+  CommonMark ends an HTML block only at a blank line, and none followed a preserved block
+  element, so in `<ul><li><input type="checkbox"><div></div><h2>h</h2>t</li></ul>` the heading
+  and the text were part of the HTML. A blank line now follows a preserved element that starts
+  an HTML block, in a list item and at the top level:
+  `- [ ] &#32;\n  <div></div>\n\n  ## h\n  t`.
+- **A table whose cells held only rules was dropped (#628).** The full converter took a table
+  with no text and no image for a blank spacer table and wrote nothing, so
+  `<table><tr><td><ul><li><hr></li></ul></td></tr></table>` gave an empty document. A rule now
+  counts as content, and both converters write the table as `| --- |` over its delimiter row. Text
+  in a cell that looks like a list marker no longer turns a rule after it into `___`, and the fast
+  converter now trims the space before a rule in a cell as the full converter does.
+- **A table whose only cell held a line break was dropped with `br_in_tables` on (#646).**
+  `<table><tr><td><br></td></tr></table>` gave an empty document from the full converter while
+  the fast converter kept the table as `| <br> |`. With `br_in_tables` on, a `<br>` in a cell
+  writes a literal `<br>`, so it now counts as content, matching the fast converter; with the
+  option off it still collapses to a space the cell trims away, so the table is still dropped
+  there, as it was before.
+- **A rule inside bold, italic, a summary or a caption split the emphasis markers (#603).** The
+  rule was written after a blank line, which ended the paragraph between the markers, so the
+  markers showed as literal text: `<summary>t<hr></summary>` gave `**t\n\n---**`, and a
+  definition list that starts its definition with a rule did the same inside a caption, `<b>` or
+  `<em>`. Markdown has no rule inside emphasis, so the rule is now the text `---` in the running
+  line, as it already was in a link: `**t ---**`. This covers `<b>`, `<strong>`, `<em>`, `<i>`,
+  `<summary>`, `<figcaption>`, a table caption, `<del>`, `<s>`, `<strike>`, `<ins>`, `<mark>`,
+  `<var>`, `<dfn>`, `<q>`, and `<sub>` and `<sup>` when they write a symbol.
+- **A list item took the checkbox of an item in its nested list (#604).**
+  `<ul><li>X<ul><li><input type="checkbox" checked> A</li></ul>ZZ</li></ul>` gave `- [x] X AZZ`:
+  the outer item became a task item and the nested list was joined into its text. A checkbox in a
+  nested list now belongs to that list's item, so the output is `- X`, the nested `- [x] A` and
+  then `ZZ`.
+- **Text after a quote, in a list inside bold, italic or `<q>`, rendered inside the quote
+  (#615).** `<b><ul><li>x<blockquote>q</blockquote>t</li></ul></b>` gave `**- x\n  > q\n  t**`,
+  so `t**` continued the quote's paragraph. The first item's marker follows the opening marker,
+  so that item is text and writes no content column, and the blank line after the quote went
+  with the column. A nested item's marker starts its own line, so it is a real list item, and
+  `**- a\n  * x\n    > q\n    t**` kept `t` in the quote too. Text after a quote or a nested
+  list now starts after a blank line, at the column of the innermost real list item:
+  `**- x\n  > q\n\nt**` and `**- a\n  * x\n    > q\n\n    t**`. A quote 4 or more columns
+  past that item's column, or past the start of the line when no item is real, is the
+  paragraph's own text, so nothing changes there and the markers stay in one paragraph.
+- **A quote that starts a list item rendered outside the item (#617).**
+  `<ul><li><blockquote>q</blockquote></li></ul>` gave `-\n> q`, an empty item and a quote after
+  the list, also when the list is inside a quote. The quote now starts on the marker line,
+  `- > q`.
+- **A quote that starts a task item became the task's text (#622).** A checked task item whose
+  first content is `<blockquote>q</blockquote>` gave `- [x] > q`, which renders the text
+  `[x] > q`. The quote now starts on the next line at the item's content column,
+  `- [x] &#32;\n  > q`. The checkbox line ends in a space written as a character reference: GFM
+  reads a checkbox only when content follows it, so cmark-gfm shows a bare `[x]` line as text.
+  A nested list, a heading or a code block that starts a task item does the same, also inside a
+  `<div>` or a `<section>`, and also when the checkbox is in a `<p>` of its own. A rule there
+  gave `- [ ] ---`, the text `[ ] ---`; it now comes after a blank line,
+  `- [ ] &#32;\n\n  ---`, since `---` right under the checkbox line makes that line a heading.
+- **A rule that starts a list item rendered outside the item (#623).**
+  `<ul><li><hr></li></ul>` gave `-\n\n---`, an empty item and a rule after the list. The rule is
+  now `___` on the marker line, `- ___`: `- ---` is a rule of its own.
+- **Text inside a list before an item joined the item's marker (#625).** `<ul>how<li>do</li></ul>`
+  gave `how- do`, one line of text, and the item was lost. The item now starts its own line,
+  `how\n- do`. When its marker cannot interrupt the text above it, as with `3.`, a blank line
+  comes first: `how\n\n3. do`.
+- **Text after a quote stayed in the quote for a later item of a list inside bold or italic
+  (#633).** `<b><ul><li>a<ol><li>x</li><li>y<blockquote>q</blockquote>t</li></ol></li></ul></b>`
+  gave `**- a\n  1. x\n  2. y\n     > q\n     t**`, and `t**` continued the quote. The marker
+  `2.` cannot interrupt a paragraph, but after the real item `1. x` no paragraph is open, so `2.`
+  starts an item. The same holds after a quote of the enclosing item. Text
+  after the quote now starts after a blank line: `**- a\n  1. x\n  2. y\n     > q\n\n     t**`.
+- **Some first blocks of a task item still became the task's text (#634).** An ordered list that
+  starts at a number other than 1 and a code block in the indented style cannot interrupt the
+  checkbox line, so they now start after a blank line: `- [ ] &#32;\n\n  3. x` and
+  `- [ ] &#32;\n\n      c`.
+  The code block keeps its indent; before, `- [ ]\n  c` lost the code. A quote after an empty
+  inline element, such as `<span></span>`, now starts on the next line like a quote right after
+  the checkbox. An image before the quote is still text on the checkbox line, and so is an empty
+  element that `preserve_tags` writes as HTML. An empty list, heading or code block writes
+  nothing, so text after it stays on the checkbox line: `- [ ] t`. A fenced code block that holds
+  only whitespace still writes its fences, so it starts on the next line and the text after it
+  stays out of the code.
+- **A quote after a line break in a task item stayed on the checkbox line (#650).**
+  `<ul><li><input type="checkbox"><br><blockquote>q</blockquote></li></ul>` gave `- [ ] > q`, and
+  the quote was text. The converter's own output now decides which element writes first, also
+  inside a `<div>` or a `<section>`. A line break, a `&nbsp;`, a `<template>`, a `<noscript>`, an
+  `<input>` that is not the checkbox, an empty `<picture>` or an image with `skip_images` writes
+  nothing there, so the quote now starts on the next line: `- [ ] &#32;\n  > q`.
+- **An underlined heading ended its list item (#635).** With `heading_style` set to `underlined`,
+  the underline of a heading in a list item was written at column 0: `<ul><li><h2>q</h2></li></ul>`
+  gave `- q\n-`, an item and an empty item. The underline now gets the item's content column,
+  `- q\n  --`. After a line of the item, the heading starts after a blank line, so it does not
+  continue that line's paragraph: `- a\n\n  q\n  --`. A block after a heading of one letter starts
+  its own paragraph: `<ul><li><h2>q</h2><p>t</p></li></ul>` gives `- q\n  --\n\n  t`. In a list
+  item the underline has at least two dashes, since a lone `-` line reads as an empty item.
+- **Many blocks in one list item took quadratic time (#649).** Each block checked every earlier
+  line of the item to see whether the item was still open, and each item of a list inside bold or
+  italic checked every earlier item. `<ul><li>` with 5000 headings after text took seconds. Each
+  check now reads only the lines written since the last one, so the time grows linearly.
+- **A heading after text in a quote joined the text (#640).** `<blockquote>a<h2>q</h2></blockquote>`
+  gave `> a## q`, a paragraph, and with `heading_style` set to `underlined` it gave `> aq\n> -`,
+  one heading. The heading now starts after a blank quote line: `> a\n>\n> ## q`. An underlined
+  heading does the same after any line of text in the quote, such as a line that ends in a hard
+  break or the last item of a list.
+- **An underlined heading whose text starts a block lost its heading (#653).** With
+  `heading_style` set to `underlined`, `<h2>-</h2>` gave `-\n-`, two empty list items. The text of
+  an underlined heading is now escaped where it would start a block: a list marker (`-`, `*`,
+  `1.`, also on its own), a quote, a `#` heading or a rule. `<h2>-</h2>` gives `\-\n-`.
+- **The lines of a list item in a quote or under tab indent left the item (#654).** A list inside
+  a quote in a list item counted the markers outside the quote too, so its lines sat further in
+  than the item, and the underline of a heading sat short of it. The quote now starts its content
+  as a container of its own, so a list in it counts only its own markers. A block after text in a
+  list item inside a quote now also starts its own line, as it does outside a quote. An
+  underlined heading in a quote in a list item now gets the one-dash underline it gets in a
+  quote elsewhere: `<ul><li><blockquote><h2>q</h2></blockquote></li></ul>` gives `- > q\n  > -`,
+  where it gave `- > q\n  > --`. Bold or italic around the quote no longer changes the lists in
+  it, so text after a nested quote in such a list leaves the nested quote. With
+  `list_indent_type` set to `tabs`, the lines of a nested item were one tab short of its content
+  column: `- a\n\t* q\n\n\tt` put `t` in the outer item. They now reach the column where the
+  item's text starts, `- a\n\t* q\n\n\t\tt`. With `list_indent_width` set to 4 or with tab
+  indent, a quote right after an opening bold marker, a summary's or a caption's, now writes a
+  nested quote or list of its list at the column of the nearest real list item, where they became
+  a code block. A list inside `<mark>` or `<del>` is now text after its marker, as inside bold,
+  so text after a quote in it no longer becomes a code block.
+- **Wrap mode joined a rule or a heading underline to the text next to it (#607).** With `wrap`
+  on, a `---` line followed by text became one line of text, `--- B`, and the rule was lost. The
+  underline of an underlined heading was joined to the heading text (`Heading -------`), or cut
+  off from it by a blank line for `=======`, so the heading was lost too. A rule now stays on its
+  own line, and an underline stays right under its heading text, which is not reflowed, as with a
+  `#` heading. Both hold inside a quote too.
+- **Wrap mode joined the keys of the frontmatter into one line.** With `wrap` on and metadata
+  extraction on, the YAML frontmatter went through the reflow like body text, so
+  `---\ntitle: My Page\n---` became `--- title: My Page ---` and the frontmatter was lost. Only
+  the text after the frontmatter is wrapped now.
+- **Wrap mode folded list items, code fences, headings and table rows inside a quote into text.**
+  With `wrap` on, `<blockquote><ul><li>alpha</li><li>beta</li></ul></blockquote>` gave
+  `> - alpha - beta`, one item, and a code block inside a quote lost its code. Outside a quote, a
+  `~~~` code block was reflowed like a paragraph. Every line that starts a block now keeps its own
+  line in and out of a quote, and a code block ends only at a fence that closes it.
+- **Wrap mode turned a tight list loose when an item went on to a second line (#616).** A line
+  right under a list item that starts no block of its own, at column 0 or indented, belongs to
+  the item's text. With `wrap` on, the reflow wrote it as a paragraph of its own and put a blank
+  line before the next item, so the list rendered loose. It now joins the item's text and is
+  wrapped with it. For the same reason, a line that starts with a number such as `1990.` or
+  `57)` stays in its paragraph, in a quote and in a list item: only a bullet or a number equal
+  to 1, such as `1.` or `01)`, can end a paragraph and start a list. Under a list item, a number
+  line left of the item's text still ends the item.
+- **Wrap mode dropped a hard line break (#613).** With `wrap` on, `<p>a<br>b</p>` gave `a b`:
+  the reflow joined the line after a `<br>` to the line before it, in a paragraph, a quote and a
+  list item. A hard break is now a line end the reflow never joins across, so each side of it is
+  wrapped on its own and the break stays, with both newline styles.
+- **Wrap mode could start a line with a list marker and turn text into a list (#614).** With
+  `wrap` on, a break before a `-`, `1.`, `#` or `>` in running text started a new line with it,
+  which opened a list, a heading or a quote. A wrapped line now never starts with a word that
+  opens a block there, also in a run such as `--- --- ---` or `* * *`; the word stays at the
+  end of the line before it, which can then run past the wrap width. A number equal to 1 with
+  leading zeros, such as `01.` or `001)`, opens a list like `1.` does, so it is kept off a line
+  start too, and a link label or image alt line that starts with one is escaped. A number
+  followed by non-breaking spaces, such as Word's `1.&nbsp;&nbsp; Cut`, is no longer read as a
+  list marker, and the reflow no longer breaks a line at a non-breaking space.
+- **Wrap mode broke a link whose address holds a space.** An address with a space is written in
+  angle brackets, `[Share](<https://example.com/?text=a b>)`, and a line end inside the brackets
+  ends the link. With `wrap` on, the reflow broke the line there. It now keeps the address in
+  angle brackets on one line.
+- **Wrap mode cut a nested list marker off from its text.** A list item that holds a nested list
+  on its own line, such as `- 3. [vote](...) title`, wrapped to `- 3.` and the text on the next
+  line. `- 3.` alone is an empty nested item, and the text below it left the nested list. The
+  reflow now treats both markers as one, so the text stays in the nested item. An item whose
+  text starts a heading or a code fence, such as `- ## Title`, is no longer reflowed: the heading
+  kept only its first words, and the code lines were joined and wrapped like text.
+
 - **A page whose bytes open with a mangled byte order mark lost its whole head.** A real leading
   U+FEFF is stripped before parsing, but one a wrong encoding guess mangles beyond recognition
   reads as ordinary text by the time #527's head search sees it, and that search treated any such
