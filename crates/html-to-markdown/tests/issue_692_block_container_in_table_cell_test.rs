@@ -7,7 +7,7 @@
 //! the text after it. These convert like a `<div>`, so the text after them gets the cell break,
 //! and both converters write the same cell.
 
-use html_to_markdown_rs::options::OutputFormat;
+use html_to_markdown_rs::options::{NewlineStyle, OutputFormat};
 use html_to_markdown_rs::prescan::PrescanReport;
 use html_to_markdown_rs::{ConversionOptions, TierStrategy, convert, tier1};
 
@@ -154,6 +154,37 @@ fn should_keep_a_div_like_container_on_its_own_line_in_plain_output() {
         };
         let plain = convert(&html, Some(options)).expect("conversion must succeed").content;
         assert_eq!(plain.as_deref(), Some("a\n\nb\n\nc\n"), "{html}");
+    }
+}
+
+const DIV_LIKE: [&str; 5] = ["center", "dialog", "search", "hgroup", "div"];
+
+#[test]
+fn should_drop_the_backslash_break_before_a_div_like_container() {
+    for container in DIV_LIKE {
+        let html = format!("<p>a<br><{container}>b</{container}>c</p>");
+        let options = ConversionOptions {
+            newline_style: NewlineStyle::Backslash,
+            ..tier2_options(false)
+        };
+        let out = convert(&html, Some(options)).expect("conversion must succeed").content;
+        assert_eq!(out.as_deref(), Some("a\n\nb\n\nc\n"), "{html}");
+    }
+}
+
+#[test]
+fn should_separate_a_dialog_from_the_link_label_around_it_like_a_div() {
+    for container in ["dialog", "div"] {
+        let html = format!("<p><a href=\"u\">l<{container}>b</{container}>m</a></p>");
+        assert_eq!(tier2(&html, false), "[l b m](u)\n", "{html}");
+    }
+}
+
+#[test]
+fn should_close_and_reopen_bold_around_a_div_like_container() {
+    for container in DIV_LIKE {
+        let html = format!("<p><b>a<{container}>b</{container}>c</b></p>");
+        assert_eq!(tier2(&html, false), "**a**\n\n**b**\n\n**c**\n", "{html}");
     }
 }
 

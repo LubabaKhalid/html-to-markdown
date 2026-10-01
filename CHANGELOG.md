@@ -59,6 +59,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   now give `| a h x y |`, or `| a<br>h<br>x<br>y |` with `br_in_tables` on, as a `<div>` does. In a
   list item, text after one of them now starts a paragraph in the item, as after a `<div>`, instead
   of continuing the container's last line or leaving the list.
+  Counting them as blocks changes three more outputs, again to match a `<div>`. With
+  `newline_style: backslash`, the hard break before one of them is dropped: `<p>a<br><center>b</center>c</p>`
+  gives `a`, `b` and `c` as paragraphs instead of `a\` then `b`. A dialog in a link label is set off
+  by spaces, so `<a href="u">l<dialog>b</dialog>m</a>` gives `[l b m](u)` instead of `[lb m](u)`.
+  Bold or italic around one of them is closed before it and opened again after it:
+  `<p><b>a<center>b</center>c</b></p>` gives `**a**`, `**b**` and `**c**` instead of one bold run
+  across three paragraphs. Visitors now get `is_inline` false for these four tags.
 - **Text before a `<dialog>` ran into it (#692).** `<p>a<dialog>b</dialog>c</p>` gave `ab`, then
   `c`, and `<td>a<dialog>b</dialog>c</td>` gave `| ab c |` in the full converter: the dialog wrote
   no break before its content. A dialog now converts like a `<div>`, so the paragraph gives `a`,
