@@ -7,38 +7,38 @@ import { convert, WasmConversionOptions, WasmVisitorHandle } from "../pkg/nodejs
 const HTML = "<h1>Title</h1>";
 
 function headingVisitor() {
-	const calls: string[] = [];
-	const handle = new WasmVisitorHandle({
-		visitHeading(_ctx: unknown, _level: number, text: string) {
-			calls.push(text);
-			return { custom: `VISITED ${text}` };
-		},
-	});
-	return { calls, handle };
+  const calls: string[] = [];
+  const handle = new WasmVisitorHandle({
+    visitHeading(_ctx: unknown, _level: number, text: string) {
+      calls.push(text);
+      return { custom: `VISITED ${text}` };
+    },
+  });
+  return { calls, handle };
 }
 
 describe("ConversionOptions.visitor", () => {
-	it("reuses one handle across two options objects", () => {
-		const { calls, handle } = headingVisitor();
+  it("reuses one handle across two options objects", () => {
+    const { calls, handle } = headingVisitor();
 
-		const first = new WasmConversionOptions();
-		first.visitor = handle;
-		const second = new WasmConversionOptions();
-		second.visitor = handle;
+    const first = new WasmConversionOptions();
+    first.visitor = handle;
+    const second = new WasmConversionOptions();
+    second.visitor = handle;
 
-		expect(convert(HTML, first).content).toContain("VISITED Title");
-		expect(convert(HTML, second).content).toContain("VISITED Title");
-		expect(calls).toEqual(["Title", "Title"]);
-	});
+    expect(convert(HTML, first).content).toContain("VISITED Title");
+    expect(convert(HTML, second).content).toContain("VISITED Title");
+    expect(calls).toEqual(["Title", "Title"]);
+  });
 
-	it("clearVisitor() unsets the field", () => {
-		const { calls, handle } = headingVisitor();
+  it("clearVisitor() unsets the field", () => {
+    const { calls, handle } = headingVisitor();
 
-		const options = new WasmConversionOptions();
-		options.visitor = handle;
-		options.clearVisitor();
+    const options = new WasmConversionOptions();
+    options.visitor = handle;
+    options.clearVisitor();
 
-		expect(convert(HTML, options).content).not.toContain("VISITED");
-		expect(calls).toEqual([]);
-	});
+    expect(convert(HTML, options).content).not.toContain("VISITED");
+    expect(calls).toEqual([]);
+  });
 });
