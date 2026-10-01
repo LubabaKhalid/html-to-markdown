@@ -7,6 +7,7 @@
 //! the text after it. These convert like a `<div>`, so the text after them gets the cell break,
 //! and both converters write the same cell.
 
+use html_to_markdown_rs::options::OutputFormat;
 use html_to_markdown_rs::prescan::PrescanReport;
 use html_to_markdown_rs::{ConversionOptions, TierStrategy, convert, tier1};
 
@@ -140,6 +141,19 @@ fn should_start_a_dialog_on_a_new_paragraph_like_a_div() {
     for container in ["dialog", "div"] {
         let html = format!("<p>a<{container}>b</{container}>c</p>");
         assert_eq!(tier2(&html, false), "a\n\nb\n\nc\n", "{html}");
+    }
+}
+
+#[test]
+fn should_keep_a_div_like_container_on_its_own_line_in_plain_output() {
+    for container in ["center", "dialog", "search", "hgroup", "div"] {
+        let html = format!("<p><b>a<{container}>b</{container}>c</b></p>");
+        let options = ConversionOptions {
+            output_format: OutputFormat::Plain,
+            ..tier2_options(false)
+        };
+        let plain = convert(&html, Some(options)).expect("conversion must succeed").content;
+        assert_eq!(plain.as_deref(), Some("a\n\nb\n\nc\n"), "{html}");
     }
 }
 

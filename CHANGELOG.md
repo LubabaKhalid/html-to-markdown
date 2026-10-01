@@ -64,6 +64,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   no break before its content. A dialog now converts like a `<div>`, so the paragraph gives `a`,
   `b` and `c` as three paragraphs, the cell gives `| a b c |` in both converters, and in a list
   item the dialog content starts a paragraph in the item.
+- **Plain text output joined a `<center>` or `<dialog>` to the text after it (#692).**
+  `<p><b>a<center>b</center>c</b></p>` with `output_format: plain` gave `a`, then `bc`. Plain
+  output now starts both on their own line, as it does for a `<div>`: `a`, `b` and `c`.
 - **A line break on its own source line became a paragraph break (#683).** `First\n<br>\nSecond`
   gave `First\n\nSecond`, two paragraphs: the newline before the `<br>` put its hard-break marker
   on a line of its own, and an empty line ends a paragraph. The break now ends the line of the text

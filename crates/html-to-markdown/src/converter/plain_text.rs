@@ -61,6 +61,8 @@ const BLOCK_TAGS: &[&str] = &[
     "address",
     "hgroup",
     "search",
+    "center",
+    "dialog",
 ];
 
 /// Shared walker state threaded through all recursive calls.
