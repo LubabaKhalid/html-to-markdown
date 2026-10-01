@@ -52,6 +52,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **Text after a `<center>`, `<search>`, `<hgroup>` or `<dialog>` in a table cell joined it
+  (#692).** `<table><tr><td>a<center><h2>h</h2>x</center>y</td></tr></table>` gave `| a h xy |`
+  in both converters, and the full converter wrote `| a h x  y |` for a `<dialog>`. These convert
+  like a `<div>` but were not counted as blocks, so the text after them got no cell break. They
+  now give `| a h x y |`, or `| a<br>h<br>x<br>y |` with `br_in_tables` on, as a `<div>` does. In a
+  list item, text after one of them now starts a paragraph in the item, as after a `<div>`, instead
+  of continuing the container's last line or leaving the list.
 - **A line break on its own source line became a paragraph break (#683).** `First\n<br>\nSecond`
   gave `First\n\nSecond`, two paragraphs: the newline before the `<br>` put its hard-break marker
   on a line of its own, and an empty line ends a paragraph. The break now ends the line of the text
