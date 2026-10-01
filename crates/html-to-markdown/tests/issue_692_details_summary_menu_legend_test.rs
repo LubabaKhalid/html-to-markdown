@@ -6,6 +6,7 @@
 //! joined the text around it in a table cell, a list item or a paragraph. Each now separates that
 //! text the way a `<div>` does, and a summary or legend stays bold.
 
+use html_to_markdown_rs::options::OutputFormat;
 use html_to_markdown_rs::prescan::PrescanReport;
 use html_to_markdown_rs::{ConversionOptions, TierStrategy, convert, tier1};
 
@@ -88,6 +89,23 @@ fn should_keep_the_element_and_the_text_after_it_in_the_list_item_like_a_div() {
         }
     }
     assert_no_failures(&failures, "list item differs from a div");
+}
+
+#[test]
+fn should_keep_the_element_on_its_own_line_in_plain_output_like_a_div() {
+    let mut failures = Vec::new();
+    for (element, _) in ELEMENTS {
+        let html = format!("<p><b>a<{element}>b</{element}>c</b></p>");
+        let options = ConversionOptions {
+            output_format: OutputFormat::Plain,
+            ..tier2_options(false)
+        };
+        let actual = convert(&html, Some(options)).expect("conversion must succeed").content;
+        if actual.as_deref() != Some("a\n\nb\n\nc\n") {
+            failures.push(format!("{html:?}: {actual:?}"));
+        }
+    }
+    assert_no_failures(&failures, "plain output differs from a div");
 }
 
 #[test]
