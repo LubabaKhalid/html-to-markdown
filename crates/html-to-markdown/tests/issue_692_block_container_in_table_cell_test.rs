@@ -148,7 +148,7 @@ fn should_start_a_dialog_on_a_new_paragraph_like_a_div() {
 #[test]
 fn should_keep_text_after_a_div_like_container_in_its_list_item_like_after_a_div() {
     let mut failures = Vec::new();
-    for container in ["center", "search", "hgroup"] {
+    for container in ["center", "search", "hgroup", "dialog"] {
         for shape in [
             "<ul><li>a<X>b</X>c</li></ul>",
             "<ol><li><X>a</X>b</li></ol>",
