@@ -25,12 +25,6 @@
         "value": "Listen to this:"
       }
     ],
-    "skip": {
-      "languages": [
-        "wasm"
-      ],
-      "reason": "WASM visitor bridge not yet exposed via @xberg-io/html-to-markdown-wasm public API"
-    },
     "docs": {
       "topic": "visitor",
       "stem": "visitor_audio_custom",
@@ -77,12 +71,6 @@
         "value": "Skip"
       }
     ],
-    "skip": {
-      "languages": [
-        "wasm"
-      ],
-      "reason": "WASM visitor bridge not yet exposed via @xberg-io/html-to-markdown-wasm public API"
-    },
     "docs": {
       "topic": "visitor",
       "stem": "visitor_audio_skip",
@@ -120,12 +108,6 @@
         "value": "Great content!"
       }
     ],
-    "skip": {
-      "languages": [
-        "wasm"
-      ],
-      "reason": "WASM visitor bridge not yet exposed via @xberg-io/html-to-markdown-wasm public API"
-    },
     "docs": {
       "topic": "visitor",
       "stem": "visitor_video_custom",
@@ -172,12 +154,6 @@
         "value": "Skip"
       }
     ],
-    "skip": {
-      "languages": [
-        "wasm"
-      ],
-      "reason": "WASM visitor bridge not yet exposed via @xberg-io/html-to-markdown-wasm public API"
-    },
     "docs": {
       "topic": "visitor",
       "stem": "visitor_video_skip",
@@ -215,12 +191,6 @@
         "value": "End of map"
       }
     ],
-    "skip": {
-      "languages": [
-        "wasm"
-      ],
-      "reason": "WASM visitor bridge not yet exposed via @xberg-io/html-to-markdown-wasm public API"
-    },
     "docs": {
       "topic": "visitor",
       "stem": "visitor_iframe_custom",
@@ -267,12 +237,6 @@
         "value": "Skip"
       }
     ],
-    "skip": {
-      "languages": [
-        "wasm"
-      ],
-      "reason": "WASM visitor bridge not yet exposed via @xberg-io/html-to-markdown-wasm public API"
-    },
     "docs": {
       "topic": "visitor",
       "stem": "visitor_iframe_skip",

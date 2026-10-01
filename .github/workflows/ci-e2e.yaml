@@ -1520,6 +1520,13 @@ jobs:
         run: ../../scripts/ci/wasm/test-wasm-rust.sh
         shell: bash
 
+      - name: Install alef
+        uses: xberg-io/actions/install-alef@v1
+
+      - name: Run E2E tests
+        run: alef test --e2e --lang wasm
+        shell: bash
+
   build-kotlin-android:
     needs: [changes]
     name: "Build: Kotlin Android"
