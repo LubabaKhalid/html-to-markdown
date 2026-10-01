@@ -126,6 +126,23 @@ fn should_separate_text_after_a_div_like_container_in_a_cell() {
     ]);
 }
 
+#[test]
+fn should_separate_the_text_before_a_dialog_in_a_cell() {
+    check(&[(
+        "<table><tr><td>a<dialog>b</dialog>c</td></tr></table>",
+        "| a b c |",
+        "| a<br>b<br>c |",
+    )]);
+}
+
+#[test]
+fn should_start_a_dialog_on_a_new_paragraph_like_a_div() {
+    for container in ["dialog", "div"] {
+        let html = format!("<p>a<{container}>b</{container}>c</p>");
+        assert_eq!(tier2(&html, false), "a\n\nb\n\nc\n", "{html}");
+    }
+}
+
 /// The same block test decides where text after these containers goes in a list item, so it
 /// starts a paragraph in the item there, as it does after a `<div>`.
 #[test]

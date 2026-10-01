@@ -59,6 +59,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   now give `| a h x y |`, or `| a<br>h<br>x<br>y |` with `br_in_tables` on, as a `<div>` does. In a
   list item, text after one of them now starts a paragraph in the item, as after a `<div>`, instead
   of continuing the container's last line or leaving the list.
+- **Text before a `<dialog>` ran into it (#692).** `<p>a<dialog>b</dialog>c</p>` gave `ab`, then
+  `c`, and `<td>a<dialog>b</dialog>c</td>` gave `| ab c |` in the full converter: the dialog wrote
+  no break before its content. A dialog now converts like a `<div>`, so the paragraph gives `a`,
+  `b` and `c` as three paragraphs, the cell gives `| a b c |` in both converters, and in a list
+  item the dialog content starts a paragraph in the item.
 - **A line break on its own source line became a paragraph break (#683).** `First\n<br>\nSecond`
   gave `First\n\nSecond`, two paragraphs: the newline before the `<br>` put its hard-break marker
   on a line of its own, and an empty line ends a paragraph. The break now ends the line of the text
