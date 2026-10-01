@@ -74,6 +74,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Plain text output joined a `<center>` or `<dialog>` to the text after it (#692).**
   `<p><b>a<center>b</center>c</b></p>` with `output_format: plain` gave `a`, then `bc`. Plain
   output now starts both on their own line, as it does for a `<div>`: `a`, `b` and `c`.
+- **A `<details>`, `<summary>`, `<menu>` or `<legend>` joined the text around it (#692).** In a
+  table cell, `<td>a<menu>b</menu>c</td>` gave `| ab  c |` and a summary gave `| a**b**  c |`. In
+  a list item, the text after a details left the list, and a summary, menu or legend ran into the
+  text before it. In a paragraph, `<p>a<summary>b</summary>c</p>` gave `a**b**`, then `c`. A
+  details and a menu now convert like a `<div>`, and a summary or legend is placed the way a
+  `<div>` is placed and stays bold: the cell gives `| a b c |` or `| a **b** c |` in both
+  converters, the list item keeps `b` and `c` as paragraphs in the item, and the paragraph gives
+  `a`, `b` and `c` apart. As with the tags above, these four now count as blocks: the backslash
+  break before them is dropped, bold around them is closed and reopened, plain output starts a
+  menu or legend on its own line, and visitors get `is_inline` false for them. A summary that holds
+  a list with a quote in it, inside a details in a list item, now stays in the item, so with the
+  default or tab list indent its bold markers no longer span the quote.
 - **A line break on its own source line became a paragraph break (#683).** `First\n<br>\nSecond`
   gave `First\n\nSecond`, two paragraphs: the newline before the `<br>` put its hard-break marker
   on a line of its own, and an empty line ends a paragraph. The break now ends the line of the text

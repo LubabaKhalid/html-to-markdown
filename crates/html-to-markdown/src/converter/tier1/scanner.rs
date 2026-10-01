@@ -1364,25 +1364,7 @@ fn emit_open(
                 // handler for these names never emits one. See
                 // `block_container_is_passthrough`'s doc comment.
             } else if state.in_table_cell() {
-                let br_in_tables = options.br_in_tables;
-                with_cell_scratch(state, |cell_buf| {
-                    if !cell_buf.is_empty()
-                        && !cell_buf.ends_with('|')
-                        && !cell_buf.ends_with("<br>")
-                        && !cell_buf.ends_with('\n')
-                    {
-                        // ~keep Routed through the same helper Tier-2's `is_table_continuation`
-                        // branch uses (`block/div.rs` -> `emit_table_cell_break`) rather
-                        // than pushing `"  \n"` unconditionally. The hardcoded form ignored
-                        // `br_in_tables`, which defaults to false: Tier-2 emits a single
-                        // space, while `"  \n"` survives `close_table_cell`'s
-                        // `replace('\n', ' ')` as a three-space run, so two sibling block
-                        // containers in one cell rendered `a   b` here against Tier-2's
-                        // `a b`. The list path was already moved onto this helper; the
-                        // block path was missed.
-                        crate::converter::main_helpers::emit_table_cell_break(cell_buf, br_in_tables);
-                    }
-                });
+                break_cell_before_block(state, options.br_in_tables);
             } else {
                 // ~keep Tier-2's `needs_leading_sep` (block/div.rs) appends "\n\n" BLINDLY
                 // whenever the output doesn't already end with a blank line — it does
@@ -1406,7 +1388,12 @@ fn emit_open(
             }
         }
         // ~keep Summary: push accumulation buffer so children redirect into it (Phase R).
-        TagKind::Summary => open_summary(state),
+        TagKind::Summary => {
+            if state.in_table_cell() {
+                break_cell_before_block(state, options.br_in_tables);
+            }
+            open_summary(state);
+        }
         // ~keep Figcaption: same buffer mechanism as summary (Phase FF-2); the
         // wrap delimiter differs (`*…*` vs `**…**`) and is emitted by
         // close_figcaption.
@@ -1419,6 +1406,18 @@ fn emit_open(
     }
 
     Ok(())
+}
+
+/// Writes the cell break Tier-2's `div::handle` writes before a block in a cell that already has
+/// content.
+fn break_cell_before_block(state: &mut Tier1State, br_in_tables: bool) {
+    with_cell_scratch(state, |cell_buf| {
+        if !cell_buf.is_empty() && !cell_buf.ends_with('|') && !cell_buf.ends_with("<br>") && !cell_buf.ends_with('\n')
+        {
+            // ~keep Tier-2's helper, so the break follows `br_in_tables` as Tier-2's does.
+            crate::converter::main_helpers::emit_table_cell_break(cell_buf, br_in_tables);
+        }
+    });
 }
 
 fn open_paragraph(state: &mut Tier1State, br_in_tables: bool) {

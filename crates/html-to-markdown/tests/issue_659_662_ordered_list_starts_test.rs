@@ -247,7 +247,7 @@ fn should_keep_a_nested_list_that_can_interrupt_the_text_or_follows_no_text_on_t
             r#"<ul><li>a<details><summary>s<ol start="3"><li>x</li></ol></summary></details></li></ul>"#,
             &options
         ),
-        "- a\n\n**s\n  3. x**\n"
+        "- a\n\n  **s\n  3. x**\n"
     );
 }
 

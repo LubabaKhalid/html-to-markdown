@@ -542,10 +542,6 @@ fn should_not_write_the_content_column_inside_a_container_once_the_item_has_ende
             tier2_options(),
         ),
         (
-            r#"<ol start="10"><li>X<details><p>a</p><hr></details></li></ol>"#,
-            tier2_options(),
-        ),
-        (
             r#"<ol start="10"><li>X<form><p>a</p><hr></form></li></ol>"#,
             ConversionOptions {
                 preprocessing: PreprocessingOptions {
@@ -728,4 +724,23 @@ fn should_hand_text_after_a_nested_task_list_to_the_full_converter() {
         assert!(tier1(html).is_none(), "Tier 1 converted {html:?}");
         assert_eq!(convert_with(html, auto.clone()), expected, "auto mode on {html:?}");
     }
+}
+
+/// A details converts like a div, so its content and rule stay in the item.
+#[test]
+fn should_keep_the_content_of_a_details_in_its_list_item_like_a_div() {
+    let details = convert_with(
+        r#"<ol start="10"><li>X<details><p>a</p><hr></details></li></ol>"#,
+        tier2_options(),
+    );
+    let div = convert_with(
+        r#"<ol start="10"><li>X<div><p>a</p><hr></div></li></ol>"#,
+        tier2_options(),
+    );
+    assert_eq!(details, div);
+    let rendered = render(&details);
+    assert!(
+        !rendered.contains("<pre>") && rendered.contains("<hr />\n</li>"),
+        "{details:?} renders {rendered:?}"
+    );
 }

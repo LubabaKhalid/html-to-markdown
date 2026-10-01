@@ -236,6 +236,11 @@ pub fn handle_menu(
             ..ctx.clone()
         };
 
+        if !ctx.convert_as_inline {
+            crate::converter::block::div::handle(node_handle, parser, output, &menu_options, &list_ctx, depth, dom_ctx);
+            return;
+        }
+
         let children = tag.children();
         {
             for child_handle in children.top().iter() {
@@ -259,18 +264,8 @@ pub fn handle_menu(
             crate::converter::main_helpers::strip_trailing_backslash_breaks(output, content_start);
         }
 
-        if !ctx.convert_as_inline && output.len() > content_start {
-            if !output.ends_with("\n\n") {
-                if output.ends_with('\n') {
-                    output.push('\n');
-                } else {
-                    output.push_str("\n\n");
-                }
-            }
-        } else if ctx.convert_as_inline {
-            while output.ends_with('\n') {
-                output.pop();
-            }
+        while output.ends_with('\n') {
+            output.pop();
         }
     }
 }

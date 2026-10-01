@@ -78,33 +78,7 @@ pub fn handle(
         let kept_len = output.trim_end_matches([' ', '\t']).len();
         (kept_len, output[kept_len..].to_string())
     });
-
-    // ~keep A plain suffix check like `output.ends_with("* ")` also matches the closing
-    // ~keep "**"/"*" of `<strong>`/`<em>` immediately followed by a migrated trailing
-    // ~keep space, indistinguishable from a real bare bullet by suffix alone -- and,
-    // ~keep being hardcoded to `-`/`*`, never matched the third bullet `+` at all. The
-    // ~keep false positive misclassified this div as sitting right after the marker,
-    // ~keep which skips BOTH branches below (neither `is_list_continuation` nor
-    // ~keep `needs_leading_sep` fires), so the div's content got glued directly onto the
-    // ~keep preceding inline text with no separator at all. See
-    // ~keep `list::utils::line_is_bare_list_marker`'s doc comment for the full rationale.
-    let is_list_continuation =
-        ctx.in_list_item && !output.is_empty() && !crate::converter::list::utils::line_is_bare_list_marker(output);
-
-    let needs_leading_sep = !ctx.in_table_cell
-        && !ctx.in_list_item
-        && !ctx.convert_as_inline
-        && !output.is_empty()
-        && !output.ends_with("\n\n");
-
-    if is_table_continuation {
-        emit_table_cell_break(output, options.br_in_tables);
-    } else if is_list_continuation {
-        crate::converter::list::utils::start_block_in_list_item(output, ctx, options);
-    } else if needs_leading_sep {
-        trim_trailing_whitespace(output);
-        output.push_str("\n\n");
-    }
+    let is_list_continuation = open_block(output, options, ctx);
 
     // ~keep Measured the same way `block/paragraph.rs` does, so a text node can tell "at the
     // ~keep start of this div's line, in this div's buffer" from an inline wrapper's empty
@@ -136,6 +110,58 @@ pub fn handle(
         output.truncate(kept_len);
         output.push_str(&kept_tail);
     }
+    close_block(output, ctx, content_start_pos, is_list_continuation);
+}
+
+/// Writes `text` as its own block, with the separators a div writes around its content.
+pub fn push_block(output: &mut String, options: &ConversionOptions, ctx: &Context, text: &str) {
+    let content_start_pos = output.len();
+    let is_list_continuation = open_block(output, options, ctx);
+    output.push_str(text);
+    close_block(output, ctx, content_start_pos, is_list_continuation);
+}
+
+/// Writes the break a div writes before its content and returns whether that content continues
+/// a list item.
+fn open_block(output: &mut String, options: &ConversionOptions, ctx: &Context) -> bool {
+    let is_table_continuation = (ctx.in_table_cell || ctx.in_layout_cell)
+        && !output.is_empty()
+        && !output.ends_with('|')
+        && !output.ends_with("<br>")
+        && !output.ends_with('\n');
+
+    // ~keep A plain suffix check like `output.ends_with("* ")` also matches the closing
+    // ~keep "**"/"*" of `<strong>`/`<em>` immediately followed by a migrated trailing
+    // ~keep space, indistinguishable from a real bare bullet by suffix alone -- and,
+    // ~keep being hardcoded to `-`/`*`, never matched the third bullet `+` at all. The
+    // ~keep false positive misclassified this div as sitting right after the marker,
+    // ~keep which skips BOTH branches below (neither `is_list_continuation` nor
+    // ~keep `needs_leading_sep` fires), so the div's content got glued directly onto the
+    // ~keep preceding inline text with no separator at all. See
+    // ~keep `list::utils::line_is_bare_list_marker`'s doc comment for the full rationale.
+    let is_list_continuation =
+        ctx.in_list_item && !output.is_empty() && !crate::converter::list::utils::line_is_bare_list_marker(output);
+
+    let needs_leading_sep = !ctx.in_table_cell
+        && !ctx.in_list_item
+        && !ctx.convert_as_inline
+        && !output.is_empty()
+        && !output.ends_with("\n\n");
+
+    if is_table_continuation {
+        emit_table_cell_break(output, options.br_in_tables);
+    } else if is_list_continuation {
+        crate::converter::list::utils::start_block_in_list_item(output, ctx, options);
+    } else if needs_leading_sep {
+        trim_trailing_whitespace(output);
+        output.push_str("\n\n");
+    }
+    is_list_continuation
+}
+
+/// Writes the break a div writes after its content, when anything was written from
+/// `content_start_pos` on.
+fn close_block(output: &mut String, ctx: &Context, content_start_pos: usize, is_list_continuation: bool) {
     let has_content = output.len() > content_start_pos;
 
     if has_content {
