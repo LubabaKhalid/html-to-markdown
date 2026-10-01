@@ -30,6 +30,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **WASM: assigning `null` or `undefined` to five optional fields now throws.** The fields are
+  `WasmConversionOptions.visitor`, `WasmConversionOptionsUpdate.visitor` and `preprocessing`,
+  `WasmConversionResult.document` and `WasmImageMetadata.dimensions`. They borrow the value you
+  assign instead of taking it, and an assignment of `null` cleared them before. To unset one, call
+  `clearVisitor()`, `clearPreprocessing()`, `clearDocument()` or `clearDimensions()`.
+
 - The `alef` pin in `alef.toml` is now 0.101.0, the version that generated the committed bindings.
   Regenerating with 0.97.0 dropped the Go binding's `runtime.LockOSThread` calls.
 
@@ -53,6 +59,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   converted by the one live handler, as before; output does not change.
 
 ### Fixed
+
+- **The WASM binding used up a visitor handle on assignment, and `convert()` ignored
+  `options.visitor` (#517).** Assigning a `WasmVisitorHandle` to `WasmConversionOptions.visitor`
+  moved it into the options, so a second options object could not take the same handle. The
+  setter now borrows the handle. `convert()` now uses `options.visitor` when you pass no visitor
+  argument, and a visitor argument still wins over the options field.
 
 - **A line break on its own source line became a paragraph break (#683).** `First\n<br>\nSecond`
   gave `First\n\nSecond`, two paragraphs: the newline before the `<br>` put its hard-break marker
