@@ -35,16 +35,27 @@ fn tier1_run(html: &str, br_in_tables: bool) -> Result<String, tier1::BailReason
     tier1::run(html, &PrescanReport::default(), &options)
 }
 
-/// The first row each tier writes for `html`, as `(html, br_in_tables off, br_in_tables on)`.
+/// The one-row table with `row` and its separator row.
+fn table(row: &str) -> String {
+    let dashes: Vec<String> = row
+        .trim_matches('|')
+        .split('|')
+        .map(|cell| "-".repeat(cell.trim().len().max(3)))
+        .collect();
+    format!("{row}\n| {} |\n", dashes.join(" | "))
+}
+
+/// The table each tier writes for `html`, as `(html, br_in_tables off row, br_in_tables on row)`.
 fn check(cases: &[(&str, &str, &str)]) {
     let mut failures = Vec::new();
     for (html, off, on) in cases {
         for (br_in_tables, expected) in [(false, off), (true, on)] {
             let tier2_out = tier2(html, br_in_tables);
             let tier1_out = tier1_run(html, br_in_tables);
-            if tier2_out.lines().next() != Some(*expected) || tier1_out.as_deref().ok() != Some(tier2_out.as_str()) {
+            let want = table(expected);
+            if tier2_out != want || tier1_out.as_deref().ok() != Some(tier2_out.as_str()) {
                 failures.push(format!(
-                    "{html:?} br_in_tables={br_in_tables}: tier2 {tier2_out:?} tier1 {tier1_out:?}, want {expected:?}"
+                    "{html:?} br_in_tables={br_in_tables}: tier2 {tier2_out:?} tier1 {tier1_out:?}, want {want:?}"
                 ));
             }
         }
