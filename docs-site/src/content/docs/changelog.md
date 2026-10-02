@@ -84,8 +84,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `<div>` is placed and stays bold: the cell gives `| a b c |` or `| a **b** c |` in both
   converters, the list item keeps `b` and `c` as paragraphs in the item, and the paragraph gives
   `a`, `b` and `c` apart. As with the tags above, these four now count as blocks: the backslash
-  break before them is dropped, bold around them is closed and reopened, plain output starts a
-  menu or legend on its own line, and visitors get `is_inline` false for them. A summary that holds
+  break before them is dropped, bold around a details, summary or menu is closed and reopened,
+  plain output starts a menu or legend on its own line, and visitors get `is_inline` false for them. A summary that holds
   a list with a quote in it, inside a details in a list item, now stays in the item, so with the
   default or tab list indent its bold markers no longer span the quote.
 - **A line break on its own source line became a paragraph break (#683).** `First\n<br>\nSecond`

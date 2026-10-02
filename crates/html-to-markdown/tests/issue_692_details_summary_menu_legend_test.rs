@@ -91,6 +91,20 @@ fn should_keep_the_element_and_the_text_after_it_in_the_list_item_like_a_div() {
     assert_no_failures(&failures, "list item differs from a div");
 }
 
+/// A legend is left out: HTML parsing keeps it inside the paragraph, so the bold is not split.
+#[test]
+fn should_close_and_reopen_bold_around_the_element_like_a_div() {
+    let mut failures = Vec::new();
+    for element in ["details", "summary", "menu", "div"] {
+        let html = format!("<p><b>a<{element}>b</{element}>c</b></p>");
+        let actual = tier2(&html, false);
+        if actual != "**a**\n\n**b**\n\n**c**\n" {
+            failures.push(format!("{html:?}: {actual:?}"));
+        }
+    }
+    assert_no_failures(&failures, "bold differs from a div");
+}
+
 #[test]
 fn should_keep_the_element_on_its_own_line_in_plain_output_like_a_div() {
     let mut failures = Vec::new();
