@@ -58,12 +58,66 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **Text after a `<center>`, `<search>`, `<hgroup>` or `<dialog>` in a table cell joined it
+  (#692).** `<table><tr><td>a<center><h2>h</h2>x</center>y</td></tr></table>` gave `| a h xy |`
+  in both converters, and the full converter wrote `| a h x  y |` for a `<dialog>`. These convert
+  like a `<div>` but were not counted as blocks, so the text after them got no cell break. They
+  now give `| a h x y |`, or `| a<br>h<br>x<br>y |` with `br_in_tables` on, as a `<div>` does. In a
+  list item, text after one of them now starts a paragraph in the item, as after a `<div>`, instead
+  of continuing the container's last line or leaving the list.
+  Counting them as blocks changes three more outputs, again to match a `<div>`. With
+  `newline_style: backslash`, the hard break before one of them is dropped: `<p>a<br><center>b</center>c</p>`
+  gives `a`, `b` and `c` as paragraphs instead of `a\` then `b`. A dialog in a link label is set off
+  by spaces, so `<a href="u">l<dialog>b</dialog>m</a>` gives `[l b m](u)` instead of `[lb m](u)`.
+  Bold or italic around one of them is closed before it and opened again after it:
+  `<p><b>a<center>b</center>c</b></p>` gives `**a**`, `**b**` and `**c**` instead of one bold run
+  across three paragraphs. Visitors now get `is_inline` false for these four tags.
+- **Text before a `<dialog>` ran into it (#692).** `<p>a<dialog>b</dialog>c</p>` gave `ab`, then
+  `c`, and `<td>a<dialog>b</dialog>c</td>` gave `| ab  c |` in the full converter and `| a bc |` in
+  the fast one: the dialog wrote no break before its content. A dialog now converts like a `<div>`, so the paragraph gives `a`,
+  `b` and `c` as three paragraphs, the cell gives `| a b c |` in both converters, and in a list
+  item the dialog content starts a paragraph in the item.
+- **Plain text output joined a `<center>` or `<dialog>` to the text after it (#692).**
+  `<p><b>a<center>b</center>c</b></p>` with `output_format: plain` gave `abc` on one line. Plain
+  output now starts both on their own line, as it does for a `<div>`: `a`, `b` and `c`.
+- **A `<details>`, `<summary>`, `<menu>` or `<legend>` joined the text around it (#692).** In a
+  table cell, `<td>a<menu>b</menu>c</td>` gave `| ab  c |` and a summary gave `| a**b**  c |`. In
+  a list item, the text after a details left the list, and a summary, menu or legend ran into the
+  text before it. In a paragraph, `<p>a<summary>b</summary>c</p>` gave `a**b**`, then `c`. A
+  details and a menu now convert like a `<div>`, and a summary or legend is placed the way a
+  `<div>` is placed and stays bold: the cell gives `| a b c |` or `| a **b** c |` in both
+  converters, the list item keeps `b` and `c` as paragraphs in the item, and the paragraph gives
+  `a`, `b` and `c` apart. As with the tags above, these four now count as blocks: the backslash
+  break before them is dropped, bold around a details, summary or menu is closed and reopened,
+  plain output starts a menu or legend on its own line, and visitors get `is_inline` false for them. A summary that holds
+  a list with a quote in it, inside a details in a list item, now stays in the item, so with the
+  default or tab list indent its bold markers no longer span the quote.
+- **A block in a heading ran into the words around it.** `<h1>a<div>b</div>c</h1>` gave `# abc`
+  in the full converter and `# a b c` in the fast one. Both now give `# a b c`, for a `<div>` and for
+  every tag that converts like one, a details and a menu included. In the fast converter, a block inside a summary, figcaption or
+  table caption now writes its break into that element's text, so a rustdoc heading such as
+  `impl Any for T<div class="where">where T: ...</div>` gives `for T where` instead of `for Twhere`.
+- **In a heading in a table cell, the text after a block ran into it.**
+  `<td><h2>a<div>b</div>c</h2></td>` gave `| a bc |`. The text after the block now gets the cell
+  break, so the cell gives `| a b c |`, or `| a<br>b<br>c |` with `br_in_tables` on. The fast
+  converter leaves this shape to the full converter.
+- **In a link label in a table cell, the text after a block ran into it.**
+  `<td><a href="u"><span>a<div>b</div>c</span></a></td>` gave `| [a bc](u) |`. The text after the
+  block now gets the cell break, as in a heading in a cell, so the cell gives `| [a b c](u) |`, or
+  `| [a<br>b<br>c](u) |` with `br_in_tables` on.
+- **Plain text output left a list item marker alone on its line.** `<ol><li><div>a</div>b</li></ol>`
+  with `output_format: plain` gave `1.` on a line of its own, then `a` and `b`. A block that opens a
+  list item now starts on the marker line, so the item gives `1. a`, then `b`.
+- **The fast converter dropped the bold of a `<legend>` and split a link label at a `<summary>`.**
+  `<legend>x</legend>` gave `x` where the full converter gives `**x**`, and
+  `<a href="u">l<summary>b</summary>m</a>` gave a link label across three paragraphs where the full
+  converter gives `[l b m](u)`. The fast converter now writes a legend in bold, as it does a summary,
+  and leaves a summary inside a link to the full converter, as it already did for a `<div>`.
 - **The WASM binding used up a visitor handle on assignment, and `convert()` ignored
   `options.visitor` (#517).** Assigning a `WasmVisitorHandle` to `WasmConversionOptions.visitor`
   moved it into the options, so a second options object could not take the same handle. The
   setter now borrows the handle. `convert()` now uses `options.visitor` when you pass no visitor
   argument, and a visitor argument still wins over the options field.
-
 - **A line break on its own source line became a paragraph break (#683).** `First\n<br>\nSecond`
   gave `First\n\nSecond`, two paragraphs: the newline before the `<br>` put its hard-break marker
   on a line of its own, and an empty line ends a paragraph. The break now ends the line of the text

@@ -537,35 +537,33 @@ fn should_keep_the_text_of_a_quote_in_a_wide_ordered_item_right_after_an_inline_
 
 #[test]
 fn should_keep_text_after_a_quote_in_a_list_in_a_caption_or_summary_after_the_list_item_ended_out_of_a_code_block() {
-    for (html, markers, tag) in [
-        (
-            "<ul><li>a<ul><li>b<figure><figcaption><ul><li>y<blockquote><ul><li>x<blockquote>q</blockquote>t</li></ul></blockquote>u</li></ul></figcaption></figure></li></ul></li></ul>",
-            "*",
-            "em",
-        ),
-        (
-            "<ul><li>a<ul><li>b<details><summary><ul><li>y<blockquote><ul><li>x<blockquote>q</blockquote>t</li></ul></blockquote>u</li></ul></summary></details></li></ul></li></ul>",
-            "**",
-            "strong",
-        ),
-    ] {
-        assert_converts(
-            html,
-            &width4(options(TierStrategy::Tier2)),
-            &format!(
-                "- a\n    * b\n\n{markers}+ y\n            > - x\n            >     > q\n            >     t\n            u{markers}\n"
-            ),
-            &format!(
-                "<ul><li>a<ul><li>b</li></ul></li></ul><p><{tag}>+ y&gt; - x&gt;     &gt; q&gt;     tu</{tag}></p>"
-            ),
-        );
-        assert_converts(
-            html,
-            &tabs(options(TierStrategy::Tier2)),
-            &format!("- a\n\t* b\n\n{markers}+ y\n\t\t> - x\n\t\t> \t> q\n\t\t> \tt\n\t\tu{markers}\n"),
-            &format!("<ul><li>a<ul><li>b</li></ul></li></ul><p><{tag}>+ y&gt; - x&gt; \t&gt; q&gt; \ttu</{tag}></p>"),
-        );
-    }
+    let html = "<ul><li>a<ul><li>b<figure><figcaption><ul><li>y<blockquote><ul><li>x<blockquote>q</blockquote>t</li></ul></blockquote>u</li></ul></figcaption></figure></li></ul></li></ul>";
+    assert_converts(
+        html,
+        &width4(options(TierStrategy::Tier2)),
+        "- a\n    * b\n\n*+ y\n            > - x\n            >     > q\n            >     t\n            u*\n",
+        "<ul><li>a<ul><li>b</li></ul></li></ul><p><em>+ y&gt; - x&gt;     &gt; q&gt;     tu</em></p>",
+    );
+    assert_converts(
+        html,
+        &tabs(options(TierStrategy::Tier2)),
+        "- a\n\t* b\n\n*+ y\n\t\t> - x\n\t\t> \t> q\n\t\t> \tt\n\t\tu*\n",
+        "<ul><li>a<ul><li>b</li></ul></li></ul><p><em>+ y&gt; - x&gt; \t&gt; q&gt; \ttu</em></p>",
+    );
+    // ~keep A details converts like a div, so its summary stays in the list item.
+    let html = "<ul><li>a<ul><li>b<details><summary><ul><li>y<blockquote><ul><li>x<blockquote>q</blockquote>t</li></ul></blockquote>u</li></ul></summary></details></li></ul></li></ul>";
+    assert_converts(
+        html,
+        &width4(options(TierStrategy::Tier2)),
+        "- a\n    * b\n\n        **+ y\n            > - x\n            >     > q\n            >     t\n            u**\n",
+        "<ul><li>a<ul><li><p>b</p><p><strong>+ y&gt; - x&gt;     &gt; q&gt;     tu</strong></p></li></ul></li></ul>",
+    );
+    assert_converts(
+        html,
+        &tabs(options(TierStrategy::Tier2)),
+        "- a\n\t* b\n\n\t\t**+ y\n\t\t> - x\n\t\t> \t> q\n\t\t> \tt\n\n\t\tu**\n",
+        "<ul><li>a<ul><li><p>b</p><p>**+ y</p><blockquote><ul><li>x<blockquote><p>qt</p></blockquote></li></ul></blockquote><p>u**</p></li></ul></li></ul>",
+    );
 }
 
 #[test]
@@ -598,31 +596,30 @@ fn should_keep_text_after_a_block_in_a_list_after_text_in_a_wrapper_without_mark
         highlight_style: HighlightStyle::None,
         ..options
     };
-    for (html, markers) in [
-        (
-            "<ul><li>a<legend><ul><li>x<p>p</p>t</li></ul></legend></li></ul>",
-            ["**", "**"],
-        ),
-        (
-            "<ul><li>a<mark><ul><li>x<p>p</p>t</li></ul></mark></li></ul>",
-            [" ", ""],
-        ),
-    ] {
-        let [open, close] = markers;
-        for options in [width4(options(TierStrategy::Tier2)), tabs(options(TierStrategy::Tier2))] {
-            let options = if html.contains("mark") {
-                no_highlight(options)
-            } else {
-                options
-            };
-            assert_converts(
-                html,
-                &options,
-                &format!("- a{open}* x\n\np\n\nt{close}\n"),
-                &format!("<ul><li>a{open}* x</li></ul><p>p</p><p>t{close}</p>"),
-            );
-        }
+    let html = "<ul><li>a<mark><ul><li>x<p>p</p>t</li></ul></mark></li></ul>";
+    for options in [width4(options(TierStrategy::Tier2)), tabs(options(TierStrategy::Tier2))] {
+        assert_converts(
+            html,
+            &no_highlight(options),
+            "- a * x\n\np\n\nt\n",
+            "<ul><li>a * x</li></ul><p>p</p><p>t</p>",
+        );
     }
+    // ~keep A legend is a block, so it starts a paragraph in the item, as a div does.
+    let html = "<ul><li>a<legend><ul><li>x<p>p</p>t</li></ul></legend></li></ul>";
+    let rendered = "<ul><li><p>a</p><p>*** x</p></li></ul><p>p</p><p>t**</p>";
+    assert_converts(
+        html,
+        &width4(options(TierStrategy::Tier2)),
+        "- a\n\n    *** x\n\np\n\nt**\n",
+        rendered,
+    );
+    assert_converts(
+        html,
+        &tabs(options(TierStrategy::Tier2)),
+        "- a\n\n\t*** x\n\np\n\nt**\n",
+        rendered,
+    );
 }
 
 #[test]

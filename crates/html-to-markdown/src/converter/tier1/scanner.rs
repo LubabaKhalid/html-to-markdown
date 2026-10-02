@@ -1230,6 +1230,7 @@ fn emit_open(
             | TagKind::Pre
             | TagKind::List(_)
             | TagKind::Table
+            | TagKind::Summary
     ) && state.stack.iter().any(|f| matches!(f.spec.kind, TagKind::Link))
     {
         return Err(BailReason::Classifier);
@@ -1364,25 +1365,7 @@ fn emit_open(
                 // handler for these names never emits one. See
                 // `block_container_is_passthrough`'s doc comment.
             } else if state.in_table_cell() {
-                let br_in_tables = options.br_in_tables;
-                with_cell_scratch(state, |cell_buf| {
-                    if !cell_buf.is_empty()
-                        && !cell_buf.ends_with('|')
-                        && !cell_buf.ends_with("<br>")
-                        && !cell_buf.ends_with('\n')
-                    {
-                        // ~keep Routed through the same helper Tier-2's `is_table_continuation`
-                        // branch uses (`block/div.rs` -> `emit_table_cell_break`) rather
-                        // than pushing `"  \n"` unconditionally. The hardcoded form ignored
-                        // `br_in_tables`, which defaults to false: Tier-2 emits a single
-                        // space, while `"  \n"` survives `close_table_cell`'s
-                        // `replace('\n', ' ')` as a three-space run, so two sibling block
-                        // containers in one cell rendered `a   b` here against Tier-2's
-                        // `a b`. The list path was already moved onto this helper; the
-                        // block path was missed.
-                        crate::converter::main_helpers::emit_table_cell_break(cell_buf, br_in_tables);
-                    }
-                });
+                break_cell_before_block(state, options.br_in_tables);
             } else {
                 // ~keep Tier-2's `needs_leading_sep` (block/div.rs) appends "\n\n" BLINDLY
                 // whenever the output doesn't already end with a blank line — it does
@@ -1398,7 +1381,8 @@ fn emit_open(
                 // keeps. `ensure_blank_line`'s normalized (never-3+) output would make
                 // that pop collapse a lone newline straight back down to one, losing the
                 // separator — hence the blind push here instead of `ensure_blank_line`.
-                let dest = &mut state.output;
+                // ~keep The open summary, figcaption or caption buffer, as `close_block_container` uses.
+                let dest = state.cell_or_output_mut();
                 if !dest.is_empty() && !dest.ends_with("\n\n") {
                     crate::converter::tier1::state::trim_trailing_horizontal(dest);
                     dest.push_str("\n\n");
@@ -1406,7 +1390,12 @@ fn emit_open(
             }
         }
         // ~keep Summary: push accumulation buffer so children redirect into it (Phase R).
-        TagKind::Summary => open_summary(state),
+        TagKind::Summary => {
+            if state.in_table_cell() {
+                break_cell_before_block(state, options.br_in_tables);
+            }
+            open_summary(state);
+        }
         // ~keep Figcaption: same buffer mechanism as summary (Phase FF-2); the
         // wrap delimiter differs (`*…*` vs `**…**`) and is emitted by
         // close_figcaption.
@@ -1419,6 +1408,18 @@ fn emit_open(
     }
 
     Ok(())
+}
+
+/// Writes the cell break Tier-2's `div::handle` writes before a block in a cell that already has
+/// content.
+fn break_cell_before_block(state: &mut Tier1State, br_in_tables: bool) {
+    with_cell_scratch(state, |cell_buf| {
+        if !cell_buf.is_empty() && !cell_buf.ends_with('|') && !cell_buf.ends_with("<br>") && !cell_buf.ends_with('\n')
+        {
+            // ~keep Tier-2's helper, so the break follows `br_in_tables` as Tier-2's does.
+            crate::converter::main_helpers::emit_table_cell_break(cell_buf, br_in_tables);
+        }
+    });
 }
 
 fn open_paragraph(state: &mut Tier1State, br_in_tables: bool) {
@@ -4365,6 +4366,16 @@ fn separate_inline_after_block(state: &mut Tier1State, br_in_tables: bool) -> Re
     Ok(())
 }
 
+/// Whether a heading is open inside the current table cell.
+fn in_heading(state: &Tier1State) -> bool {
+    state
+        .stack
+        .iter()
+        .rev()
+        .take_while(|frame| !matches!(frame.spec.kind, TagKind::TableCell { .. }))
+        .any(|frame| matches!(frame.spec.kind, TagKind::Heading(_)))
+}
+
 /// Tier-2's inline-element test, which decides what counts as inline content after a block.
 fn is_inline_tag(name_lower: &[u8]) -> bool {
     std::str::from_utf8(name_lower).is_ok_and(crate::converter::main_helpers::is_inline_element)
@@ -4428,6 +4439,10 @@ fn flush_text(
 
     // ~keep Whitespace-only text between a block and the content after it keeps the window open.
     // ~keep In a cell without `br_in_tables` a text's leading space is the break (issue #645).
+    // ~keep Tier-2 breaks the cell line before text after a block in a heading; this scanner does not.
+    if !raw.trim().is_empty() && state.last_closed_block && state.in_table_cell() && in_heading(state) {
+        return Err(BailReason::TableBlockChildInCell);
+    }
     if !raw.trim().is_empty()
         && std::mem::take(&mut state.last_closed_block)
         && (br_in_tables || !state.in_table_cell() || !raw.as_bytes().first().is_some_and(u8::is_ascii_whitespace))

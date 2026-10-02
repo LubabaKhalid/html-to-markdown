@@ -277,10 +277,8 @@ pub fn handle_legend(
                 let mut symbol = String::with_capacity(2);
                 symbol.push(options.strong_em_symbol);
                 symbol.push(options.strong_em_symbol);
-                output.push_str(&symbol);
-                output.push_str(trimmed);
-                output.push_str(&symbol);
-                output.push_str("\n\n");
+                let bold = format!("{symbol}{trimmed}{symbol}");
+                crate::converter::block::div::push_block(output, options, ctx, &bold);
             }
         }
     }
