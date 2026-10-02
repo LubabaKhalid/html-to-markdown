@@ -258,7 +258,7 @@ describeRequiredField({
 });
 
 describe("borrowed values stay usable", () => {
-  it("a visitor handle on an update still drives a conversion", () => {
+  it("a handle assigned to an update can still go on options for a conversion", () => {
     const { calls, handle } = headingVisitor();
 
     const update = WasmConversionOptionsUpdate.default();
