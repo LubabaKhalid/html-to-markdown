@@ -69,12 +69,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `<p><b>a<center>b</center>c</b></p>` gives `**a**`, `**b**` and `**c**` instead of one bold run
   across three paragraphs. Visitors now get `is_inline` false for these four tags.
 - **Text before a `<dialog>` ran into it (#692).** `<p>a<dialog>b</dialog>c</p>` gave `ab`, then
-  `c`, and `<td>a<dialog>b</dialog>c</td>` gave `| ab c |` in the full converter: the dialog wrote
-  no break before its content. A dialog now converts like a `<div>`, so the paragraph gives `a`,
+  `c`, and `<td>a<dialog>b</dialog>c</td>` gave `| ab  c |` in the full converter and `| a bc |` in
+  the fast one: the dialog wrote no break before its content. A dialog now converts like a `<div>`, so the paragraph gives `a`,
   `b` and `c` as three paragraphs, the cell gives `| a b c |` in both converters, and in a list
   item the dialog content starts a paragraph in the item.
 - **Plain text output joined a `<center>` or `<dialog>` to the text after it (#692).**
-  `<p><b>a<center>b</center>c</b></p>` with `output_format: plain` gave `a`, then `bc`. Plain
+  `<p><b>a<center>b</center>c</b></p>` with `output_format: plain` gave `abc` on one line. Plain
   output now starts both on their own line, as it does for a `<div>`: `a`, `b` and `c`.
 - **A `<details>`, `<summary>`, `<menu>` or `<legend>` joined the text around it (#692).** In a
   table cell, `<td>a<menu>b</menu>c</td>` gave `| ab  c |` and a summary gave `| a**b**  c |`. In
