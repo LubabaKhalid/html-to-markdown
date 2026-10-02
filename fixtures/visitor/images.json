@@ -31,12 +31,6 @@
         "value": "photoone.jpg"
       }
     ],
-    "skip": {
-      "languages": [
-        "wasm"
-      ],
-      "reason": "WASM visitor bridge not yet exposed via @xberg-io/html-to-markdown-wasm public API"
-    },
     "docs": {
       "topic": "visitor",
       "stem": "visitor_image_bare_string_preserves_case",
@@ -88,12 +82,6 @@
         "value": "Skip"
       }
     ],
-    "skip": {
-      "languages": [
-        "wasm"
-      ],
-      "reason": "WASM visitor bridge not yet exposed via @xberg-io/html-to-markdown-wasm public API"
-    },
     "docs": {
       "topic": "visitor",
       "stem": "visitor_skip_images",
@@ -126,12 +114,6 @@
         "value": "banner.png"
       }
     ],
-    "skip": {
-      "languages": [
-        "wasm"
-      ],
-      "reason": "WASM visitor bridge not yet exposed via @xberg-io/html-to-markdown-wasm public API"
-    },
     "docs": {
       "topic": "visitor",
       "stem": "visitor_custom_image",

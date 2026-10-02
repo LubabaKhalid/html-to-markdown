@@ -34,12 +34,6 @@
         "value": "Skip"
       }
     ],
-    "skip": {
-      "languages": [
-        "wasm"
-      ],
-      "reason": "WASM visitor bridge not yet exposed via @xberg-io/html-to-markdown-wasm public API"
-    },
     "docs": {
       "topic": "visitor",
       "stem": "visitor_skip_heading",
@@ -72,12 +66,6 @@
         "value": "# Original Heading"
       }
     ],
-    "skip": {
-      "languages": [
-        "wasm"
-      ],
-      "reason": "WASM visitor bridge not yet exposed via @xberg-io/html-to-markdown-wasm public API"
-    },
     "docs": {
       "topic": "visitor",
       "stem": "visitor_custom_output",
@@ -109,12 +97,6 @@
         "value": "preserve_html"
       }
     ],
-    "skip": {
-      "languages": [
-        "wasm"
-      ],
-      "reason": "WASM visitor bridge not yet exposed via @xberg-io/html-to-markdown-wasm public API"
-    },
     "docs": {
       "topic": "visitor",
       "stem": "visitor_preserve_html",
@@ -146,12 +128,6 @@
         "value": "continue"
       }
     ],
-    "skip": {
-      "languages": [
-        "wasm"
-      ],
-      "reason": "WASM visitor bridge not yet exposed via @xberg-io/html-to-markdown-wasm public API"
-    },
     "docs": {
       "topic": "visitor",
       "stem": "visitor_continue_default",
