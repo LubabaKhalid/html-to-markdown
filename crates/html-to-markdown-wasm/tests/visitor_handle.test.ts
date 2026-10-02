@@ -72,89 +72,119 @@ describe("ConversionOptions.visitor", () => {
 
 // Each optional class-typed field borrows the value it is given and has a clear*() method to unset it.
 // Assigning null or undefined throws: the clear*() method is the way to unset the field.
-type Field = {
+interface OptionalField<Owner extends object, Value> {
   name: string;
-  owner: () => Record<string, unknown>;
   field: string;
-  clear: string;
-  value: () => object;
+  clearName: string;
   className: string;
-};
+  owner: () => Owner;
+  value: () => Value;
+  get: (owner: Owner) => Value | undefined;
+  set: (owner: Owner, value: Value) => void;
+  clear: (owner: Owner) => void;
+}
 
-const FIELDS: Field[] = [
-  {
-    name: "ConversionOptions.visitor",
-    owner: () => new WasmConversionOptions() as unknown as Record<string, unknown>,
-    field: "visitor",
-    clear: "clearVisitor",
-    value: () => headingVisitor().handle,
-    className: "WasmVisitorHandle",
-  },
-  {
-    name: "ConversionOptionsUpdate.visitor",
-    owner: () => WasmConversionOptionsUpdate.default() as unknown as Record<string, unknown>,
-    field: "visitor",
-    clear: "clearVisitor",
-    value: () => headingVisitor().handle,
-    className: "WasmVisitorHandle",
-  },
-  {
-    name: "ConversionOptionsUpdate.preprocessing",
-    owner: () => WasmConversionOptionsUpdate.default() as unknown as Record<string, unknown>,
-    field: "preprocessing",
-    clear: "clearPreprocessing",
-    value: () => new WasmPreprocessingOptionsUpdate(true),
-    className: "WasmPreprocessingOptionsUpdate",
-  },
-  {
-    name: "ConversionResult.document",
-    owner: () => WasmConversionResult.default() as unknown as Record<string, unknown>,
-    field: "document",
-    clear: "clearDocument",
-    value: () => new WasmDocumentStructure([], "html"),
-    className: "WasmDocumentStructure",
-  },
-  {
-    name: "ImageMetadata.dimensions",
-    owner: () => WasmImageMetadata.default() as unknown as Record<string, unknown>,
-    field: "dimensions",
-    clear: "clearDimensions",
-    value: () => new WasmImageDimensions(1, 2),
-    className: "WasmImageDimensions",
-  },
-];
+function describeOptionalField<Owner extends object, Value>(c: OptionalField<Owner, Value>): void {
+  describe(c.name, () => {
+    it("reuses one value across two owners", () => {
+      const shared = c.value();
 
-describe.each(FIELDS)("$name", ({ owner, field, clear, value, className }) => {
-  it("reuses one value across two owners", () => {
-    const shared = value();
+      const first = c.owner();
+      c.set(first, shared);
+      const second = c.owner();
+      c.set(second, shared);
 
-    const first = owner();
-    first[field] = shared;
-    const second = owner();
-    second[field] = shared;
+      expect(c.get(first)).toBeDefined();
+      expect(c.get(second)).toBeDefined();
+    });
 
-    expect(first[field]).toBeDefined();
-    expect(second[field]).toBeDefined();
+    it(`${c.clearName}() unsets the field and a later assignment sets it again`, () => {
+      const target = c.owner();
+      c.set(target, c.value());
+      c.clear(target);
+      expect(c.get(target)).toBeUndefined();
+
+      c.set(target, c.value());
+      expect(c.get(target)).toBeDefined();
+    });
+
+    it.each([null, undefined])("rejects %s", (empty) => {
+      const target = c.owner();
+      c.set(target, c.value());
+
+      expect(() => Reflect.set(target, c.field, empty)).toThrow(`expected instance of ${c.className}`);
+    });
   });
+}
 
-  it(`${clear}() unsets the field and a later assignment sets it again`, () => {
-    const target = owner();
-    target[field] = value();
-    (target[clear] as () => void).call(target);
-    expect(target[field]).toBeUndefined();
+describeOptionalField({
+  name: "ConversionOptions.visitor",
+  field: "visitor",
+  clearName: "clearVisitor",
+  className: "WasmVisitorHandle",
+  owner: () => new WasmConversionOptions(),
+  value: () => headingVisitor().handle,
+  get: (o: WasmConversionOptions) => o.visitor,
+  set: (o: WasmConversionOptions, v: WasmVisitorHandle) => {
+    o.visitor = v;
+  },
+  clear: (o: WasmConversionOptions) => o.clearVisitor(),
+});
 
-    target[field] = value();
-    expect(target[field]).toBeDefined();
-  });
+describeOptionalField({
+  name: "ConversionOptionsUpdate.visitor",
+  field: "visitor",
+  clearName: "clearVisitor",
+  className: "WasmVisitorHandle",
+  owner: () => WasmConversionOptionsUpdate.default(),
+  value: () => headingVisitor().handle,
+  get: (o: WasmConversionOptionsUpdate) => o.visitor,
+  set: (o: WasmConversionOptionsUpdate, v: WasmVisitorHandle) => {
+    o.visitor = v;
+  },
+  clear: (o: WasmConversionOptionsUpdate) => o.clearVisitor(),
+});
 
-  it.each([null, undefined])("rejects %s", (empty) => {
-    const target = owner();
-    target[field] = value();
+describeOptionalField({
+  name: "ConversionOptionsUpdate.preprocessing",
+  field: "preprocessing",
+  clearName: "clearPreprocessing",
+  className: "WasmPreprocessingOptionsUpdate",
+  owner: () => WasmConversionOptionsUpdate.default(),
+  value: () => new WasmPreprocessingOptionsUpdate(true),
+  get: (o: WasmConversionOptionsUpdate) => o.preprocessing,
+  set: (o: WasmConversionOptionsUpdate, v: WasmPreprocessingOptionsUpdate) => {
+    o.preprocessing = v;
+  },
+  clear: (o: WasmConversionOptionsUpdate) => o.clearPreprocessing(),
+});
 
-    expect(() => {
-      target[field] = empty;
-    }).toThrow(`expected instance of ${className}`);
-  });
+describeOptionalField({
+  name: "ConversionResult.document",
+  field: "document",
+  clearName: "clearDocument",
+  className: "WasmDocumentStructure",
+  owner: () => WasmConversionResult.default(),
+  value: () => new WasmDocumentStructure([], "html"),
+  get: (o: WasmConversionResult) => o.document,
+  set: (o: WasmConversionResult, v: WasmDocumentStructure) => {
+    o.document = v;
+  },
+  clear: (o: WasmConversionResult) => o.clearDocument(),
+});
+
+describeOptionalField({
+  name: "ImageMetadata.dimensions",
+  field: "dimensions",
+  clearName: "clearDimensions",
+  className: "WasmImageDimensions",
+  owner: () => WasmImageMetadata.default(),
+  value: () => new WasmImageDimensions(1, 2),
+  get: (o: WasmImageMetadata) => o.dimensions,
+  set: (o: WasmImageMetadata, v: WasmImageDimensions) => {
+    o.dimensions = v;
+  },
+  clear: (o: WasmImageMetadata) => o.clearDimensions(),
 });
 
 describe("borrowed values stay usable", () => {
