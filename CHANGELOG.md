@@ -86,6 +86,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   plain output starts a menu or legend on its own line, and visitors get `is_inline` false for them. A summary that holds
   a list with a quote in it, inside a details in a list item, now stays in the item, so with the
   default or tab list indent its bold markers no longer span the quote.
+- **A block in a heading ran into the words around it.** `<h1>a<div>b</div>c</h1>` gave `# abc`
+  in the full converter and `# a b c` in the fast one. Both now give `# a b c`, for a `<div>` and for
+  every tag that converts like one. In the fast converter, a block inside a summary, figcaption or
+  table caption now writes its break into that element's text, so a rustdoc heading such as
+  `impl Any for T<div class="where">where T: ...</div>` gives `for T where` instead of `for Twhere`.
 - **A line break on its own source line became a paragraph break (#683).** `First\n<br>\nSecond`
   gave `First\n\nSecond`, two paragraphs: the newline before the `<br>` put its hard-break marker
   on a line of its own, and an empty line ends a paragraph. The break now ends the line of the text

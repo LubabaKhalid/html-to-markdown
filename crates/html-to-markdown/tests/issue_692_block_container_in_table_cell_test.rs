@@ -199,6 +199,20 @@ fn should_close_and_reopen_bold_around_a_div_like_container() {
     }
 }
 
+#[test]
+fn should_keep_the_words_around_a_div_like_container_apart_in_a_heading_in_both_tiers() {
+    let mut failures = Vec::new();
+    for container in DIV_LIKE {
+        let html = format!("<h1>a<{container}>b</{container}>c</h1>");
+        let tier2_out = tier2(&html, false);
+        let tier1_out = tier1_run(&html, false);
+        if tier2_out != "# a b c\n" || tier1_out.as_deref().ok() != Some(tier2_out.as_str()) {
+            failures.push(format!("{html:?}: tier2 {tier2_out:?} tier1 {tier1_out:?}"));
+        }
+    }
+    assert!(failures.is_empty(), "heading differs:\n{}", failures.join("\n"));
+}
+
 /// The same block test decides where text after these containers goes in a list item, so it
 /// starts a paragraph in the item there, as it does after a `<div>`.
 #[test]

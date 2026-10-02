@@ -62,11 +62,20 @@ pub fn handle(
         if is_table_continuation {
             emit_table_cell_break(output, options.br_in_tables);
         }
+        // ~keep A heading is one line, so a block in it is set off by spaces, as Tier 1 does.
+        let in_heading_line = ctx.in_heading && !is_table_continuation;
+        if in_heading_line && !output.is_empty() && !output.ends_with(char::is_whitespace) {
+            output.push(' ');
+        }
+        let children_start = output.len();
         let children = tag.children();
         {
             for child_handle in children.top().iter() {
                 walk_node(child_handle, parser, output, options, ctx, depth + 1, dom_ctx);
             }
+        }
+        if in_heading_line && output.len() > children_start {
+            output.push(' ');
         }
         return;
     }

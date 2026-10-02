@@ -1380,7 +1380,8 @@ fn emit_open(
                 // keeps. `ensure_blank_line`'s normalized (never-3+) output would make
                 // that pop collapse a lone newline straight back down to one, losing the
                 // separator — hence the blind push here instead of `ensure_blank_line`.
-                let dest = &mut state.output;
+                // ~keep The open summary, figcaption or caption buffer, as `close_block_container` uses.
+                let dest = state.cell_or_output_mut();
                 if !dest.is_empty() && !dest.ends_with("\n\n") {
                     crate::converter::tier1::state::trim_trailing_horizontal(dest);
                     dest.push_str("\n\n");
