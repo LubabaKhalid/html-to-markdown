@@ -7,10 +7,15 @@ import {
   WasmConversionOptions,
   WasmConversionOptionsUpdate,
   WasmConversionResult,
+  WasmDocumentMetadata,
   WasmDocumentStructure,
+  WasmHtmlMetadata,
   WasmImageDimensions,
   WasmImageMetadata,
+  WasmPreprocessingOptions,
   WasmPreprocessingOptionsUpdate,
+  WasmTableData,
+  WasmTableGrid,
   WasmVisitorHandle,
 } from "../pkg/nodejs/html_to_markdown_wasm.js";
 
@@ -185,6 +190,71 @@ describeOptionalField({
     o.dimensions = v;
   },
   clear: (o: WasmImageMetadata) => o.clearDimensions(),
+});
+
+// Each required class-typed field borrows the value it is given, so one value can go on two owners.
+interface RequiredField<Owner extends object, Value> {
+  name: string;
+  owner: () => Owner;
+  value: () => Value;
+  get: (owner: Owner) => Value;
+  set: (owner: Owner, value: Value) => void;
+}
+
+function describeRequiredField<Owner extends object, Value>(c: RequiredField<Owner, Value>): void {
+  describe(c.name, () => {
+    it("reuses one value across two owners", () => {
+      const shared = c.value();
+
+      const first = c.owner();
+      c.set(first, shared);
+      const second = c.owner();
+      c.set(second, shared);
+
+      expect(c.get(first)).toBeDefined();
+      expect(c.get(second)).toBeDefined();
+    });
+  });
+}
+
+describeRequiredField({
+  name: "ConversionOptions.preprocessing",
+  owner: () => new WasmConversionOptions(),
+  value: () => WasmPreprocessingOptions.default(),
+  get: (o: WasmConversionOptions) => o.preprocessing,
+  set: (o: WasmConversionOptions, v: WasmPreprocessingOptions) => {
+    o.preprocessing = v;
+  },
+});
+
+describeRequiredField({
+  name: "ConversionResult.metadata",
+  owner: () => WasmConversionResult.default(),
+  value: () => WasmHtmlMetadata.default(),
+  get: (o: WasmConversionResult) => o.metadata,
+  set: (o: WasmConversionResult, v: WasmHtmlMetadata) => {
+    o.metadata = v;
+  },
+});
+
+describeRequiredField({
+  name: "HtmlMetadata.document",
+  owner: () => WasmHtmlMetadata.default(),
+  value: () => WasmDocumentMetadata.default(),
+  get: (o: WasmHtmlMetadata) => o.document,
+  set: (o: WasmHtmlMetadata, v: WasmDocumentMetadata) => {
+    o.document = v;
+  },
+});
+
+describeRequiredField({
+  name: "TableData.grid",
+  owner: () => WasmTableData.default(),
+  value: () => WasmTableGrid.default(),
+  get: (o: WasmTableData) => o.grid,
+  set: (o: WasmTableData, v: WasmTableGrid) => {
+    o.grid = v;
+  },
 });
 
 describe("borrowed values stay usable", () => {
