@@ -30,7 +30,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- The `alef` pin in `alef.toml` is now 0.97.1, the version that generated the committed bindings.
+- The `alef` pin in `alef.toml` is now 0.101.0, the version that generated the committed bindings.
   Regenerating with 0.97.0 dropped the Go binding's `runtime.LockOSThread` calls.
 
 - The FFI Symbols CI gate now fails when a detector matches no call site, and names the silent
