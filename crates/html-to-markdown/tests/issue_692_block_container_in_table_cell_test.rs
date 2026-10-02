@@ -246,6 +246,28 @@ fn should_start_a_list_item_with_a_div_like_container_on_the_marker_line_in_plai
     assert!(failures.is_empty(), "plain list item differs:\n{}", failures.join("\n"));
 }
 
+#[test]
+fn should_keep_text_that_looks_like_a_list_marker_apart_from_a_block_in_plain_output() {
+    let mut failures = Vec::new();
+    for (html, want) in [
+        ("<span>- </span><div>b</div>", "-\n\nb\n"),
+        ("<p>x</p>1. <div>b</div>", "x\n\n1.\n\nb\n"),
+        ("<p>x</p>a. <div>b</div>", "x\n\na.\n\nb\n"),
+        ("<ol><li>x</li><li><div>a</div>b</li></ol>", "1. x\n2. a\n\nb\n"),
+        ("<p>x</p><ul><li><div>a</div></li></ul>", "x\n\n- a\n"),
+    ] {
+        let options = ConversionOptions {
+            output_format: OutputFormat::Plain,
+            ..tier2_options(false)
+        };
+        let actual = convert(html, Some(options)).expect("conversion must succeed").content;
+        if actual.as_deref() != Some(want) {
+            failures.push(format!("{html:?}: {actual:?}, want {want:?}"));
+        }
+    }
+    assert!(failures.is_empty(), "plain output differs:\n{}", failures.join("\n"));
+}
+
 /// The same block test decides where text after these containers goes in a list item, so it
 /// starts a paragraph in the item there, as it does after a `<div>`.
 #[test]
