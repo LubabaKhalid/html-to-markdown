@@ -28,7 +28,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- The `alef` pin in `alef.toml` is now 0.97.1, the version that generated the committed bindings.
+- **WASM: assigning `null` or `undefined` to five optional fields now throws.** The fields are
+  `WasmConversionOptions.visitor`, `WasmConversionOptionsUpdate.visitor` and `preprocessing`,
+  `WasmConversionResult.document` and `WasmImageMetadata.dimensions`. They borrow the value you
+  assign instead of taking it, and an assignment of `null` cleared them before. To unset one, call
+  `clearVisitor()`, `clearPreprocessing()`, `clearDocument()` or `clearDimensions()`.
+
+- The `alef` pin in `alef.toml` is now 0.101.0, the version that generated the committed bindings.
   Regenerating with 0.97.0 dropped the Go binding's `runtime.LockOSThread` calls.
 
 - The FFI Symbols CI gate now fails when a detector matches no call site, and names the silent
@@ -99,6 +105,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `<a href="u">l<summary>b</summary>m</a>` gave a link label across three paragraphs where the full
   converter gives `[l b m](u)`. The fast converter now writes a legend in bold, as it does a summary,
   and leaves a summary inside a link to the full converter, as it already did for a `<div>`.
+- **The WASM binding used up a visitor handle on assignment, and `convert()` ignored
+  `options.visitor` (#517).** Assigning a `WasmVisitorHandle` to `WasmConversionOptions.visitor`
+  moved it into the options, so a second options object could not take the same handle. The
+  setter now borrows the handle. `convert()` now uses `options.visitor` when you pass no visitor
+  argument, and a visitor argument still wins over the options field.
 - **A line break on its own source line became a paragraph break (#683).** `First\n<br>\nSecond`
   gave `First\n\nSecond`, two paragraphs: the newline before the `<br>` put its hard-break marker
   on a line of its own, and an empty line ends a paragraph. The break now ends the line of the text

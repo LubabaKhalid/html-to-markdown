@@ -39,8 +39,8 @@ mirror_lines="$(wc -l <"$workdir/mirror.txt" | tr -d ' ')"
 echo "changelog entries: $ROOT has $root_lines lines, $MIRROR has $mirror_lines lines"
 
 if [ "$root_lines" -eq 0 ]; then
-  echo "::error::no changelog entries were extracted from $ROOT — nothing was compared"
-  exit 1
+echo "::error::no changelog entries were extracted from $ROOT — nothing was compared"
+exit 1
 fi
 
 if ! diff -q "$workdir/root.txt" "$workdir/mirror.txt" >/dev/null 2>&1; then
