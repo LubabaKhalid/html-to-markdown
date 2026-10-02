@@ -324,7 +324,9 @@ fn walk_plain(
                     ensure_newline(buf);
                 }
                 _ if BLOCK_TAGS.contains(&tag_str) => {
-                    ensure_blank_line(buf);
+                    if !ends_with_bare_list_marker(buf) {
+                        ensure_blank_line(buf);
+                    }
                     walk_children(tag, parser, buf, in_pre, list_ctx, &child_state);
                     ensure_blank_line(buf);
                 }
@@ -364,6 +366,15 @@ fn walk_plain(
         }
         tl::Node::Comment(_) => {}
     }
+}
+
+/// Whether the last line of `buf` is a list item marker with nothing after it yet.
+fn ends_with_bare_list_marker(buf: &str) -> bool {
+    let line = &buf[buf.rfind('\n').map_or(0, |pos| pos + 1)..];
+    line == "- "
+        || line
+            .strip_suffix(". ")
+            .is_some_and(|number| !number.is_empty() && number.bytes().all(|b| b.is_ascii_digit()))
 }
 
 /// Walk all children of a tag.

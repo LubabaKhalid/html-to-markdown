@@ -213,6 +213,30 @@ fn should_keep_the_words_around_a_div_like_container_apart_in_a_heading_in_both_
     assert!(failures.is_empty(), "heading differs:\n{}", failures.join("\n"));
 }
 
+#[test]
+fn should_start_a_list_item_with_a_div_like_container_on_the_marker_line_in_plain_output() {
+    let mut failures = Vec::new();
+    for container in DIV_LIKE {
+        for (html, want) in [
+            (
+                format!("<ol><li><{container}>a</{container}>b</li></ol>"),
+                "1. a\n\nb\n",
+            ),
+            (format!("<ul><li><{container}>a</{container}></li></ul>"), "- a\n"),
+        ] {
+            let options = ConversionOptions {
+                output_format: OutputFormat::Plain,
+                ..tier2_options(false)
+            };
+            let actual = convert(&html, Some(options)).expect("conversion must succeed").content;
+            if actual.as_deref() != Some(want) {
+                failures.push(format!("{html:?}: {actual:?}, want {want:?}"));
+            }
+        }
+    }
+    assert!(failures.is_empty(), "plain list item differs:\n{}", failures.join("\n"));
+}
+
 /// The same block test decides where text after these containers goes in a list item, so it
 /// starts a paragraph in the item there, as it does after a `<div>`.
 #[test]
