@@ -345,6 +345,40 @@ fn should_keep_the_heading_spacing_out_of_cells() {
     assert!(failures.is_empty(), "cell differs:\n{}", failures.join("\n"));
 }
 
+/// A link label converts inline like a heading, so in a cell the text after a block in the label
+/// also gets the cell break. Tier 1 leaves a link around a block to Tier 2.
+#[test]
+fn should_separate_the_text_after_a_block_in_a_link_label_in_a_cell() {
+    let mut failures = Vec::new();
+    for (inner, off, on) in [
+        ("<span>a<div>b</div>c</span>", "| [a b c](u) |", "| [a<br>b<br>c](u) |"),
+        (
+            "<b>a<div>b</div>c</b>",
+            "| [**a b c**](u) |",
+            "| [**a<br>b<br>c**](u) |",
+        ),
+        (
+            "<span>a<ul><li>x</li></ul>c</span>",
+            "| [a x c](u) |",
+            "| [a<br>x<br>c](u) |",
+        ),
+        ("<span>a<p>b</p>c</span>", "| [a b c](u) |", "| [a<br>b<br>c](u) |"),
+    ] {
+        let html = format!(r#"<table><tr><td><a href="u">{inner}</a></td></tr></table>"#);
+        for (br_in_tables, expected) in [(false, off), (true, on)] {
+            let tier2_out = tier2(&html, br_in_tables);
+            let tier1_out = tier1_run(&html, br_in_tables);
+            let want = table(expected);
+            if tier2_out != want || tier1_out.as_deref().is_ok_and(|out| out != tier2_out) {
+                failures.push(format!(
+                    "{html:?} br_in_tables={br_in_tables}: tier2 {tier2_out:?} tier1 {tier1_out:?}, want {want:?}"
+                ));
+            }
+        }
+    }
+    assert!(failures.is_empty(), "link label differs:\n{}", failures.join("\n"));
+}
+
 /// Inside a summary or a figcaption, Tier 1 writes the break before a block into that element's text.
 #[test]
 fn should_break_before_a_block_in_a_summary_or_figcaption_the_same_in_both_tiers() {

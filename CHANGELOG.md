@@ -101,6 +101,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `<td><h2>a<div>b</div>c</h2></td>` gave `| a bc |`. The text after the block now gets the cell
   break, so the cell gives `| a b c |`, or `| a<br>b<br>c |` with `br_in_tables` on. The fast
   converter leaves this shape to the full converter.
+- **In a link label in a table cell, the text after a block ran into it.**
+  `<td><a href="u"><span>a<div>b</div>c</span></a></td>` gave `| [a bc](u) |`. The text after the
+  block now gets the cell break, as in a heading in a cell, so the cell gives `| [a b c](u) |`, or
+  `| [a<br>b<br>c](u) |` with `br_in_tables` on.
 - **Plain text output left a list item marker alone on its line.** `<ol><li><div>a</div>b</li></ol>`
   with `output_format: plain` gave `1.` on a line of its own, then `a` and `b`. A block that opens a
   list item now starts on the marker line, so the item gives `1. a`, then `b`.
