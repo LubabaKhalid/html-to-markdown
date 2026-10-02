@@ -268,6 +268,31 @@ fn should_keep_text_that_looks_like_a_list_marker_apart_from_a_block_in_plain_ou
     assert!(failures.is_empty(), "plain output differs:\n{}", failures.join("\n"));
 }
 
+/// Inside a summary or a figcaption, Tier 1 writes the break before a block into that element's text.
+#[test]
+fn should_break_before_a_block_in_a_summary_or_figcaption_the_same_in_both_tiers() {
+    let mut failures = Vec::new();
+    for (html, want) in [
+        (
+            "<summary><h3>for T<div>where</div></h3></summary>",
+            "**### for T where**\n",
+        ),
+        (
+            "<figure><figcaption><h3>for T<div>where</div></h3></figcaption></figure>",
+            "*### for T where*\n",
+        ),
+    ] {
+        let tier2_out = tier2(html, false);
+        let tier1_out = tier1_run(html, false);
+        if tier2_out != want || tier1_out.as_deref().ok() != Some(tier2_out.as_str()) {
+            failures.push(format!(
+                "{html:?}: tier2 {tier2_out:?} tier1 {tier1_out:?}, want {want:?}"
+            ));
+        }
+    }
+    assert!(failures.is_empty(), "tiers differ:\n{}", failures.join("\n"));
+}
+
 /// The same block test decides where text after these containers goes in a list item, so it
 /// starts a paragraph in the item there, as it does after a `<div>`.
 #[test]
