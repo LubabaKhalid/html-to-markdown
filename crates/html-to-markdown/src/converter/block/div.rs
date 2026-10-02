@@ -67,14 +67,13 @@ pub fn handle(
         if in_heading_line && !output.is_empty() && !output.ends_with(char::is_whitespace) {
             output.push(' ');
         }
-        let children_start = output.len();
         let children = tag.children();
         {
             for child_handle in children.top().iter() {
                 walk_node(child_handle, parser, output, options, ctx, depth + 1, dom_ctx);
             }
         }
-        if in_heading_line && output.len() > children_start {
+        if in_heading_line && !output.ends_with(char::is_whitespace) {
             output.push(' ');
         }
         return;
