@@ -47,12 +47,6 @@
         "value": "Skip"
       }
     ],
-    "skip": {
-      "languages": [
-        "wasm"
-      ],
-      "reason": "WASM visitor bridge not yet exposed via @xberg-io/html-to-markdown-wasm public API"
-    },
     "docs": {
       "topic": "visitor",
       "stem": "visitor_definition_list_skip",
@@ -99,12 +93,6 @@
         "value": "> A scripting language for web browsers"
       }
     ],
-    "skip": {
-      "languages": [
-        "wasm"
-      ],
-      "reason": "WASM visitor bridge not yet exposed via @xberg-io/html-to-markdown-wasm public API"
-    },
     "docs": {
       "topic": "visitor",
       "stem": "visitor_definition_list_custom_format",
@@ -137,12 +125,6 @@
         "value": "This content is initially hidden."
       }
     ],
-    "skip": {
-      "languages": [
-        "wasm"
-      ],
-      "reason": "WASM visitor bridge not yet exposed via @xberg-io/html-to-markdown-wasm public API"
-    },
     "docs": {
       "topic": "visitor",
       "stem": "visitor_details_summary_custom",
@@ -194,12 +176,6 @@
         "value": "Skip"
       }
     ],
-    "skip": {
-      "languages": [
-        "wasm"
-      ],
-      "reason": "WASM visitor bridge not yet exposed via @xberg-io/html-to-markdown-wasm public API"
-    },
     "docs": {
       "topic": "visitor",
       "stem": "visitor_details_summary_skip",
@@ -237,12 +213,6 @@
         "value": "Explanation of the figure."
       }
     ],
-    "skip": {
-      "languages": [
-        "wasm"
-      ],
-      "reason": "WASM visitor bridge not yet exposed via @xberg-io/html-to-markdown-wasm public API"
-    },
     "docs": {
       "topic": "visitor",
       "stem": "visitor_figure_custom",
@@ -294,12 +264,6 @@
         "value": "Skip"
       }
     ],
-    "skip": {
-      "languages": [
-        "wasm"
-      ],
-      "reason": "WASM visitor bridge not yet exposed via @xberg-io/html-to-markdown-wasm public API"
-    },
     "docs": {
       "topic": "visitor",
       "stem": "visitor_figure_skip",
@@ -341,12 +305,6 @@
         "value": "Gallery"
       }
     ],
-    "skip": {
-      "languages": [
-        "wasm"
-      ],
-      "reason": "WASM visitor bridge not yet exposed via @xberg-io/html-to-markdown-wasm public API"
-    },
     "docs": {
       "topic": "visitor",
       "stem": "visitor_figure_custom_wrap",

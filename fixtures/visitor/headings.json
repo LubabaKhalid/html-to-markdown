@@ -26,12 +26,6 @@
         "value": "important section title"
       }
     ],
-    "skip": {
-      "languages": [
-        "wasm"
-      ],
-      "reason": "WASM visitor bridge not yet exposed via @xberg-io/html-to-markdown-wasm public API"
-    },
     "docs": {
       "topic": "visitor",
       "stem": "visitor_heading_bare_string_preserves_case",
@@ -69,12 +63,6 @@
         "value": "Content below heading."
       }
     ],
-    "skip": {
-      "languages": [
-        "wasm"
-      ],
-      "reason": "WASM visitor bridge not yet exposed via @xberg-io/html-to-markdown-wasm public API"
-    },
     "docs": {
       "topic": "visitor",
       "stem": "visitor_custom_heading",
