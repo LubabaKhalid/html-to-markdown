@@ -202,7 +202,7 @@ fn should_close_and_reopen_bold_around_a_div_like_container() {
 #[test]
 fn should_keep_the_words_around_a_div_like_container_apart_in_a_heading_in_both_tiers() {
     let mut failures = Vec::new();
-    for container in DIV_LIKE {
+    for container in DIV_LIKE.into_iter().chain(["details", "menu"]) {
         let html = format!("<h1>a<{container}>b</{container}>c</h1>");
         let tier2_out = tier2(&html, false);
         let tier1_out = tier1_run(&html, false);

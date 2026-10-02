@@ -79,16 +79,6 @@ pub fn handle_details(
             }
         }
 
-        if ctx.convert_as_inline {
-            let children = tag.children();
-            {
-                for child_handle in children.top().iter() {
-                    super::walk_node(child_handle, parser, output, options, ctx, depth + 1, dom_ctx);
-                }
-            }
-            return;
-        }
-
         crate::converter::block::div::handle(node_handle, parser, output, options, ctx, depth, dom_ctx);
     }
 }

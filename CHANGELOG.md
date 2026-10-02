@@ -94,7 +94,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   default or tab list indent its bold markers no longer span the quote.
 - **A block in a heading ran into the words around it.** `<h1>a<div>b</div>c</h1>` gave `# abc`
   in the full converter and `# a b c` in the fast one. Both now give `# a b c`, for a `<div>` and for
-  every tag that converts like one. In the fast converter, a block inside a summary, figcaption or
+  every tag that converts like one, a details and a menu included. In the fast converter, a block inside a summary, figcaption or
   table caption now writes its break into that element's text, so a rustdoc heading such as
   `impl Any for T<div class="where">where T: ...</div>` gives `for T where` instead of `for Twhere`.
 - **Plain text output left a list item marker alone on its line.** `<ol><li><div>a</div>b</li></ol>`
