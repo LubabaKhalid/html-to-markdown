@@ -276,8 +276,21 @@ fn should_keep_the_heading_spacing_out_of_cells() {
     let mut failures = Vec::new();
     let layout = r#"<table border="0"><tr><td><div>A</div><div>B</div></td><td colspan="1">x</td></tr></table>"#;
     for (html, br_in_tables, want) in [
-        ("<table><tr><td><h2>a<div>b</div>c</h2></td></tr></table>", false, None),
-        ("<table><tr><td><h2>a<div>b</div>c</h2></td></tr></table>", true, None),
+        (
+            "<table><tr><td><h2>a<div>b</div>c</h2></td></tr></table>",
+            false,
+            Some("| a b c |\n| ----- |\n"),
+        ),
+        (
+            "<table><tr><td><h2>a<div>b</div>c</h2></td></tr></table>",
+            true,
+            Some("| a<br>b<br>c |\n| ----------- |\n"),
+        ),
+        (
+            "<table><tr><td><h2>a<menu>b</menu>c</h2></td></tr></table>",
+            false,
+            Some("| a b c |\n| ----- |\n"),
+        ),
         (layout, false, Some("- A B x\n")),
         (layout, true, Some("- A<br>B x\n")),
     ] {

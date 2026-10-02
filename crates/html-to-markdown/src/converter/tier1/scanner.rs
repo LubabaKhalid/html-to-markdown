@@ -4366,6 +4366,16 @@ fn separate_inline_after_block(state: &mut Tier1State, br_in_tables: bool) -> Re
     Ok(())
 }
 
+/// Whether a heading is open inside the current table cell.
+fn in_heading(state: &Tier1State) -> bool {
+    state
+        .stack
+        .iter()
+        .rev()
+        .take_while(|frame| !matches!(frame.spec.kind, TagKind::TableCell { .. }))
+        .any(|frame| matches!(frame.spec.kind, TagKind::Heading(_)))
+}
+
 /// Tier-2's inline-element test, which decides what counts as inline content after a block.
 fn is_inline_tag(name_lower: &[u8]) -> bool {
     std::str::from_utf8(name_lower).is_ok_and(crate::converter::main_helpers::is_inline_element)
@@ -4429,6 +4439,10 @@ fn flush_text(
 
     // ~keep Whitespace-only text between a block and the content after it keeps the window open.
     // ~keep In a cell without `br_in_tables` a text's leading space is the break (issue #645).
+    // ~keep Tier-2 breaks the cell line before text after a block in a heading; this scanner does not.
+    if !raw.trim().is_empty() && state.last_closed_block && state.in_table_cell() && in_heading(state) {
+        return Err(BailReason::TableBlockChildInCell);
+    }
     if !raw.trim().is_empty()
         && std::mem::take(&mut state.last_closed_block)
         && (br_in_tables || !state.in_table_cell() || !raw.as_bytes().first().is_some_and(u8::is_ascii_whitespace))

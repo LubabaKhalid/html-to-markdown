@@ -425,7 +425,9 @@ fn separate_from_block(
     ctx: &Context,
     dom_ctx: &DomContext,
 ) {
-    if output.is_empty() || ctx.convert_as_inline || ctx.in_code {
+    // ~keep A heading converts inline, but in a cell the text after its block still needs the break.
+    let heading_in_cell = ctx.in_heading && ctx.in_table_cell;
+    if output.is_empty() || (ctx.convert_as_inline && !heading_in_cell) || ctx.in_code {
         return;
     }
     if ctx.in_table_cell {
