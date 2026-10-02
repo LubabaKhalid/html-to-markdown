@@ -268,6 +268,33 @@ fn should_keep_text_that_looks_like_a_list_marker_apart_from_a_block_in_plain_ou
     assert!(failures.is_empty(), "plain output differs:\n{}", failures.join("\n"));
 }
 
+/// The heading spacing stays out of a heading in a table cell, which already has its cell break,
+/// and out of a layout cell, which converts inline without being a heading. Tier 1 leaves a
+/// layout table to Tier 2.
+#[test]
+fn should_keep_the_heading_spacing_out_of_cells() {
+    let mut failures = Vec::new();
+    let layout = r#"<table border="0"><tr><td><div>A</div><div>B</div></td><td colspan="1">x</td></tr></table>"#;
+    for (html, br_in_tables, want) in [
+        ("<table><tr><td><h2>a<div>b</div>c</h2></td></tr></table>", false, None),
+        ("<table><tr><td><h2>a<div>b</div>c</h2></td></tr></table>", true, None),
+        (layout, false, Some("- A B x\n")),
+        (layout, true, Some("- A<br>B x\n")),
+    ] {
+        let tier2_out = tier2(html, br_in_tables);
+        let tier1_out = tier1_run(html, br_in_tables);
+        let tier1_agrees = tier1_out
+            .as_ref()
+            .map_or_else(|_| want.is_some(), |out| *out == tier2_out);
+        if want.is_some_and(|want| tier2_out != want) || !tier1_agrees {
+            failures.push(format!(
+                "{html:?} br_in_tables={br_in_tables}: tier2 {tier2_out:?} tier1 {tier1_out:?}, want {want:?}"
+            ));
+        }
+    }
+    assert!(failures.is_empty(), "cell differs:\n{}", failures.join("\n"));
+}
+
 /// Inside a summary or a figcaption, Tier 1 writes the break before a block into that element's text.
 #[test]
 fn should_break_before_a_block_in_a_summary_or_figcaption_the_same_in_both_tiers() {
