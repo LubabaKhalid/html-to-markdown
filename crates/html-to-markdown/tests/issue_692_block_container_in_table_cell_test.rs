@@ -255,6 +255,15 @@ fn should_keep_text_that_looks_like_a_list_marker_apart_from_a_block_in_plain_ou
         ("<p>x</p>a. <div>b</div>", "x\n\na.\n\nb\n"),
         ("<ol><li>x</li><li><div>a</div>b</li></ol>", "1. x\n2. a\n\nb\n"),
         ("<p>x</p><ul><li><div>a</div></li></ul>", "x\n\n- a\n"),
+        ("<ul><li>a</li></ul><div>b</div>", "- a\n\nb\n"),
+        (
+            "<table><tr><td><ul><li>a</li></ul></td><td>xy<div>b</div></td></tr></table>",
+            "- a\txy\n\nb\n",
+        ),
+        (
+            "<table><tr><td><ol><li>a</li></ol></td><td>xyz<div>b</div></td></tr></table>",
+            "1. a\txyz\n\nb\n",
+        ),
     ] {
         let options = ConversionOptions {
             output_format: OutputFormat::Plain,

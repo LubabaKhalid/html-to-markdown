@@ -4,7 +4,6 @@
 //! visible text content with structural whitespace, bypassing the full
 //! Markdown/Djot conversion pipeline.
 
-use std::cell::Cell;
 use std::collections::HashSet;
 use std::fmt::Write;
 
@@ -75,9 +74,9 @@ const BLOCK_TAGS: &[&str] = &[
 struct WalkState<'a> {
     options: &'a ConversionOptions,
     excluded_node_ids: &'a HashSet<u32>,
-    /// The buffer and length right after the last list item marker written, so a block that
-    /// follows the marker directly starts on its line.
-    item_marker_end: &'a Cell<Option<(usize, usize)>>,
+    /// For the direct children of a list item, the buffer length right after the item's marker,
+    /// so a block that follows the marker directly starts on its line. Deeper levels get `None`.
+    item_marker_end: Option<usize>,
     depth: usize,
     #[cfg(feature = "visitor")]
     visitor: Option<&'a VisitorHandle>,
@@ -88,7 +87,7 @@ impl WalkState<'_> {
         WalkState {
             options: self.options,
             excluded_node_ids: self.excluded_node_ids,
-            item_marker_end: self.item_marker_end,
+            item_marker_end: None,
             depth: self.depth + 1,
             #[cfg(feature = "visitor")]
             visitor: self.visitor,
@@ -127,11 +126,10 @@ pub fn extract_plain_text(dom: &tl::VDom, parser: &tl::Parser, options: &Convers
         ids
     };
 
-    let item_marker_end = Cell::new(None);
     let state = WalkState {
         options,
         excluded_node_ids: &excluded_node_ids,
-        item_marker_end: &item_marker_end,
+        item_marker_end: None,
         depth: 0,
         #[cfg(feature = "visitor")]
         visitor: options.visitor.as_ref(),
@@ -327,12 +325,15 @@ fn walk_plain(
                             buf.push_str("- ");
                         }
                     }
-                    state.item_marker_end.set(Some(buffer_position(buf)));
-                    walk_children(tag, parser, buf, false, list_ctx, &child_state);
+                    let item_state = WalkState {
+                        item_marker_end: Some(buf.len()),
+                        ..state.descend()
+                    };
+                    walk_children(tag, parser, buf, false, list_ctx, &item_state);
                     ensure_newline(buf);
                 }
                 _ if BLOCK_TAGS.contains(&tag_str) => {
-                    if state.item_marker_end.get() != Some(buffer_position(buf)) {
+                    if state.item_marker_end != Some(buf.len()) {
                         ensure_blank_line(buf);
                     }
                     walk_children(tag, parser, buf, in_pre, list_ctx, &child_state);
@@ -374,11 +375,6 @@ fn walk_plain(
         }
         tl::Node::Comment(_) => {}
     }
-}
-
-/// Which buffer `buf` is, and how much it holds.
-fn buffer_position(buf: &String) -> (usize, usize) {
-    (std::ptr::from_ref(buf) as usize, buf.len())
 }
 
 /// Walk all children of a tag.
