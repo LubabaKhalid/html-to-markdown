@@ -224,14 +224,7 @@ pub fn handle_menu(
         bullets: "-".to_string(),
         ..options.clone()
     };
-    let list_ctx = super::Context {
-        in_ordered_list: false,
-        list_counter: 0,
-        in_list: true,
-        list_depth: ctx.list_depth,
-        ..ctx.clone()
-    };
-    crate::converter::block::div::handle(node_handle, parser, output, &menu_options, &list_ctx, depth, dom_ctx);
+    crate::converter::block::div::handle(node_handle, parser, output, &menu_options, ctx, depth, dom_ctx);
 }
 
 /// Dispatcher for definition list and related elements.

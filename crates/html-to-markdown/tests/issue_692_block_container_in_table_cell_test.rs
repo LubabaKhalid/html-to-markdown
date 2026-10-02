@@ -342,6 +342,35 @@ fn should_break_before_a_block_in_a_summary_or_figcaption_the_same_in_both_tiers
     assert!(failures.is_empty(), "tiers differ:\n{}", failures.join("\n"));
 }
 
+/// A menu writes its items with a `-` bullet whatever bullets the options set.
+#[test]
+fn should_write_menu_items_with_a_dash_bullet() {
+    let options = ConversionOptions {
+        bullets: "*+".to_string(),
+        ..tier2_options(false)
+    };
+    let out = convert("<menu><li>x</li><li>y</li></menu>", Some(options))
+        .expect("conversion must succeed")
+        .content;
+    assert_eq!(out.as_deref(), Some("- x\n- y\n"));
+}
+
+/// Only a block that is the list item's own child starts on the marker line: a block in a table
+/// cell inside the item keeps its blank line, whatever the cell holds before it.
+#[test]
+fn should_keep_a_block_in_a_cell_inside_a_list_item_apart_in_plain_output() {
+    let options = ConversionOptions {
+        output_format: OutputFormat::Plain,
+        ..tier2_options(false)
+    };
+    let html = "<ul><li><table><tr><td>xy<div>b</div></td></tr></table></li></ul>";
+    let out = convert(html, Some(options))
+        .expect("conversion must succeed")
+        .content
+        .unwrap_or_default();
+    assert!(out.contains("xy\n\nb"), "{out:?}");
+}
+
 /// The same block test decides where text after these containers goes in a list item, so it
 /// starts a paragraph in the item there, as it does after a `<div>`.
 #[test]
