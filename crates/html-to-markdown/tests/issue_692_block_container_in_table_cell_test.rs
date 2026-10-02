@@ -246,6 +246,34 @@ fn should_start_a_list_item_with_a_div_like_container_on_the_marker_line_in_plai
     assert!(failures.is_empty(), "plain list item differs:\n{}", failures.join("\n"));
 }
 
+/// A block inside an inline wrapper or another block that opens the item also starts on the
+/// marker line.
+#[test]
+fn should_start_a_list_item_with_a_nested_block_on_the_marker_line_in_plain_output() {
+    let mut failures = Vec::new();
+    for container in ["div", "center", "dialog", "details", "menu"] {
+        for (shape, want) in [
+            ("<ul><li><span><X>a</X></span></li></ul>", "- a\n"),
+            ("<ul><li><div><X>a</X></div></li></ul>", "- a\n"),
+            ("<ul><li><b><i><X>a</X></i></b></li></ul>", "- a\n"),
+            ("<ul><li><span><X>a</X></span>b</li></ul>", "- a\n\nb\n"),
+            ("<ol><li><div><X>a</X>b</div></li></ol>", "1. a\n\nb\n"),
+            ("<ul><li>x<span><X>a</X></span></li></ul>", "- x\n\na\n"),
+        ] {
+            let html = shape.replace('X', container);
+            let options = ConversionOptions {
+                output_format: OutputFormat::Plain,
+                ..tier2_options(false)
+            };
+            let actual = convert(&html, Some(options)).expect("conversion must succeed").content;
+            if actual.as_deref() != Some(want) {
+                failures.push(format!("{html:?}: {actual:?}, want {want:?}"));
+            }
+        }
+    }
+    assert!(failures.is_empty(), "plain list item differs:\n{}", failures.join("\n"));
+}
+
 #[test]
 fn should_keep_text_that_looks_like_a_list_marker_apart_from_a_block_in_plain_output() {
     let mut failures = Vec::new();

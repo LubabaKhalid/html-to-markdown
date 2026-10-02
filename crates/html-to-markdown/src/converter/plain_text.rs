@@ -74,8 +74,8 @@ const BLOCK_TAGS: &[&str] = &[
 struct WalkState<'a> {
     options: &'a ConversionOptions,
     excluded_node_ids: &'a HashSet<u32>,
-    /// For the direct children of a list item, the buffer length right after the item's marker,
-    /// so a block that follows the marker directly starts on its line. Deeper levels get `None`.
+    /// Inside a list item, the item's buffer length right after its marker, so a block that
+    /// follows the marker directly starts on its line. A table cell starts its own buffer with `None`.
     item_marker_end: Option<usize>,
     depth: usize,
     #[cfg(feature = "visitor")]
@@ -87,7 +87,7 @@ impl WalkState<'_> {
         WalkState {
             options: self.options,
             excluded_node_ids: self.excluded_node_ids,
-            item_marker_end: None,
+            item_marker_end: self.item_marker_end,
             depth: self.depth + 1,
             #[cfg(feature = "visitor")]
             visitor: self.visitor,
@@ -418,7 +418,10 @@ fn walk_table(table_tag: &tl::HTMLTag, parser: &tl::Parser, buf: &mut String, st
             }
         }
 
-        let cell_state = state.descend();
+        let cell_state = WalkState {
+            item_marker_end: None,
+            ..state.descend()
+        };
         for (cell_idx, cell_handle) in cell_handles.iter().enumerate() {
             if cell_idx > 0 {
                 buf.push('\t');
