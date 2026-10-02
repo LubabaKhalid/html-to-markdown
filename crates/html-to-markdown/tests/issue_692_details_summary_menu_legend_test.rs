@@ -91,6 +91,36 @@ fn should_keep_the_element_and_the_text_after_it_in_the_list_item_like_a_div() {
     assert_no_failures(&failures, "list item differs from a div");
 }
 
+/// Tier 1 either writes what Tier 2 writes or leaves the document to Tier 2.
+#[test]
+fn should_convert_a_legend_or_summary_outside_a_cell_the_same_in_both_tiers() {
+    let mut failures = Vec::new();
+    for (html, want) in [
+        ("<legend>x</legend>", "**x**\n"),
+        (
+            "<blockquote>a<legend>b</legend>c</blockquote>",
+            "> a\n>\n> **b**\n>\n> c\n",
+        ),
+        ("<fieldset><legend>t</legend>body</fieldset>", "**t**\n\nbody\n"),
+        ("<p><a href=\"u\">l<summary>b</summary>m</a></p>", "[l b m](u)\n"),
+        ("<p><a href=\"u\">l<legend>b</legend>m</a></p>", "[l b m](u)\n"),
+    ] {
+        let tier2_out = tier2(html, false);
+        let options = ConversionOptions {
+            tier_strategy: TierStrategy::Tier1,
+            ..tier2_options(false)
+        };
+        let tier1_out = tier1::run(html, &PrescanReport::default(), &options);
+        let tier1_agrees = tier1_out.as_ref().map_or(true, |out| *out == tier2_out);
+        if tier2_out != want || !tier1_agrees {
+            failures.push(format!(
+                "{html:?}: tier2 {tier2_out:?} tier1 {tier1_out:?}, want {want:?}"
+            ));
+        }
+    }
+    assert_no_failures(&failures, "tiers differ");
+}
+
 /// A legend is left out: HTML parsing keeps it inside the paragraph, so the bold is not split.
 #[test]
 fn should_close_and_reopen_bold_around_the_element_like_a_div() {

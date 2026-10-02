@@ -96,6 +96,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Plain text output left a list item marker alone on its line.** `<ol><li><div>a</div>b</li></ol>`
   with `output_format: plain` gave `1.` on a line of its own, then `a` and `b`. A block that opens a
   list item now starts on the marker line, so the item gives `1. a`, then `b`.
+- **The fast converter dropped the bold of a `<legend>` and split a link label at a `<summary>`.**
+  `<legend>x</legend>` gave `x` where the full converter gives `**x**`, and
+  `<a href="u">l<summary>b</summary>m</a>` gave a link label across three paragraphs where the full
+  converter gives `[l b m](u)`. The fast converter now writes a legend in bold, as it does a summary,
+  and leaves a summary inside a link to the full converter, as it already did for a `<div>`.
 - **A line break on its own source line became a paragraph break (#683).** `First\n<br>\nSecond`
   gave `First\n\nSecond`, two paragraphs: the newline before the `<br>` put its hard-break marker
   on a line of its own, and an empty line ends a paragraph. The break now ends the line of the text

@@ -1230,6 +1230,7 @@ fn emit_open(
             | TagKind::Pre
             | TagKind::List(_)
             | TagKind::Table
+            | TagKind::Summary
     ) && state.stack.iter().any(|f| matches!(f.spec.kind, TagKind::Link))
     {
         return Err(BailReason::Classifier);
