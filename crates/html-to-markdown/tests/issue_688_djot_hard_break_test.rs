@@ -31,3 +31,23 @@ fn should_write_a_djot_hard_break_with_a_backslash_for_every_newline_style() {
         }
     }
 }
+
+#[test]
+fn should_preserve_djot_hard_breaks_at_tier1_link_boundaries() {
+    assert_eq!(
+        convert_djot(
+            r#"<p><a href="H"><br>A</a></p>"#,
+            NewlineStyle::Spaces,
+            TierStrategy::Tier1,
+        ),
+        "[\\\nA](H)\n"
+    );
+    assert_eq!(
+        convert_djot(
+            r#"<p><a href="H">A<br></a>B</p>"#,
+            NewlineStyle::Spaces,
+            TierStrategy::Tier1,
+        ),
+        "[A\\\n](H)B\n"
+    );
+}

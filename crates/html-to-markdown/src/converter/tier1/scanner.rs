@@ -3764,15 +3764,13 @@ fn try_emit_autolink(
 /// holding nothing but breaks collapses to empty, because a break needs a line on both sides
 /// to mean anything.
 ///
-/// Only the `"  \n"` marker is matched: `router.rs` bails Tier-1 whenever `newline_style` is
-/// not `Spaces`, so it is the only shape Tier-1 can have emitted.
+/// ~keep `marker` is selected from the complete conversion options: Markdown Tier-1 uses the
+/// spaces form, while Djot always uses the backslash form regardless of `newline_style`.
 ///
 /// With `keeps_breaks` false -- a heading or a pipe-table cell, neither of which can carry a
 /// hard break at all -- every marker in the label is folded to a space instead, which is what
 /// Tier-2 does at emission time in `line_break.rs`.
-fn trim_label_preserving_boundary_hard_breaks(dest: &mut String, trim_start: usize, keeps_breaks: bool) {
-    const MARKER: &str = "  \n";
-
+fn trim_label_preserving_boundary_hard_breaks(dest: &mut String, trim_start: usize, keeps_breaks: bool, marker: &str) {
     if !keeps_breaks {
         // ~keep Fold the markers away entirely rather than merely declining to keep the ones at
         // the edges. `close_heading` / `close_table_cell` would collapse them to a space
@@ -3782,8 +3780,8 @@ fn trim_label_preserving_boundary_hard_breaks(dest: &mut String, trim_start: usi
         // in `line_break.rs`'s `in_heading` arm -- never applies. That divergence is
         // visible as `# [A \- B](H)` against Tier-2's `# [A - B](H)`.
         let label = &dest[trim_start..];
-        if label.contains(MARKER) {
-            let folded = label.replace(MARKER, " ");
+        if label.contains(marker) {
+            let folded = label.replace(marker, " ");
             dest.truncate(trim_start);
             dest.push_str(&folded);
         }
@@ -3797,20 +3795,20 @@ fn trim_label_preserving_boundary_hard_breaks(dest: &mut String, trim_start: usi
     }
 
     let label = &dest[trim_start..];
-    let without_trailing = label.trim_end_matches(MARKER);
+    let without_trailing = label.trim_end_matches(marker);
     let has_trailing_break = without_trailing.len() != label.len();
     let body = without_trailing.trim_end_matches(|c: char| c.is_whitespace());
-    let without_leading = body.trim_start_matches(MARKER);
+    let without_leading = body.trim_start_matches(marker);
     let has_leading_break = without_leading.len() != body.len();
 
-    let mut rebuilt = String::with_capacity(without_leading.len() + 2 * MARKER.len());
+    let mut rebuilt = String::with_capacity(without_leading.len() + 2 * marker.len());
     if !without_leading.is_empty() {
         if has_leading_break {
-            rebuilt.push_str(MARKER);
+            rebuilt.push_str(marker);
         }
         rebuilt.push_str(without_leading);
         if has_trailing_break {
-            rebuilt.push_str(MARKER);
+            rebuilt.push_str(marker);
         }
     }
 
@@ -3844,7 +3842,12 @@ fn close_link(state: &mut Tier1State, frame: &OpenTag, options: &ConversionOptio
     // source HTML with whitespace before `</a>`), while keeping a `<br>` that sits at
     // either edge of the label (issue #497).
     let trim_start = clamp_to_char_boundary(dest, frame.content_start);
-    trim_label_preserving_boundary_hard_breaks(dest, trim_start, keeps_boundary_hard_breaks);
+    trim_label_preserving_boundary_hard_breaks(
+        dest,
+        trim_start,
+        keeps_boundary_hard_breaks,
+        crate::converter::main_helpers::hard_break_marker(options),
+    );
     // ~keep Mirror Tier-2's `normalize_whitespace_cow` step inside
     // `normalize_link_label` (utility/content.rs:144): any Unicode whitespace
     // in the link label (notably NBSP `\u{00a0}`) collapses to a single ASCII
