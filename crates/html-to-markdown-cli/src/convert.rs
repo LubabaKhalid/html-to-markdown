@@ -63,6 +63,7 @@ pub fn build_conversion_options(cli: &Cli) -> ConversionOptions {
         include_document_structure: cli.include_structure,
         extract_images: cli.extract_inline_images,
         max_image_size: cli.max_image_size.unwrap_or(defaults.max_image_size),
+        max_input_size: defaults.max_input_size,
         capture_svg: cli.capture_svg,
         infer_dimensions: !cli.no_infer_dimensions,
         max_depth: cli.max_depth,

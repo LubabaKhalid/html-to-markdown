@@ -46,7 +46,8 @@ use crate::{HtmlMetadata, MetadataConfig};
 ///
 /// # Errors
 ///
-/// Returns an error if HTML parsing fails or if the input contains invalid UTF-8.
+/// Returns an error if the configured input-size limit is exceeded, HTML parsing fails,
+/// or the input contains invalid UTF-8.
 ///
 /// # Observability
 ///
@@ -89,6 +90,16 @@ fn convert_inner(html: &str, options: ConversionOptions) -> Result<ConversionRes
     use std::cell::RefCell;
     #[cfg(any(feature = "metadata", feature = "inline-images"))]
     use std::rc::Rc;
+
+    if let Some(max_size) = options.max_input_size {
+        let observed_size = u64::try_from(html.len()).unwrap_or(u64::MAX);
+        if observed_size > max_size {
+            return Err(crate::error::ConversionError::InputTooLarge {
+                observed_size,
+                max_size,
+            });
+        }
+    }
 
     // ~keep Both tiers convert this text, so the base is read from it too.
     let normalized_html = normalize_input(html)?;
