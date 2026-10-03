@@ -416,7 +416,10 @@ fn should_read_the_base_href_of_utf16_input_on_both_tiers() {
         let input = utf16_with_bom(html, little_endian);
         for tier in [TierStrategy::Tier2, TierStrategy::Tier1] {
             let out = with_base_url(&input, tier);
-            assert!(out.contains("base: /b/\n"), "{little_endian} {tier:?}: {out}");
+            assert!(
+                out.contains("base: https://example.com/b/\n"),
+                "{little_endian} {tier:?}: {out}"
+            );
             assert!(
                 out.contains("(https://example.com/b/rel)"),
                 "{little_endian} {tier:?}: {out}"
@@ -430,7 +433,7 @@ fn should_read_the_base_href_of_a_tag_name_holding_a_nul_byte_on_both_tiers() {
     let html = "<html><head><ba\0se href=\"/n/\"></head><body><p><a href=\"rel\">l</a></p></body></html>";
     for tier in [TierStrategy::Tier2, TierStrategy::Tier1] {
         let out = with_base_url(html, tier);
-        assert!(out.contains("base: /n/\n"), "{tier:?}: {out}");
+        assert!(out.contains("base: https://example.com/n/\n"), "{tier:?}: {out}");
         assert!(out.contains("(https://example.com/n/rel)"), "{tier:?}: {out}");
     }
 }
@@ -515,7 +518,7 @@ fn should_take_the_base_href_and_canonical_link_from_their_elements_and_a_meta_t
             .contains("(https://example.com/real/x)")
     );
     let document = result.metadata.document;
-    assert_eq!(document.base_href.as_deref(), Some("/real/"));
+    assert_eq!(document.base_href.as_deref(), Some("https://example.com/real/"));
     assert_eq!(document.canonical_url.as_deref(), Some("https://example.com/real"));
     assert_eq!(document.title.as_deref(), Some("Real"));
     assert_eq!(document.meta_tags.get("base").map(String::as_str), Some("/meta/"));
@@ -525,7 +528,7 @@ fn should_take_the_base_href_and_canonical_link_from_their_elements_and_a_meta_t
     let document = convert(html, Some(opts)).unwrap().metadata.document;
     assert_eq!(document.title.as_deref(), Some("Meta"));
     assert!(!document.meta_tags.contains_key("title"));
-    assert_eq!(document.base_href, None);
+    assert_eq!(document.base_href.as_deref(), Some("https://example.com/dir/page"));
     assert_eq!(document.canonical_url, None);
 }
 
