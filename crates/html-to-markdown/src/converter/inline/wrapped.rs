@@ -105,7 +105,7 @@ pub fn wrap_block_runs(content: &str, open: &str, close: &str) -> String {
 
 /// ~keep General inline handlers split only plain paragraph-like runs. Structured Markdown
 /// remains on its established path because moving a delimiter across nested list/quote syntax
-/// changes the block tree; synthetic block wrappers such as summary opt into that explicitly.
+/// changes the block tree; legend opts into that explicitly for its pinned list behavior.
 pub fn block_runs_are_plain(content: &str) -> bool {
     block_runs_are_single_line(content)
         && content.split("\n\n").all(|block| {

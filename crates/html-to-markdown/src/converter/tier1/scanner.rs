@@ -2565,7 +2565,7 @@ fn close_summary(state: &mut Tier1State, _frame: &OpenTag) {
             dest.push_str("\n\n");
         }
     }
-    if trimmed.contains("\n\n") && crate::converter::inline::wrapped::block_runs_are_single_line(trimmed) {
+    if trimmed.contains("\n\n") && crate::converter::inline::wrapped::block_runs_are_plain(trimmed) {
         dest.push_str(&crate::converter::inline::wrapped::wrap_block_runs(trimmed, "**", "**"));
     } else {
         dest.push_str("**");

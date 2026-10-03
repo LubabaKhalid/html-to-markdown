@@ -212,7 +212,7 @@ pub fn handle_summary(
             output.push_str(trimmed);
         } else {
             let mut bold = String::with_capacity(trimmed.len() + 4);
-            crate::converter::inline::emphasis::emit_strong_wrapped_blocks(
+            crate::converter::inline::emphasis::emit_strong_wrapped(
                 &mut bold,
                 trimmed,
                 options,

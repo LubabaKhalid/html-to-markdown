@@ -133,8 +133,7 @@ pub fn emit_strong_wrapped(
     }
 }
 
-/// ~keep Summary and legend are block containers that semantically bold every child block, so
-/// they opt into splitting structured list/quote runs as well as plain paragraph runs (#724).
+/// ~keep Legend semantically bolds every child block, including structured list runs (#724).
 pub fn emit_strong_wrapped_blocks(
     output: &mut String,
     content: &str,

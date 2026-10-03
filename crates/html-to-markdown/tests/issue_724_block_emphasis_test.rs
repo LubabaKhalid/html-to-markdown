@@ -40,6 +40,14 @@ fn should_keep_summary_markers_inside_the_surrounding_list_item() {
 }
 
 #[test]
+fn should_keep_a_structured_summary_list_in_one_emphasis_run() {
+    assert_all_tiers(
+        "<details><summary><ul><li>x<dl><dd>d</dd></dl>t</li></ul></summary></details>",
+        "**- x\n\nd\n\nt**\n",
+    );
+}
+
+#[test]
 fn should_split_strong_and_emphasis_markers_around_block_children() {
     assert_all_tiers("<strong>a<div>b</div>c</strong>", "**a**\n\n**b**\n\n**c**\n");
     assert_all_tiers("<em>a<div>b</div>c</em>", "*a*\n\n*b*\n\n*c*\n");
