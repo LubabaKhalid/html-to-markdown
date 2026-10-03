@@ -324,7 +324,7 @@ fn should_leave_a_block_in_inline_markup_or_a_label_in_a_cell_to_tier2() {
         ("a <sub> <br>b</sub>c", "a bc", "a <br>bc"),
         ("<legend><hr></legend>c", "**---** c", "**---**<br>c"),
         ("a<figcaption><p>b</p></figcaption>c", "a  *b* c", "a  *b*<br>c"),
-        ("a<label> b</label>c", "ab  c", "ab  c"),
+        ("a<label> b</label>c", "abc", "abc"),
         ("<p>a</p><b>b</b>", "a **b**", "a<br>**b**"),
         ("a <dt><p>b</p></dt>c", "a b c", "a b<br>c"),
         ("a <dd><p>b</p></dd>c", "a b c", "a b<br>c"),
