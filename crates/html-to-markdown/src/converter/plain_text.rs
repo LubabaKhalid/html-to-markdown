@@ -77,6 +77,8 @@ struct WalkState<'a> {
     /// Inside a list item, the item's buffer length right after its marker, so a block that
     /// follows the marker directly starts on its line. A table cell starts its own buffer with `None`.
     item_marker_end: Option<usize>,
+    in_document_body: bool,
+    in_content_header_scope: bool,
     depth: usize,
     #[cfg(feature = "visitor")]
     visitor: Option<&'a VisitorHandle>,
@@ -88,6 +90,8 @@ impl WalkState<'_> {
             options: self.options,
             excluded_node_ids: self.excluded_node_ids,
             item_marker_end: self.item_marker_end,
+            in_document_body: self.in_document_body,
+            in_content_header_scope: self.in_content_header_scope,
             depth: self.depth + 1,
             #[cfg(feature = "visitor")]
             visitor: self.visitor,
@@ -130,6 +134,8 @@ pub fn extract_plain_text(dom: &tl::VDom, parser: &tl::Parser, options: &Convers
         options,
         excluded_node_ids: &excluded_node_ids,
         item_marker_end: None,
+        in_document_body: false,
+        in_content_header_scope: false,
         depth: 0,
         #[cfg(feature = "visitor")]
         visitor: options.visitor.as_ref(),
@@ -215,7 +221,12 @@ fn walk_plain(
                 return;
             }
 
-            if should_drop_for_preprocessing(tag_str, tag, state.options) {
+            if should_drop_for_preprocessing(
+                tag_str,
+                tag,
+                state.options,
+                tag_str == "header" && state.in_document_body && !state.in_content_header_scope,
+            ) {
                 return;
             }
 
@@ -263,7 +274,12 @@ fn walk_plain(
             #[cfg(feature = "visitor")]
             let element_output_start = buf.len();
 
-            let child_state = state.descend();
+            let child_state = WalkState {
+                in_document_body: state.in_document_body || tag_str == "body",
+                in_content_header_scope: state.in_content_header_scope
+                    || matches!(tag_str, "article" | "section" | "main"),
+                ..state.descend()
+            };
 
             match tag_str {
                 "br" => {

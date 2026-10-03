@@ -20,7 +20,9 @@ use crate::converter::main_helpers::{
     trim_line_end_whitespace, trim_trailing_whitespace,
 };
 use crate::converter::plain_text::extract_plain_text;
-use crate::converter::preprocessing_helpers::{has_inline_block_misnest, should_drop_for_preprocessing};
+use crate::converter::preprocessing_helpers::{
+    has_inline_block_misnest, is_page_header, should_drop_for_preprocessing,
+};
 use crate::converter::utility::caching::build_dom_context;
 use crate::converter::utility::content::{is_block_level_element, normalized_tag_name};
 use crate::converter::utility::preprocessing::{
@@ -490,7 +492,12 @@ fn separate_in_list_item(
         tl::Node::Tag(tag) => dom_ctx.tag_info(node_handle.get_inner(), parser).is_some_and(|info| {
             is_block_level_element(&info.name)
                 && !matches!(info.name.as_str(), "ul" | "ol" | "li")
-                && !should_drop_for_preprocessing(&info.name, tag, options)
+                && !should_drop_for_preprocessing(
+                    &info.name,
+                    tag,
+                    options,
+                    info.name == "header" && is_page_header(node_handle, parser, dom_ctx),
+                )
         }),
         _ => false,
     };
@@ -685,7 +692,14 @@ fn convert_node(
             #[cfg(not(feature = "visitor"))]
             let visitor_is_active = false;
 
-            if !visitor_is_active && should_drop_for_preprocessing(tag_name.as_ref(), tag, options) {
+            if !visitor_is_active
+                && should_drop_for_preprocessing(
+                    tag_name.as_ref(),
+                    tag,
+                    options,
+                    tag_name == "header" && is_page_header(node_handle, parser, dom_ctx),
+                )
+            {
                 trim_trailing_whitespace(output);
                 return;
             }

@@ -475,7 +475,8 @@ pub fn scan(
                     let close = parse::find_tag_close(bytes, name_end).ok_or(BailReason::LiteralLt { offset: pos })?;
                     let attrs_end = if close.1 { close.0.saturating_sub(1) } else { close.0 };
                     let skip_attrs = parse::collect_attrs(bytes, name_end, attrs_end);
-                    if should_skip_preprocessing(name_lower, &skip_attrs, options) {
+                    let is_page_header = name_lower == b"header" && header_is_page_level(&state, html);
+                    if should_skip_preprocessing(name_lower, &skip_attrs, options, is_page_header) {
                         // ~keep Tier-2 still sees the dropped block between two parts of a list
                         // ~keep item (issue #583); see `BailReason::ListItemUnsupportedBlockChild`.
                         if !state.in_table_cell() && state.list_continuation_indent_width() > 0 {
@@ -5450,7 +5451,12 @@ fn is_preprocessing_skip_candidate(name_lower: &[u8]) -> bool {
 /// Called only for tags that passed [`is_preprocessing_skip_candidate`].
 /// Uses the raw attribute byte slices collected by [`parse::collect_attrs`]
 /// instead of the Tier-2 `tl::HTMLTag` DOM node.
-fn should_skip_preprocessing(name_lower: &[u8], attrs: &[(&[u8], Option<&[u8]>)], options: &ConversionOptions) -> bool {
+fn should_skip_preprocessing(
+    name_lower: &[u8],
+    attrs: &[(&[u8], Option<&[u8]>)],
+    options: &ConversionOptions,
+    is_page_header: bool,
+) -> bool {
     use crate::options::PreprocessingPreset;
 
     if !options.preprocessing.enabled {
@@ -5477,11 +5483,33 @@ fn should_skip_preprocessing(name_lower: &[u8], attrs: &[(&[u8], Option<&[u8]>)]
     // (Aggressive would drop footer/aside unconditionally, but Aggressive routes
     // through Tier-2 via the existing router gate so Tier-1 only needs the
     // Standard-preset behaviour: nav-hint check.)
+    if name_lower == b"header" && is_page_header {
+        return true;
+    }
+
     if matches!(name_lower, b"header" | b"footer" | b"aside") {
         return byte_attrs_have_navigation_hint(attrs);
     }
 
     false
+}
+
+fn header_is_page_level(state: &Tier1State, html: &str) -> bool {
+    let mut in_document_body = false;
+    for frame in &state.stack {
+        let Some(name) = html.as_bytes().get(frame.name_range.clone()) else {
+            continue;
+        };
+        if matches_ignore_ascii_case(name, &[b"article", b"section", b"main"]) {
+            return false;
+        }
+        in_document_body |= name.eq_ignore_ascii_case(b"body");
+    }
+    in_document_body
+}
+
+fn matches_ignore_ascii_case(value: &[u8], candidates: &[&[u8]]) -> bool {
+    candidates.iter().any(|candidate| value.eq_ignore_ascii_case(candidate))
 }
 
 /// Byte-level equivalent of `element_has_navigation_hint` for use in the
