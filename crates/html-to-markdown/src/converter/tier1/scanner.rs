@@ -2241,9 +2241,9 @@ fn should_keep_image_as_markdown(html: &str, stack: &[OpenTag], options: &Conver
 
 /// Return `true` when the `<img>` should be emitted as `![alt](src)` markdown.
 ///
-/// Mirrors the Tier-2 logic in `converter.rs`: images are kept as markdown
-/// unconditionally when `keep_inline_images_in` is empty.  When the list is
-/// non-empty, the nearest heading OR link ancestor decides: if it is a link
+/// Mirrors the Tier-2 logic in `converter.rs`: images outside headings are kept
+/// as markdown, while images inside headings require a matching heading or link
+/// ancestor in `keep_inline_images_in`. The nearest heading OR link ancestor decides: if it is a link
 /// (`<a>`) whose tag name is in the list, the image is kept regardless of any
 /// heading further out (#492, mirroring `ctx.link_allow_inline_images` in
 /// `handlers/link.rs`); if it is a link NOT in the list, that link imposes no
