@@ -2717,8 +2717,28 @@ fn clamp_to_char_boundary(buf: &str, at: usize) -> usize {
 /// nothing for an empty inline node; the byte-equality oracle requires us to
 /// match that.
 fn close_inline_marker(state: &mut Tier1State, frame: &OpenTag, marker: &str) -> Result<(), BailReason> {
+    let indent_width = state.list_continuation_indent_width();
     let buf = state.cell_or_output_mut();
-    let content_start = clamp_to_char_boundary(buf, frame.content_start);
+    let mut content_start = clamp_to_char_boundary(buf, frame.content_start);
+    if buf[content_start..].starts_with("  \n") {
+        let marker_start = clamp_to_char_boundary(buf, content_start.saturating_sub(marker.len()));
+        let indent: String = std::iter::repeat_n(' ', indent_width).collect();
+        let mut replacement = String::with_capacity(marker.len() + indent.len() * 2 + 3);
+        if buf[..marker_start].ends_with('\n') {
+            replacement.push_str(&indent);
+            replacement.push_str("\\\n");
+        } else {
+            replacement.push_str("  \n");
+        }
+        replacement.push_str(&indent);
+        replacement.push_str(marker);
+        let mut body_start = content_start + 3;
+        while matches!(buf.as_bytes().get(body_start), Some(b' ' | b'\t')) {
+            body_start += 1;
+        }
+        buf.replace_range(marker_start..body_start, &replacement);
+        content_start = marker_start + replacement.len();
+    }
     let content_is_absent = buf.len() <= content_start;
     let is_whitespace_only_not_empty = !content_is_absent
         && buf[content_start..]
@@ -4577,16 +4597,16 @@ fn flush_text(
     // Tier-1's flush_text runs BEFORE entity decode, so the patterns must
     // be listed explicitly.
     const UNICODE_WS_ENTITIES: &[&str] = &[
-        "&nbsp;", "&#160;", "&#xa0;", "&#xA0;", "&ensp;", "&#8194;", "&#x2002;", "&emsp;", "&#8195;", "&#x2003;",
-        "&thinsp;", "&#8201;", "&#x2009;", "&hairsp;", "&#8202;", "&#x200a;", "&#x200A;",
+        "&#12;", "&#x0c;", "&#x0C;", "&#xC;", "&nbsp;", "&#160;", "&#xa0;", "&#xA0;", "&ensp;", "&#8194;", "&#x2002;",
+        "&emsp;", "&#8195;", "&#x2003;", "&thinsp;", "&#8201;", "&#x2009;", "&hairsp;", "&#8202;", "&#x200a;",
+        "&#x200A;", "&#12288;", "&#x3000;",
     ];
     let raw_owned_nbsp;
     let raw: &str = if !in_pre && !in_code {
         let has_ws_entity = UNICODE_WS_ENTITIES.iter().any(|p| raw.contains(p));
-        let has_unicode_ws_literal = raw.bytes().any(|b| b >= 0x80)
-            && raw
-                .chars()
-                .any(|c| c.is_whitespace() && c != ' ' && c != '\t' && c != '\n' && c != '\r');
+        let has_unicode_ws_literal = raw
+            .chars()
+            .any(|c| c.is_whitespace() && c != ' ' && c != '\t' && c != '\n' && c != '\r');
         if has_ws_entity || has_unicode_ws_literal {
             let mut stripped = raw.to_owned();
             for p in UNICODE_WS_ENTITIES {

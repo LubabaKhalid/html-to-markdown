@@ -163,6 +163,7 @@ pub fn handle_subscript(
             parser,
             dom_ctx,
             ctx,
+            options,
         },
     );
 }
@@ -272,6 +273,7 @@ pub fn handle_superscript(
             parser,
             dom_ctx,
             ctx,
+            options,
         },
     );
 }
@@ -338,6 +340,7 @@ pub fn handle_variable(
             parser,
             dom_ctx,
             ctx,
+            options,
         },
     );
 }
@@ -404,6 +407,7 @@ pub fn handle_definition(
             parser,
             dom_ctx,
             ctx,
+            options,
         },
     );
 }

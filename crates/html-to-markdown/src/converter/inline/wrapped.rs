@@ -14,6 +14,7 @@ use tl::{NodeHandle, Parser};
 
 type DomContext = crate::converter::DomContext;
 type Context = crate::converter::Context;
+type ConversionOptions = crate::options::ConversionOptions;
 
 /// Where a wrapper is being emitted: its DOM node, the parser and DOM lookup context, and the
 /// conversion `Context` of the buffer it writes into.
@@ -27,6 +28,7 @@ pub struct InlineSite<'p> {
     pub parser: &'p Parser<'p>,
     pub dom_ctx: &'p DomContext,
     pub ctx: &'p Context,
+    pub options: &'p ConversionOptions,
 }
 
 /// Tag names that render with the single `strong_em_symbol` italic delimiter.
@@ -157,6 +159,44 @@ fn markdown_block_prefix_len(block: &str) -> usize {
     digits_start
 }
 
+fn move_leading_hard_breaks<'a>(
+    output: &mut String,
+    content: &'a str,
+    ctx: &Context,
+    options: &ConversionOptions,
+) -> &'a str {
+    let mut remaining = content;
+    let mut moved = false;
+    loop {
+        let candidate = remaining.trim_start_matches([' ', '\t']);
+        let Some((marker, rest)) = ["\\\n", "\n"]
+            .into_iter()
+            .find_map(|marker| candidate.strip_prefix(marker).map(|rest| (marker, rest)))
+        else {
+            break;
+        };
+        let starts_on_empty_line = output.ends_with('\n');
+        crate::converter::list::utils::indent_list_item_line_start(output, ctx, options);
+        let marker = if marker == "\n" {
+            crate::converter::main_helpers::hard_break_marker(options.newline_style)
+        } else {
+            marker
+        };
+        output.push_str(if marker == "  \n" && starts_on_empty_line {
+            "\\\n"
+        } else {
+            marker
+        });
+        remaining = rest;
+        moved = true;
+    }
+    if moved {
+        crate::converter::list::utils::indent_list_item_line_start(output, ctx, options);
+        remaining = remaining.trim_start_matches([' ', '\t']);
+    }
+    remaining
+}
+
 /// Emit `content` wrapped in `delimiters`, handling delimiter-run adjacency with a preceding
 /// sibling and a body that is non-empty but entirely whitespace.
 pub fn emit_wrapped_inline(
@@ -170,6 +210,7 @@ pub fn emit_wrapped_inline(
         parser,
         dom_ctx,
         ctx,
+        options,
     } = site;
     let InlineDelimiters {
         open,
@@ -180,6 +221,7 @@ pub fn emit_wrapped_inline(
     use crate::converter::utility::siblings::get_previous_sibling_tag;
     use crate::converter::{append_inline_suffix, chomp_inline, merge_adjacent_emphasis};
 
+    let content = move_leading_hard_breaks(output, content, ctx, options);
     let (prefix, suffix, trimmed) = chomp_inline(content);
     if content.trim().is_empty() {
         if content.is_empty() {

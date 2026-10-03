@@ -92,6 +92,7 @@ pub fn emit_strong_wrapped(
                 parser,
                 dom_ctx,
                 ctx,
+                options,
             },
         );
     } else if options.output_format == OutputFormat::Djot {
@@ -111,6 +112,7 @@ pub fn emit_strong_wrapped(
                 parser,
                 dom_ctx,
                 ctx,
+                options,
             },
         );
     } else {
@@ -128,6 +130,7 @@ pub fn emit_strong_wrapped(
                 parser,
                 dom_ctx,
                 ctx,
+                options,
             },
         );
     }
@@ -195,6 +198,7 @@ fn emit_emphasis_wrapped(
                 parser,
                 dom_ctx,
                 ctx,
+                options,
             },
         );
     } else {
@@ -212,6 +216,7 @@ fn emit_emphasis_wrapped(
                 parser,
                 dom_ctx,
                 ctx,
+                options,
             },
         );
     }

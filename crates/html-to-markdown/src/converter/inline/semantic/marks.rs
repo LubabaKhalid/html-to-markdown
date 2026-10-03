@@ -133,6 +133,7 @@ pub fn handle_mark(
             parser,
             dom_ctx,
             ctx,
+            options,
         },
     );
 }
@@ -199,6 +200,7 @@ fn emit_strikethrough_wrapped(
                 parser,
                 dom_ctx,
                 ctx,
+                options,
             },
         );
     } else {
@@ -216,6 +218,7 @@ fn emit_strikethrough_wrapped(
                 parser,
                 dom_ctx,
                 ctx,
+                options,
             },
         );
     }
@@ -247,6 +250,7 @@ fn emit_inserted_wrapped(
                 parser,
                 dom_ctx,
                 ctx,
+                options,
             },
         );
     } else {
@@ -264,6 +268,7 @@ fn emit_inserted_wrapped(
                 parser,
                 dom_ctx,
                 ctx,
+                options,
             },
         );
     }
