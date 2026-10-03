@@ -72,6 +72,19 @@ pub fn emit_strong_wrapped(
     } else {
         [options.strong_em_symbol; 2].iter().collect()
     };
+    // ~keep A block that is the task item's first content keeps its opener outside the bold
+    // ~keep delimiters, so the checkbox line cannot turn the opener into literal text (#643).
+    if !marker.is_empty()
+        && ctx
+            .first_writer
+            .as_ref()
+            .is_some_and(|first_writer| first_writer.starts_with_block(parser))
+        && block_runs_are_single_line(content.trim_end_matches('\n'))
+        && crate::converter::utility::escaping::opens_block(content.trim_start())
+    {
+        output.push_str(&wrap_block_runs(content, &marker, &marker));
+        return;
+    }
     if !marker.is_empty() && content.contains("\n\n") && block_runs_are_plain(content) {
         output.push_str(&wrap_block_runs(content, &marker, &marker));
         return;

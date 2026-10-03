@@ -522,7 +522,7 @@ fn should_start_a_task_item_quote_after_an_empty_inline_element_on_the_next_line
     for (wrapper, expected) in [
         (r#"<img src="i.png" alt="i">"#, "- [ ] ![i](i.png)\n  > q\n"),
         ("<span>s</span>", "- [ ] s\n  > q\n"),
-        ("<b>", "- [ ] **> q**\n"),
+        ("<b>", "- [ ] &#32;\n  > **q**\n"),
     ] {
         let html = format!(r#"<ul><li><input type="checkbox">{wrapper}<blockquote>q</blockquote></li></ul>"#);
         assert_eq!(convert_with(&html, &options), expected, "{html}");

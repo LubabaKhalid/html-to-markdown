@@ -603,16 +603,31 @@ impl FirstWriter {
         self.0.borrow().node.is_none()
     }
 
+    /// Whether the first node that wrote is a block with its own Markdown opener.
+    pub(crate) fn starts_with_block(&self, parser: &tl::Parser) -> bool {
+        let state = self.0.borrow();
+        state.node.is_some_and(|node| {
+            let Some(tl::Node::Tag(tag)) = node.get(parser) else {
+                return false;
+            };
+            block_content(&normalized_tag_name(tag.name().as_utf8_str())).is_some()
+        })
+    }
+
     /// Record the render of `node`, which started while no node had written and wrote `written`.
     pub fn record(&self, node: tl::NodeHandle, parser: &tl::Parser, written: Option<&str>) {
+        let child_starts_block = self.starts_with_block(parser);
         let mut state = self.0.borrow_mut();
         let Some(text) = written.map(str::trim_start).filter(|text| !text.is_empty()) else {
             *state = FirstWriterState::default();
             return;
         };
         let first_line = text.split('\n').next().unwrap_or_default();
-        let container =
-            state.node.is_some() && is_container(node, parser) && first_line.starts_with(state.first_line.as_str());
+        // ~keep An inline container may reposition delimiters around its child's opener, but
+        // ~keep the child still decides whether the task starts with a block (#643).
+        let container = state.node.is_some()
+            && is_container(node, parser)
+            && (first_line.starts_with(state.first_line.as_str()) || child_starts_block);
         if !container {
             state.node = Some(node);
             state.first_line = first_line.to_string();
