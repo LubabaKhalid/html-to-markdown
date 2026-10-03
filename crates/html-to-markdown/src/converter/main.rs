@@ -68,6 +68,7 @@ pub fn convert_html_impl(
     base_url: Option<std::rc::Rc<url::Url>>,
     document_base_href: Option<&str>,
 ) -> Result<ConversionOutput> {
+    let preserve_menu = options.preserve_tags.iter().any(|tag| tag.eq_ignore_ascii_case("menu"));
     let stripped = strip_script_and_style_tags(html);
     // ~keep Before anything else looks for tags: an HTML5 bogus comment (`<?php … ?>`,
     // ~keep `<!bogus>`, `</3>`) is a comment token, so it must render as nothing rather
@@ -82,7 +83,7 @@ pub fn convert_html_impl(
     // ~keep The `tl` parser does not handle such end-tags and leaves the element unclosed,
     // ~keep causing all subsequent siblings to be absorbed as children.
     let stripped = normalize_split_closing_tags(&stripped);
-    let stripped = normalize_menu_elements(&stripped);
+    let stripped = normalize_menu_elements(&stripped, preserve_menu);
     // ~keep Insert missing `</li>`, `</dt>`, `</dd>` close tags that the HTML5 spec
     // ~keep says are implicitly added when a new list-item starts or the parent list
     // ~keep closes.  Without this, `tl` nests each item inside the previous one,
@@ -102,7 +103,7 @@ pub fn convert_html_impl(
             let stripped = strip_hidden_elements(&stripped);
             let stripped = normalize_bogus_comment_endings(&stripped);
             let stripped = normalize_split_closing_tags(&stripped);
-            let stripped = normalize_menu_elements(&stripped);
+            let stripped = normalize_menu_elements(&stripped, preserve_menu);
             let repaired = preprocess_html(&stripped).into_owned();
             preprocessed = repaired;
             preprocessed_len = preprocessed.len();
@@ -127,7 +128,7 @@ pub fn convert_html_impl(
             let stripped = strip_hidden_elements(&stripped);
             let stripped = normalize_bogus_comment_endings(&stripped);
             let stripped = normalize_split_closing_tags(&stripped);
-            let stripped = normalize_menu_elements(&stripped);
+            let stripped = normalize_menu_elements(&stripped, preserve_menu);
             preprocessed = preprocess_html(&stripped).into_owned();
             preprocessed_len = preprocessed.len();
             continue;
@@ -162,7 +163,7 @@ pub fn convert_html_impl(
             let stripped = strip_hidden_elements(&stripped);
             let stripped = normalize_bogus_comment_endings(&stripped);
             let stripped = normalize_split_closing_tags(&stripped);
-            let stripped = normalize_menu_elements(&stripped);
+            let stripped = normalize_menu_elements(&stripped, preserve_menu);
             preprocessed = preprocess_html(&stripped).into_owned();
             preprocessed_len = preprocessed.len();
             dom = tl::parse(&preprocessed, parser_options)

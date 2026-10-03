@@ -46,3 +46,35 @@ fn should_keep_text_after_an_hgroup_inside_the_task_item() {
     let html = "<ul><li><input type=\"checkbox\"><hgroup><h2>h</h2></hgroup>t</li></ul>";
     assert_eq!(markdown(html), "- [ ] &#32;\n  ## h\n\n  t\n");
 }
+
+#[test]
+fn should_keep_menu_bullets_as_dashes_outside_list_items() {
+    for bullets in [ConversionOptions::default().bullets, "*+".to_string()] {
+        let options = ConversionOptions {
+            extract_metadata: false,
+            bullets,
+            tier_strategy: TierStrategy::Tier2,
+            ..ConversionOptions::default()
+        };
+        let actual = convert("<menu><li>x</li><li>y</li></menu>", Some(options))
+            .expect("conversion should succeed")
+            .content
+            .unwrap_or_default();
+        assert_eq!(actual, "- x\n- y\n");
+    }
+}
+
+#[test]
+fn should_preserve_a_menu_tag_when_requested() {
+    let options = ConversionOptions {
+        extract_metadata: false,
+        preserve_tags: vec!["menu".to_string()],
+        tier_strategy: TierStrategy::Tier2,
+        ..ConversionOptions::default()
+    };
+    let actual = convert("<menu><li>x</li></menu>", Some(options))
+        .expect("conversion should succeed")
+        .content
+        .unwrap_or_default();
+    assert_eq!(actual, "<menu><li>x</li></menu>\n");
+}

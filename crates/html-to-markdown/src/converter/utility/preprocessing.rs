@@ -783,11 +783,14 @@ fn looks_like_tag_start(bytes: &[u8], idx: usize, len: usize) -> bool {
     }
 }
 
-/// Normalize `<menu>` elements to `<ul>` before parsing.
+/// Normalize parser-broken `<menu>` elements to `<ul>` before parsing.
 ///
 /// ~keep The bundled parser foster-parents `<li>` children out of `<menu>`, so the converter
 /// ~keep cannot preserve a menu nested in a list item after the DOM has been built (issue #657).
-pub fn normalize_menu_elements(input: &str) -> Cow<'_, str> {
+pub fn normalize_menu_elements(input: &str, preserve_menu: bool) -> Cow<'_, str> {
+    if preserve_menu {
+        return Cow::Borrowed(input);
+    }
     let mut replacements = menu_name_replacements(input.as_bytes());
     if replacements.is_empty() {
         return Cow::Borrowed(input);
@@ -809,12 +812,63 @@ struct OpenMenuTag {
     name_start: usize,
     name_end: usize,
     has_list_item: bool,
+    nested_in_list_item: bool,
+}
+
+#[derive(Default)]
+struct MenuTagScan {
+    list_item_depth: usize,
+    menus: Vec<OpenMenuTag>,
+    replacements: Vec<(usize, usize)>,
+}
+
+impl MenuTagScan {
+    fn scan_menu(&mut self, bytes: &[u8], idx: usize) -> Option<usize> {
+        if matches_end_tag_start(bytes, idx + 1, b"menu") {
+            let close_start = idx + 2;
+            let close_end = close_start + b"menu".len();
+            if let Some(menu) = self
+                .menus
+                .pop()
+                .filter(|menu| menu.nested_in_list_item && menu.has_list_item)
+            {
+                self.replacements.push((menu.name_start, menu.name_end));
+                self.replacements.push((close_start, close_end));
+            }
+            return Some(find_tag_end(bytes, close_end).unwrap_or(bytes.len()));
+        }
+        if !matches_tag_start(bytes, idx + 1, b"menu") {
+            return None;
+        }
+        let name_start = idx + 1;
+        let name_end = name_start + b"menu".len();
+        let tag_end = find_tag_end(bytes, name_end).unwrap_or(bytes.len());
+        if !bytes[idx..tag_end].ends_with(b"/>") {
+            self.menus.push(OpenMenuTag {
+                name_start,
+                name_end,
+                has_list_item: false,
+                nested_in_list_item: self.list_item_depth > 0,
+            });
+        }
+        Some(tag_end)
+    }
+
+    fn track_list_item(&mut self, bytes: &[u8], idx: usize) {
+        if matches_tag_start(bytes, idx + 1, b"li") {
+            if let Some(menu) = self.menus.last_mut() {
+                menu.has_list_item = true;
+            }
+            self.list_item_depth += 1;
+        } else if matches_end_tag_start(bytes, idx + 1, b"li") {
+            self.list_item_depth = self.list_item_depth.saturating_sub(1);
+        }
+    }
 }
 
 fn menu_name_replacements(bytes: &[u8]) -> Vec<(usize, usize)> {
     let mut idx = 0;
-    let mut menus: Vec<OpenMenuTag> = Vec::new();
-    let mut replacements = Vec::new();
+    let mut scan = MenuTagScan::default();
     while idx < bytes.len() {
         if bytes[idx] != b'<' {
             idx += 1;
@@ -824,43 +878,18 @@ fn menu_name_replacements(bytes: &[u8]) -> Vec<(usize, usize)> {
             idx = region_end;
             continue;
         }
-        if matches_end_tag_start(bytes, idx + 1, b"menu") {
-            let close_start = idx + 2;
-            let close_end = close_start + b"menu".len();
-            let tag_end = find_tag_end(bytes, close_end).unwrap_or(bytes.len());
-            if let Some(menu) = menus.pop().filter(|menu| menu.has_list_item) {
-                replacements.push((menu.name_start, menu.name_end));
-                replacements.push((close_start, close_end));
-            }
+        if let Some(tag_end) = scan.scan_menu(bytes, idx) {
             idx = tag_end;
             continue;
         }
-        if matches_tag_start(bytes, idx + 1, b"menu") {
-            let name_start = idx + 1;
-            let name_end = name_start + b"menu".len();
-            let tag_end = find_tag_end(bytes, name_end).unwrap_or(bytes.len());
-            if !bytes[idx..tag_end].ends_with(b"/>") {
-                menus.push(OpenMenuTag {
-                    name_start,
-                    name_end,
-                    has_list_item: false,
-                });
-            }
-            idx = tag_end;
-            continue;
-        }
-        if matches_tag_start(bytes, idx + 1, b"li") {
-            if let Some(menu) = menus.last_mut() {
-                menu.has_list_item = true;
-            }
-        }
+        scan.track_list_item(bytes, idx);
         if opens_a_tag(bytes, idx) {
             idx = find_tag_end(bytes, idx + 1).unwrap_or(bytes.len());
             continue;
         }
         idx += 1;
     }
-    replacements
+    scan.replacements
 }
 
 /// Preprocess HTML to normalize tags and fix common issues.
@@ -2323,20 +2352,29 @@ mod tests {
 
     #[test]
     fn normalize_menu_elements_rewrites_open_and_close_tags() {
-        let input = "<MeNu class='commands'><li>x</li></MENU>";
-        assert_eq!(normalize_menu_elements(input), "<ul class='commands'><li>x</li></ul>");
+        let input = "<ul><li><MeNu class='commands'><li>x</li></MENU></li></ul>";
+        assert_eq!(
+            normalize_menu_elements(input, false),
+            "<ul><li><ul class='commands'><li>x</li></ul></li></ul>"
+        );
     }
 
     #[test]
     fn normalize_menu_elements_ignores_opaque_and_attribute_content() {
         let input = "<!-- <menu><li>x</li></menu> --><div data-x='<menu><li>x</li></menu>'>x</div>";
-        assert!(matches!(normalize_menu_elements(input), Cow::Borrowed(_)));
+        assert!(matches!(normalize_menu_elements(input, false), Cow::Borrowed(_)));
     }
 
     #[test]
     fn normalize_menu_elements_leaves_text_only_menu_unchanged() {
         let input = "<menu>b</menu>";
-        assert!(matches!(normalize_menu_elements(input), Cow::Borrowed(_)));
+        assert!(matches!(normalize_menu_elements(input, false), Cow::Borrowed(_)));
+    }
+
+    #[test]
+    fn normalize_menu_elements_leaves_standalone_list_menu_unchanged() {
+        let input = "<menu><li>x</li></menu>";
+        assert!(matches!(normalize_menu_elements(input, false), Cow::Borrowed(_)));
     }
 
     #[test]
