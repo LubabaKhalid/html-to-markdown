@@ -740,15 +740,25 @@ fn convert_node(
             if ctx.preserve_tags.contains(tag_name.as_ref()) {
                 let starts_line = at_line_start(output);
                 let html = serialize_tag_to_html(node_handle, parser);
-                output.push_str(&html);
-                // ~keep An HTML block ends only at a blank line, so one follows it (issue #655).
-                if starts_line
+                let custom_element_starts_block =
+                    tag_name.contains('-') && !crate::converter::list::utils::line_is_bare_list_marker(output);
+                let opens_html_block = starts_line
                     && !ctx.in_marker_text()
                     && !ctx.in_table_cell
                     && !ctx.convert_as_inline
                     && !ctx.in_code
-                    && crate::converter::utility::escaping::opens_block(html.trim_start())
-                {
+                    && (custom_element_starts_block
+                        || crate::converter::utility::escaping::opens_block(html.trim_start()));
+                // ~keep Custom elements are not in the converter's block-tag allowlist, so
+                // ~keep `separate_from_block` cannot put a preserved custom block at the item's
+                // ~keep content column. A hyphenated HTML name identifies that custom-element
+                // ~keep case at the preservation boundary (issue #658).
+                if opens_html_block && ctx.in_list_item {
+                    crate::converter::list::utils::start_block_in_list_item(output, ctx, options);
+                }
+                output.push_str(&html);
+                // ~keep An HTML block ends only at a blank line, so one follows it (issue #655).
+                if opens_html_block {
                     output.push_str("\n\n");
                 }
                 return;
