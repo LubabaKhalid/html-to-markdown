@@ -233,7 +233,18 @@ pub fn normalize_link_label(label: &str) -> String {
     collapse_whitespace_into(&mut segment, rest);
     segments.push(segment);
 
-    assemble_label(segments, markers)
+    let label = assemble_label(segments, markers);
+    protect_adjacent_hard_breaks(&label).into_owned()
+}
+
+/// ~keep Keep consecutive hard breaks inside a link label from creating a blank line, which
+/// would end the paragraph before the link's closing delimiter is parsed.
+pub fn protect_adjacent_hard_breaks(label: &str) -> Cow<'_, str> {
+    if !label.contains("  \n  \n") && !label.contains("\\\n  \n") {
+        return Cow::Borrowed(label);
+    }
+    let protected = label.replace("  \n  \n", "  \n\\\n");
+    Cow::Owned(protected.replace("\\\n  \n", "\\\n\\\n"))
 }
 
 /// Re-join a label's whitespace-collapsed segments and the hard-break markers between them,

@@ -3818,6 +3818,13 @@ fn trim_label_preserving_boundary_hard_breaks(dest: &mut String, trim_start: usi
         dest.truncate(trim_start);
         dest.push_str(&rebuilt);
     }
+
+    if let std::borrow::Cow::Owned(protected) =
+        crate::converter::utility::content::protect_adjacent_hard_breaks(&dest[trim_start..])
+    {
+        dest.truncate(trim_start);
+        dest.push_str(&protected);
+    }
 }
 
 fn close_link(state: &mut Tier1State, frame: &OpenTag, options: &ConversionOptions) -> Result<(), BailReason> {
