@@ -1,8 +1,9 @@
 //! Synchronous text wrapping for Markdown output.
 
 use super::utils::{
-    is_heading, is_list_like, is_numbered_list, joins_into_a_block, parse_blockquote_line, parse_list_item,
-    push_paragraph_line, wrap_blockquote_paragraph, wrap_indented_line, wrap_list_item,
+    is_heading, is_list_like, is_non_interrupting_ordered_item, is_numbered_list, joins_into_a_block,
+    parse_blockquote_line, parse_list_item, push_paragraph_line, wrap_blockquote_paragraph, wrap_indented_line,
+    wrap_list_item,
 };
 use crate::converter::utility::escaping::{code_fence, is_heading_underline, opens_block};
 use crate::options::ConversionOptions;
@@ -218,10 +219,14 @@ pub fn wrap_markdown(markdown: &str, options: &ConversionOptions) -> String {
             // ~keep and the reflow does not know the column of a list item in a quote to tell.
             let underline = in_blockquote_paragraph && is_heading_underline(&content);
             let fence = code_fence(&content);
+            let list_item = parse_list_item(&content).is_some();
+            let continues_numbered_paragraph = in_blockquote_paragraph
+                && blockquote_buffer.ends_with('\n')
+                && is_non_interrupting_ordered_item(&content);
             if underline
                 || fence.is_some()
-                || opens_block(&content)
-                || parse_list_item(&content).is_some()
+                || (opens_block(&content) && !continues_numbered_paragraph)
+                || (list_item && !continues_numbered_paragraph)
                 || content.starts_with('|')
             {
                 if in_blockquote_paragraph && !blockquote_buffer.is_empty() {

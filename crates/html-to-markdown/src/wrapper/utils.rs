@@ -45,7 +45,7 @@ pub fn wrap_blockquote_paragraph(prefix: &str, content: &str, width: usize) -> S
     let prefix_len = prefix.len();
     let inner_width = if width > prefix_len { width - prefix_len } else { 1 };
 
-    let wrapped = wrap_line(content, inner_width);
+    let wrapped = wrap_line_inner(content, inner_width, true);
     let mut out = String::new();
     for (idx, part) in wrapped.split('\n').enumerate() {
         if idx > 0 {
@@ -110,6 +110,20 @@ pub fn parse_list_item(line: &str) -> Option<(String, String, String)> {
         format!("{} ", &trimmed[..marker_len]),
         trimmed[marker_len..].trim_ascii_start().to_string(),
     ))
+}
+
+/// Whether `line` starts a nonempty ordered item whose start number is not 1.
+///
+/// Such a line starts a list on its own, but cannot interrupt an open CommonMark paragraph.
+pub fn is_non_interrupting_ordered_item(line: &str) -> bool {
+    parse_list_item(line).is_some_and(|(_, marker, content)| {
+        !content.is_empty()
+            && marker
+                .trim_ascii_end()
+                .trim_end_matches(['.', ')'])
+                .parse::<u64>()
+                .is_ok_and(|start| start != 1)
+    })
 }
 
 /// Check if content is a single inline link (e.g., "[text](#anchor)").
@@ -208,6 +222,10 @@ fn words_are_bare_marker(words: &[&str]) -> bool {
 /// A newline in `text` is a line end the reflow keeps: the text on each side is wrapped on its
 /// own, and the spaces of a hard break before the newline are kept.
 pub fn wrap_line(text: &str, width: usize) -> String {
+    wrap_line_inner(text, width, false)
+}
+
+fn wrap_line_inner(text: &str, width: usize, allow_non_interrupting_ordered_continuation: bool) -> String {
     let text = text.trim_end_matches(['\n', ' ']);
     if text.len() <= width {
         return text.to_string();
@@ -219,7 +237,9 @@ pub fn wrap_line(text: &str, width: usize) -> String {
             result.push('\n');
         }
         let words = segment.trim_end_matches(' ');
-        wrap_words(words, width, &mut result);
+        let allow_first_block =
+            allow_non_interrupting_ordered_continuation && index > 0 && is_non_interrupting_ordered_item(words);
+        wrap_words(words, width, &mut result, allow_first_block);
         result.push_str(&segment[words.len()..]);
     }
     result
@@ -265,7 +285,7 @@ fn words(text: &str) -> Vec<&str> {
 /// ~keep (`---` of `--- x`) takes words from the lines after it, twice as many each time; `text`
 /// ~keep itself opens no block, so that ends. Every step moves a line start right or drops a
 /// ~keep line, so the loop ends. A line that takes words can run past `width`.
-fn wrap_words(text: &str, width: usize, result: &mut String) {
+fn wrap_words(text: &str, width: usize, result: &mut String, first_line_may_open: bool) {
     let words = words(text);
     let mut greedy_ends = Vec::new();
     let mut line_len = 0;
@@ -291,7 +311,7 @@ fn wrap_words(text: &str, width: usize, result: &mut String) {
         let mut index = starts.len() - 1;
         while index < starts.len() {
             let line_end = starts.get(index + 1).copied().unwrap_or(end);
-            if !opens(starts[index], line_end) {
+            if !opens(starts[index], line_end) || (index == 0 && first_line_may_open) {
                 index += 1;
             } else if index == 0 {
                 let mut step = 1;
