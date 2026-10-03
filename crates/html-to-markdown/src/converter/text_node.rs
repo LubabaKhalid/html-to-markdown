@@ -511,6 +511,16 @@ pub fn process_text_node(
             first = false;
             output.push_str(part.trim());
         }
+    } else if ctx.in_list_item && final_text.contains('\n') {
+        // ~keep A source line ending inside one text node starts another physical line of the
+        // ~keep same item; give that line the content column before reflow sees it (#637).
+        let mut lines = final_text.split_inclusive('\n').peekable();
+        while let Some(line) = lines.next() {
+            output.push_str(line);
+            if lines.peek().is_some() {
+                crate::converter::list::utils::indent_list_item_line_start(output, ctx, options);
+            }
+        }
     } else {
         output.push_str(&final_text);
     }
