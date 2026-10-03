@@ -28,6 +28,30 @@ use std::borrow::Cow;
 #[cfg(feature = "visitor")]
 use crate::converter::utility::serialization::serialize_node;
 
+fn indent_hard_break_continuations(label: &mut String, ctx: &Context, options: &ConversionOptions) {
+    if !ctx.in_list_item || !label.contains('\n') {
+        return;
+    }
+    let Some(indent) = crate::converter::list::utils::continuation_indent_string(ctx.list_indent_columns, options)
+    else {
+        return;
+    };
+    let original = std::mem::take(label);
+    let mut lines = original.split('\n');
+    let mut indented = lines.next().unwrap_or_default().to_string();
+    for line in lines {
+        indented.push('\n');
+        if !line.is_empty() {
+            // ~keep Link-label normalization collapses the content-column whitespace after a
+            // ~keep hard break to one space. Restore the enclosing item's actual column so the
+            // ~keep continuation cannot become a new block and split the link (issue #678).
+            indented.push_str(&indent);
+            indented.push_str(line.trim_start_matches([' ', '\t']));
+        }
+    }
+    *label = indented;
+}
+
 /// Handle an `<a>` (link) element and convert to Markdown.
 ///
 /// This handler processes link elements including:
@@ -306,6 +330,8 @@ pub fn handle_link(
         if label == "^" && href.starts_with('#') {
             label = "↑".to_string();
         }
+
+        indent_hard_break_continuations(&mut label, ctx, options);
 
         let escaped_label = escape_link_label(&label);
 
