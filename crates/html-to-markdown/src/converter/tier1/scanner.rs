@@ -398,8 +398,9 @@ pub fn scan(
                         .iter()
                         .position(|b| !b.is_ascii_whitespace())
                         .unwrap_or(after.len())];
-                    let newline_before = name_start >= 2 && bytes[name_start - 2] == b'\n';
-                    if (newline_before && after_ws.first() == Some(&b'\n')) || after_ws.windows(2).any(|w| w == b"\n\n")
+                    let newline_before = name_start >= 2 && matches!(bytes[name_start - 2], b'\n' | b'\r');
+                    if (newline_before && after_ws.first().is_some_and(|byte| matches!(byte, b'\n' | b'\r')))
+                        || contains_blank_line(after_ws)
                     {
                         state.pending_newline_join = None;
                     }
@@ -5008,6 +5009,17 @@ fn flush_text(
     // outside `<pre>` (verbatim), and outside table cells (which run
     // `normalize_whitespace_cow` directly).
     let mut ends_in_newline_join = false;
+    let mut phase_y_predecoded = false;
+    let phase_y_decoded;
+    let raw = if !inside_inline && !state.in_table_cell() && raw.contains('&') {
+        let mut decoded = String::with_capacity(raw.len());
+        decode_entities_into(&mut decoded, raw, base_offset, ReferenceContext::Text)?;
+        phase_y_decoded = decoded;
+        phase_y_predecoded = true;
+        phase_y_decoded.as_str()
+    } else {
+        raw
+    };
     let raw_owned;
     let raw = if !inside_inline && !state.in_table_cell() {
         let trim_chars: &[char] = &['\n', '\r', ' ', '\t'];
@@ -5028,7 +5040,7 @@ fn flush_text(
                 let core = &raw[core_start..core_end];
                 let trailing = &raw[core_end..];
                 let prefix = if leading_len > 0 { " " } else { "" };
-                let suffix = if trailing.contains("\n\n") {
+                let suffix = if contains_blank_line(trailing.as_bytes()) {
                     "\n\n"
                 } else if trailing.bytes().any(|b| b == b' ' || b == b'\t') {
                     " "
@@ -5051,7 +5063,7 @@ fn flush_text(
     if raw.is_empty() {
         return Ok(());
     }
-    let has_entities = raw.contains('&');
+    let has_entities = !phase_y_predecoded && raw.contains('&');
 
     // ~keep Issue #458: Tier-2 escapes a literal `\` in prose whether or not any
     // `escape_*` flag is set (`text::backslash_needs_escape`), so Tier-1 has to
@@ -6141,6 +6153,28 @@ fn trailing_single_newline_join(state: &Tier1State, next_tag_is_span: bool) -> &
         )
     });
     if in_paragraph_or_inline_wrapper { " " } else { "\n" }
+}
+
+fn contains_blank_line(bytes: &[u8]) -> bool {
+    let mut line_breaks = 0;
+    let mut index = 0;
+    while index < bytes.len() {
+        match bytes[index] {
+            b'\r' => {
+                line_breaks += 1;
+                if bytes.get(index + 1) == Some(&b'\n') {
+                    index += 1;
+                }
+            }
+            b'\n' => line_breaks += 1,
+            _ => {}
+        }
+        if line_breaks >= 2 {
+            return true;
+        }
+        index += 1;
+    }
+    false
 }
 
 /// Position where the innermost enclosing `<p>`/`<div>` frame's OWN content
