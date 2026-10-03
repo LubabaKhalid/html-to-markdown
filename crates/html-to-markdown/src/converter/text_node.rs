@@ -490,10 +490,16 @@ pub fn process_text_node(
     // ~keep Code keeps its bytes; a Djot paragraph ends only at a blank line, so no line in it
     // ~keep needs the escape.
     if !ctx.in_code && options.output_format == crate::options::OutputFormat::Markdown {
+        let writes_to_task_marker = ctx.task_item_scope == Some((ctx.list_depth, ctx.blockquote_depth))
+            && ctx
+                .first_writer
+                .as_ref()
+                .is_some_and(crate::converter::list::item::FirstWriter::is_open);
         let writes_to_block = !ctx.convert_as_inline
             && !ctx.in_heading
             && !ctx.in_table_cell
             && !ctx.in_marker_text()
+            && !writes_to_task_marker
             && (ctx.block_output_ptr == 0 || std::ptr::from_ref::<String>(output) as usize == ctx.block_output_ptr);
         if writes_to_block {
             crate::converter::utility::escaping::escape_block_start(

@@ -144,6 +144,10 @@ pub struct Context {
     /// The element of a task item whose render writes the item's first content, or `None`
     /// outside a task item.
     pub(crate) first_writer: Option<crate::converter::list::item::FirstWriter>,
+    /// ~keep List and blockquote depths of the task item whose children are being collected into
+    /// the detached `task_text` buffer. Text at this exact scope is later placed after the
+    /// checkbox marker; nested list items and blockquotes keep normal block-start escaping.
+    pub(crate) task_item_scope: Option<(usize, usize)>,
     /// Unordered list nesting depth (for bullet cycling)
     pub(crate) ul_depth: usize,
     /// Are we inside any list (ul or ol)?
@@ -350,6 +354,7 @@ impl Context {
             ordered_delimiter: None,
             item_lines: crate::converter::list::utils::ItemLineScan::default(),
             first_writer: None,
+            task_item_scope: None,
             ul_depth: 0,
             in_list: false,
             loose_list: false,

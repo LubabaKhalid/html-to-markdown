@@ -54,6 +54,23 @@ fn should_escape_a_list_marker_at_the_start_of_list_item_text() {
 }
 
 #[test]
+fn should_treat_task_marker_text_as_paragraph_text_but_escape_nested_item_text() {
+    assert_all_tiers(r#"<ul><li><input type="checkbox">&gt; x</li></ul>"#, "- [ ] > x\n");
+    assert_all_tiers(
+        r#"<blockquote><ul><li><input type="checkbox">&gt; x</li></ul></blockquote>"#,
+        "> - [ ] > x\n",
+    );
+    assert_all_tiers(
+        r#"<ul><li><input type="checkbox"><ul><li>&gt; x</li></ul></li></ul>"#,
+        "- [ ] &#32;\n  * \\> x\n",
+    );
+    assert_all_tiers(
+        r#"<ul><li><input type="checkbox"><blockquote>&gt; x</blockquote></li></ul>"#,
+        "- [ ] &#32;\n  > \\> x\n",
+    );
+}
+
+#[test]
 fn should_not_escape_markdown_characters_in_running_text() {
     assert_all_tiers("<p>1. version 3.5 of C++</p>", "1\\. version 3.5 of C++\n");
     assert_all_tiers("<h2>1. t</h2>", "## 1. t\n");

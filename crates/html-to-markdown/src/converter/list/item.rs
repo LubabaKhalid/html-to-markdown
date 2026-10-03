@@ -267,6 +267,9 @@ fn write_li(
         list_indent_columns: marker_column + own_marker_width,
         real_item_columns,
         first_writer: is_task_list.then(FirstWriter::default),
+        task_item_scope: is_task_list
+            .then_some((ctx.list_depth + 1, ctx.blockquote_depth))
+            .or(ctx.task_item_scope),
         ..ctx.clone()
     };
 
