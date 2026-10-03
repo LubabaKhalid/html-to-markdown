@@ -32,6 +32,10 @@ pub fn handle_ul(
     depth: usize,
     dom_ctx: &DomContext,
 ) {
+    if !super::utils::has_list_item_child(*node_handle, parser, dom_ctx) {
+        crate::converter::block::div::handle(node_handle, parser, output, options, ctx, depth, dom_ctx);
+        return;
+    }
     let separator_comment = preceding_same_type_list_separator_comment(*node_handle, parser, dom_ctx, "ul");
     add_list_leading_separator(output, ctx, options);
     if let Some(comment) = separator_comment {

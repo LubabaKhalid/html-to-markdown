@@ -1110,6 +1110,17 @@ pub fn is_list_item(node_handle: tl::NodeHandle, parser: &tl::Parser, dom_ctx: &
     )
 }
 
+/// ~keep Whether a list node has at least one direct list-item child.
+pub(super) fn has_list_item_child(node_handle: tl::NodeHandle, parser: &tl::Parser, dom_ctx: &DomContext) -> bool {
+    let Some(tl::Node::Tag(tag)) = node_handle.get(parser) else {
+        return false;
+    };
+    tag.children()
+        .top()
+        .iter()
+        .any(|child| is_list_item(*child, parser, dom_ctx))
+}
+
 /// Process a list's children, tracking which items had block elements.
 ///
 /// This is used to determine proper spacing between list items.
