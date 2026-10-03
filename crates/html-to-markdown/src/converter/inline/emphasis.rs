@@ -50,12 +50,13 @@ pub fn handle(
 }
 
 use crate::converter::inline::wrapped::{
-    EMPHASIS_SIBLING_TAGS, InlineDelimiters, InlineSite, STRONG_SIBLING_TAGS, emit_wrapped_inline,
+    EMPHASIS_SIBLING_TAGS, InlineDelimiters, InlineSite, STRONG_SIBLING_TAGS, block_runs_are_plain,
+    block_runs_are_single_line, emit_wrapped_inline, wrap_block_runs,
 };
 
 /// Resolve `<strong>`/`<b>`'s wrapping delimiters for the current context and options, then
 /// emit via [`emit_wrapped_inline`].
-fn emit_strong_wrapped(
+pub fn emit_strong_wrapped(
     output: &mut String,
     content: &str,
     options: &ConversionOptions,
@@ -64,6 +65,18 @@ fn emit_strong_wrapped(
     parser: &Parser,
     dom_ctx: &DomContext,
 ) {
+    let marker = if ctx.in_strong {
+        String::new()
+    } else if options.output_format == OutputFormat::Djot {
+        String::from("*")
+    } else {
+        [options.strong_em_symbol; 2].iter().collect()
+    };
+    if !marker.is_empty() && content.contains("\n\n") && block_runs_are_plain(content) {
+        output.push_str(&wrap_block_runs(content, &marker, &marker));
+        return;
+    }
+
     if ctx.in_strong {
         emit_wrapped_inline(
             output,
@@ -101,7 +114,6 @@ fn emit_strong_wrapped(
             },
         );
     } else {
-        let marker: String = [options.strong_em_symbol; 2].iter().collect();
         emit_wrapped_inline(
             output,
             content,
@@ -121,6 +133,31 @@ fn emit_strong_wrapped(
     }
 }
 
+/// ~keep Summary and legend are block containers that semantically bold every child block, so
+/// they opt into splitting structured list/quote runs as well as plain paragraph runs (#724).
+pub fn emit_strong_wrapped_blocks(
+    output: &mut String,
+    content: &str,
+    options: &ConversionOptions,
+    ctx: &Context,
+    node_handle: &NodeHandle,
+    parser: &Parser,
+    dom_ctx: &DomContext,
+) {
+    let marker = if ctx.in_strong {
+        String::new()
+    } else if options.output_format == OutputFormat::Djot {
+        String::from("*")
+    } else {
+        [options.strong_em_symbol; 2].iter().collect()
+    };
+    if !marker.is_empty() && content.contains("\n\n") && block_runs_are_single_line(content) {
+        output.push_str(&wrap_block_runs(content, &marker, &marker));
+    } else {
+        emit_strong_wrapped(output, content, options, ctx, node_handle, parser, dom_ctx);
+    }
+}
+
 /// Resolve `<em>`/`<i>`'s wrapping delimiters for the current context and options, then emit
 /// via [`emit_wrapped_inline`].
 fn emit_emphasis_wrapped(
@@ -132,6 +169,16 @@ fn emit_emphasis_wrapped(
     parser: &Parser,
     dom_ctx: &DomContext,
 ) {
+    let marker = if options.output_format == OutputFormat::Djot {
+        String::from("_")
+    } else {
+        options.strong_em_symbol.to_string()
+    };
+    if content.contains("\n\n") && block_runs_are_plain(content) {
+        output.push_str(&wrap_block_runs(content, &marker, &marker));
+        return;
+    }
+
     if options.output_format == OutputFormat::Djot {
         // ~keep Djot emphasis always uses `_`, independent of `options.strong_em_symbol`
         // ~keep (pre-existing behaviour, unchanged by this refactor).
@@ -152,7 +199,6 @@ fn emit_emphasis_wrapped(
             },
         );
     } else {
-        let marker = options.strong_em_symbol.to_string();
         emit_wrapped_inline(
             output,
             content,

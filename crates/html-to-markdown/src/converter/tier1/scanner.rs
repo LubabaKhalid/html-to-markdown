@@ -2565,9 +2565,14 @@ fn close_summary(state: &mut Tier1State, _frame: &OpenTag) {
             dest.push_str("\n\n");
         }
     }
-    dest.push_str("**");
-    dest.push_str(trimmed);
-    dest.push_str("**\n\n");
+    if trimmed.contains("\n\n") && crate::converter::inline::wrapped::block_runs_are_single_line(trimmed) {
+        dest.push_str(&crate::converter::inline::wrapped::wrap_block_runs(trimmed, "**", "**"));
+    } else {
+        dest.push_str("**");
+        dest.push_str(trimmed);
+        dest.push_str("**");
+    }
+    dest.push_str("\n\n");
 }
 
 // ~keep ── Figcaption italic-wrap (Phase FF-2) ──────────────────────────────────────
@@ -2705,6 +2710,18 @@ fn close_inline_marker(state: &mut Tier1State, frame: &OpenTag, marker: &str) ->
         }
         let open_marker_start = clamp_to_char_boundary(buf, content_start.saturating_sub(marker.len()));
         buf.truncate(open_marker_start);
+        return Ok(());
+    }
+
+    if buf[content_start..].contains("\n\n")
+        && crate::converter::inline::wrapped::block_runs_are_plain(&buf[content_start..])
+    {
+        let content = buf[content_start..].to_owned();
+        let marker_start = clamp_to_char_boundary(buf, content_start.saturating_sub(marker.len()));
+        buf.truncate(marker_start);
+        buf.push_str(&crate::converter::inline::wrapped::wrap_block_runs(
+            &content, marker, marker,
+        ));
         return Ok(());
     }
 

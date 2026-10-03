@@ -71,6 +71,92 @@ pub struct InlineDelimiters<'a> {
     pub sibling_tag_names: &'a [&'a str],
 }
 
+/// ~keep Wrap every non-empty Markdown block in its own delimiter pair so a blank line cannot
+/// split one inline delimiter run into literal markers (issue #724).
+pub fn wrap_block_runs(content: &str, open: &str, close: &str) -> String {
+    let (prefix, suffix, trimmed) = crate::converter::chomp_inline(content);
+    let mut wrapped = String::with_capacity(content.len() + open.len() + close.len());
+    wrapped.push_str(prefix);
+
+    for (index, block) in trimmed.split("\n\n").enumerate() {
+        if index > 0 {
+            wrapped.push_str("\n\n");
+        }
+        if block.trim_matches([' ', '\t']).is_empty() {
+            wrapped.push_str(block);
+        } else {
+            let body_start = markdown_block_prefix_len(block);
+            let body_end = block.trim_end_matches([' ', '\t']).len();
+            if body_end <= body_start {
+                wrapped.push_str(block);
+                continue;
+            }
+            wrapped.push_str(&block[..body_start]);
+            wrapped.push_str(open);
+            wrapped.push_str(&block[body_start..body_end]);
+            wrapped.push_str(close);
+            wrapped.push_str(&block[body_end..]);
+        }
+    }
+
+    wrapped.push_str(suffix);
+    wrapped
+}
+
+/// ~keep General inline handlers split only plain paragraph-like runs. Structured Markdown
+/// remains on its established path because moving a delimiter across nested list/quote syntax
+/// changes the block tree; synthetic block wrappers such as summary opt into that explicitly.
+pub fn block_runs_are_plain(content: &str) -> bool {
+    block_runs_are_single_line(content)
+        && content.split("\n\n").all(|block| {
+            let indentation = block.bytes().take_while(|byte| matches!(byte, b' ' | b'\t')).count();
+            markdown_block_prefix_len(block) == indentation
+        })
+}
+
+/// ~keep Multi-line structured blocks need tree-aware delimiter placement; the shared wrapper
+/// safely handles single-line blocks while preserving their Markdown prefixes.
+pub fn block_runs_are_single_line(content: &str) -> bool {
+    content.split("\n\n").all(|block| !block.contains('\n'))
+}
+
+// ~keep Markdown block syntax stays outside the inline delimiters: `* **x**` remains a list,
+// ~keep whereas `*** x**` is an ambiguous delimiter run rather than a bold list item.
+fn markdown_block_prefix_len(block: &str) -> usize {
+    let bytes = block.as_bytes();
+    let mut position = bytes.iter().take_while(|byte| matches!(byte, b' ' | b'\t')).count();
+
+    while bytes.get(position..position + 2) == Some(b"> ") {
+        position += 2;
+    }
+
+    if matches!(bytes.get(position), Some(b'-' | b'+' | b'*')) && matches!(bytes.get(position + 1), Some(b' ' | b'\t'))
+    {
+        return position + 2;
+    }
+
+    let digits_start = position;
+    while bytes.get(position).is_some_and(u8::is_ascii_digit) {
+        position += 1;
+    }
+    if position > digits_start
+        && matches!(bytes.get(position), Some(b'.' | b')'))
+        && matches!(bytes.get(position + 1), Some(b' ' | b'\t'))
+    {
+        return position + 2;
+    }
+
+    let heading_start = position;
+    while bytes.get(position) == Some(&b'#') && position - heading_start < 6 {
+        position += 1;
+    }
+    if position > heading_start && bytes.get(position) == Some(&b' ') {
+        return position + 1;
+    }
+
+    digits_start
+}
+
 /// Emit `content` wrapped in `delimiters`, handling delimiter-run adjacency with a preceding
 /// sibling and a body that is non-empty but entirely whitespace.
 pub fn emit_wrapped_inline(

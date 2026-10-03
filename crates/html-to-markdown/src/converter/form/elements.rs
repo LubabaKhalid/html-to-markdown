@@ -274,10 +274,16 @@ pub fn handle_legend(
             if ctx.convert_as_inline {
                 output.push_str(trimmed);
             } else {
-                let mut symbol = String::with_capacity(2);
-                symbol.push(options.strong_em_symbol);
-                symbol.push(options.strong_em_symbol);
-                let bold = format!("{symbol}{trimmed}{symbol}");
+                let mut bold = String::with_capacity(trimmed.len() + 4);
+                crate::converter::inline::emphasis::emit_strong_wrapped_blocks(
+                    &mut bold,
+                    trimmed,
+                    options,
+                    ctx,
+                    node_handle,
+                    parser,
+                    dom_ctx,
+                );
                 crate::converter::block::div::push_block(output, options, ctx, &bold);
             }
         }

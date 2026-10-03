@@ -607,17 +607,17 @@ fn should_keep_text_after_a_block_in_a_list_after_text_in_a_wrapper_without_mark
     }
     // ~keep A legend is a block, so it starts a paragraph in the item, as a div does.
     let html = "<ul><li>a<legend><ul><li>x<p>p</p>t</li></ul></legend></li></ul>";
-    let rendered = "<ul><li><p>a</p><p>*** x</p></li></ul><p>p</p><p>t**</p>";
+    let rendered = "<ul><li><p>a</p><ul><li><strong>x</strong></li></ul></li></ul><p><strong>p</strong></p><p><strong>t</strong></p>";
     assert_converts(
         html,
         &width4(options(TierStrategy::Tier2)),
-        "- a\n\n    *** x\n\np\n\nt**\n",
+        "- a\n\n    * **x**\n\n**p**\n\n**t**\n",
         rendered,
     );
     assert_converts(
         html,
         &tabs(options(TierStrategy::Tier2)),
-        "- a\n\n\t*** x\n\np\n\nt**\n",
+        "- a\n\n\t* **x**\n\n**p**\n\n**t**\n",
         rendered,
     );
 }
