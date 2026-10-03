@@ -125,10 +125,12 @@ pub fn scan(
             b'<' => {
                 if text_start < pos {
                     let next_tag_is_html = upcoming_tag_is_named(bytes, pos, b"html");
-                    if !crate::converter::main_helpers::is_ignorable_before_head(
-                        &html[text_start..pos],
-                        next_tag_is_html,
-                    ) {
+                    let ignored_before_head = state.head_range.is_none()
+                        && crate::converter::main_helpers::is_ignorable_before_head(
+                            &html[text_start..pos],
+                            next_tag_is_html,
+                        );
+                    if !ignored_before_head {
                         state.start_body(text_start);
                     }
                     // ~keep Peek the upcoming tag BEFORE flushing the preceding text: a
@@ -151,17 +153,19 @@ pub fn scan(
                     // tag is special-cased.
                     let next_tag_is_span = upcoming_tag_is_named(bytes, pos, b"span");
                     let next_tag_is_inline = upcoming_tag_is_inline(bytes, pos);
-                    flush_text(
-                        &mut state,
-                        &html[text_start..pos],
-                        text_start,
-                        next_tag_is_list,
-                        next_tag_is_img,
-                        next_tag_is_span,
-                        next_tag_is_inline,
-                        options.br_in_tables,
-                        options.output_format,
-                    )?;
+                    if !ignored_before_head {
+                        flush_text(
+                            &mut state,
+                            &html[text_start..pos],
+                            text_start,
+                            next_tag_is_list,
+                            next_tag_is_img,
+                            next_tag_is_span,
+                            next_tag_is_inline,
+                            options.br_in_tables,
+                            options.output_format,
+                        )?;
+                    }
                 }
 
                 let next = bytes.get(pos + 1).copied().unwrap_or(0);

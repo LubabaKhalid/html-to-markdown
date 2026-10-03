@@ -827,7 +827,8 @@ pub fn document_head(roots: &[tl::NodeHandle], parser: &tl::Parser) -> Option<tl
 }
 
 /// Whether a run of text before the head is found should be skipped rather than ending the
-/// search: whitespace, or any run that sits directly in front of the document's own `<html>`
+/// search: whitespace after character-reference decoding, or any run that sits directly in
+/// front of the document's own `<html>`
 /// tag. The WHATWG "before html" insertion mode already discards anything ahead of `<html>`
 /// itself without letting it block the parser from reaching the real head inside, whether that
 /// text is a real byte order mark (stripped earlier, so it never reaches here), one a wrong
@@ -836,7 +837,10 @@ pub fn document_head(roots: &[tl::NodeHandle], parser: &tl::Parser) -> Option<tl
 /// fragment, still ends the search unchanged; see
 /// `should_ignore_a_head_after_implicit_body_content_on_both_tiers`.
 pub fn is_ignorable_before_head(text: &str, next_tag_is_html: bool) -> bool {
-    next_tag_is_html || text.chars().all(|c| c.is_ascii_whitespace())
+    next_tag_is_html
+        || crate::text::decode_html_entities_cow(text)
+            .chars()
+            .all(char::is_whitespace)
 }
 
 /// Whether a start tag named `name` (lower case) starts the body when no body has started:
@@ -931,6 +935,8 @@ mod tests {
     fn test_is_ignorable_before_head() {
         assert!(is_ignorable_before_head("", false));
         assert!(is_ignorable_before_head("   \n\t", false));
+        assert!(is_ignorable_before_head("&nbsp;", false));
+        assert!(is_ignorable_before_head("&#160;", false));
         assert!(!is_ignorable_before_head("hello", false));
         assert!(!is_ignorable_before_head("x", false));
         assert!(!is_ignorable_before_head("\u{FFFD}\u{FFFD}", false));
