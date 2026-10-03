@@ -1,3 +1,6 @@
+#![allow(missing_docs)]
+#![cfg(feature = "testkit")]
+
 //! Regression test for issue #715: a run of unmatched closing tags before a `<br>` must scale
 //! linearly rather than re-scan the remaining run for every tag.
 
