@@ -138,6 +138,17 @@ pub fn separate_block_in_cell(output: &mut String, br_in_tables: bool) {
     }
 }
 
+/// Emit a cell break while keeping a table-cell `<pre>` break outside its code spans. ~keep
+pub fn emit_table_cell_break_in_context(output: &mut String, br_in_tables: bool, ctx: &crate::converter::Context) {
+    if br_in_tables && let Some(ref offsets) = ctx.pre_cell_break_offsets {
+        trim_trailing_whitespace(output);
+        offsets.borrow_mut().push(output.len());
+        output.push('\n');
+    } else {
+        emit_table_cell_break(output, br_in_tables);
+    }
+}
+
 /// The literal hard-break marker `line_break.rs` emits for a real `<br>` under `style`.
 ///
 /// Shared by `line_break.rs`'s own non-code fallback and by the split code-span emitters

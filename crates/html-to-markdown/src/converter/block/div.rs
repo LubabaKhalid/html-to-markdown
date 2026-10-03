@@ -6,9 +6,7 @@
 //! - List continuations: Uses list indentation
 //! - Block context: Adds surrounding newlines for proper block separation
 
-use crate::converter::main_helpers::{
-    emit_table_cell_break, strip_trailing_backslash_breaks, trim_trailing_whitespace,
-};
+use crate::converter::main_helpers::{strip_trailing_backslash_breaks, trim_trailing_whitespace};
 use crate::options::{ConversionOptions, NewlineStyle};
 use tl::{NodeHandle, Parser};
 
@@ -60,7 +58,7 @@ pub fn handle(
         // ~keep `in_table_cell` never reaches this branch: a real cell does not set
         // ~keep `convert_as_inline`, so only `in_layout_cell` can make this fire.
         if is_table_continuation {
-            emit_table_cell_break(output, options.br_in_tables);
+            crate::converter::main_helpers::emit_table_cell_break_in_context(output, options.br_in_tables, ctx);
         }
         // ~keep A heading is one line, so a block in it is set off by spaces, as Tier 1 does.
         let in_heading_line = ctx.in_heading && !is_table_continuation;
@@ -157,7 +155,7 @@ fn open_block(output: &mut String, options: &ConversionOptions, ctx: &Context) -
         && !output.ends_with("\n\n");
 
     if is_table_continuation {
-        emit_table_cell_break(output, options.br_in_tables);
+        crate::converter::main_helpers::emit_table_cell_break_in_context(output, options.br_in_tables, ctx);
     } else if is_list_continuation {
         crate::converter::list::utils::start_block_in_list_item(output, ctx, options);
     } else if needs_leading_sep {

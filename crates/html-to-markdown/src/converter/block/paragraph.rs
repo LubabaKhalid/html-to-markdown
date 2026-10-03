@@ -63,7 +63,7 @@ pub fn handle(
         };
 
     if is_table_continuation {
-        crate::converter::emit_table_cell_break(output, options.br_in_tables);
+        crate::converter::main_helpers::emit_table_cell_break_in_context(output, options.br_in_tables, ctx);
     } else if is_list_continuation {
         crate::converter::list::utils::start_block_in_list_item(output, ctx, options);
     } else if needs_leading_sep {

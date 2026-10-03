@@ -1427,6 +1427,16 @@ fn emit_open(
 /// Writes the cell break Tier-2's `div::handle` writes before a block in a cell that already has
 /// content.
 fn break_cell_before_block(state: &mut Tier1State, br_in_tables: bool) {
+    if state.escape_ctx.contains(EscapeCtx::PRE) {
+        let should_break = {
+            let cell_buf = state.cell_or_output_mut();
+            !cell_buf.is_empty() && !cell_buf.ends_with('|') && !cell_buf.ends_with("<br>") && !cell_buf.ends_with('\n')
+        };
+        if should_break {
+            emit_tier1_table_cell_break(state, br_in_tables);
+        }
+        return;
+    }
     with_cell_scratch(state, |cell_buf| {
         if !cell_buf.is_empty() && !cell_buf.ends_with('|') && !cell_buf.ends_with("<br>") && !cell_buf.ends_with('\n')
         {
@@ -1436,6 +1446,20 @@ fn break_cell_before_block(state: &mut Tier1State, br_in_tables: bool) {
     });
 }
 
+fn emit_tier1_table_cell_break(state: &mut Tier1State, br_in_tables: bool) {
+    if br_in_tables && state.escape_ctx.contains(EscapeCtx::PRE) {
+        let offset = {
+            let output = state.cell_or_output_mut();
+            crate::converter::main_helpers::trim_trailing_whitespace(output);
+            output.len()
+        };
+        state.pre_cell_break_offsets.push(offset);
+        state.cell_or_output_mut().push('\n');
+    } else {
+        crate::converter::main_helpers::emit_table_cell_break(state.cell_or_output_mut(), br_in_tables);
+    }
+}
+
 fn open_paragraph(state: &mut Tier1State, br_in_tables: bool) {
     // ~keep When inside a table cell, treat `<p>` as a transparent container.
     // Tier-2's paragraph.rs writes the cell break (`<br>` under `br_in_tables`,
@@ -1443,6 +1467,10 @@ fn open_paragraph(state: &mut Tier1State, br_in_tables: bool) {
     // (issue #647); we mirror that behaviour so the cell buffer stays on one
     // logical line (no `\n` in cell output to collapse later).
     if state.in_table_cell() {
+        if state.escape_ctx.contains(EscapeCtx::PRE) {
+            break_cell_before_block(state, br_in_tables);
+            return;
+        }
         with_cell_scratch(state, |cell_buf| {
             if !cell_buf.is_empty() && !cell_buf.ends_with("<br>") && !cell_buf.ends_with('\n') {
                 crate::converter::main_helpers::emit_table_cell_break(cell_buf, br_in_tables);
@@ -1547,6 +1575,9 @@ fn open_blockquote(state: &mut Tier1State) {
 
 fn open_pre(state: &mut Tier1State, attrs: &[(&[u8], Option<&[u8]>)]) {
     state.ensure_blank_line();
+    if state.in_table_cell() {
+        state.pre_cell_break_offsets.clear();
+    }
     if let Some(lang) = extract_language_from_class(attrs) {
         state.pre_lang = Some(lang);
     }
@@ -2071,6 +2102,10 @@ fn emit_void(
                 // leaves this newline as-is and defers the cell's own
                 // newline-to-space fold to `close_table_cell`, exactly as it already
                 // does for every other line ending a `<pre>` accumulates.
+                if state.in_table_cell() && options.br_in_tables {
+                    let offset = state.cell_or_output_mut().len();
+                    state.pre_cell_break_offsets.push(offset);
+                }
                 state.cell_or_output_mut().push('\n');
             } else if state.in_table_cell() {
                 // ~keep A code SPAN inside a table cell (not caught above, since it is
@@ -3274,13 +3309,28 @@ fn separate_closed_block_in_cell(state: &mut Tier1State, content_start: usize, b
 
 fn close_pre(state: &mut Tier1State, frame: &OpenTag, options: &ConversionOptions) {
     use crate::options::CodeBlockStyle;
-    // ~keep Phase GG follow-up: when `<pre>` opened inside a table cell, its content
-    // was accumulated into `current_cell` (the cell buffer), not `state.output`.
-    // The frame's `content_start` indexes into the cell buffer.  Don't emit a
-    // code fence — Tier-2 also collapses pre inside cells to plain inline text
-    // (the cell's `replace('\n', ' ')` step does the rest).
+    // ~keep A pipe table cannot contain a fenced block, so render the preformatted
+    // ~keep content as one or more code spans and keep real `<br>` nodes between spans.
     if state.in_table_cell() {
-        separate_closed_block_in_cell(state, frame.content_start, options.br_in_tables);
+        let break_offsets = std::mem::take(&mut state.pre_cell_break_offsets);
+        let cell_buf = state.cell_or_output_mut();
+        let content_start = clamp_to_char_boundary(cell_buf, frame.content_start);
+        let content = cell_buf.split_off(content_start);
+        let relative_break_offsets: Vec<usize> = break_offsets
+            .into_iter()
+            .filter_map(|offset| offset.checked_sub(content_start))
+            .filter(|&offset| offset < content.len())
+            .collect();
+        if !content.trim_matches('\n').is_empty() {
+            crate::converter::main_helpers::separate_block_in_cell(cell_buf, options.br_in_tables);
+            crate::converter::handlers::code_block::format_preformatted_cell_content(
+                &content,
+                &relative_break_offsets,
+                cell_buf,
+                options.br_in_tables,
+                options.whitespace_mode == crate::options::WhitespaceMode::Strict,
+            );
+        }
         return;
     }
     let content_start = clamp_to_char_boundary(&state.output, frame.content_start);

@@ -278,11 +278,10 @@ pub fn process_text_node(
             .as_ref()
             .is_some_and(crate::converter::context::DjotRuleLikeText::current);
 
-    let processed_text = if (ctx.in_code || ctx.in_ruby) && ctx.in_table_cell {
-        // ~keep Code/ruby content is verbatim by design, but a GFM table cell cannot
-        // ~keep contain a raw newline: fold line breaks to a space without touching any
-        // ~keep other whitespace, and regardless of whitespace_mode — this is a structural
-        // ~keep constraint of the cell, not a stylistic normalization (issue #455).
+    let processed_text = if ((ctx.in_code && !ctx.in_code_block) || ctx.in_ruby) && ctx.in_table_cell {
+        // ~keep Inline code/ruby content is verbatim by design, but a GFM table cell cannot
+        // ~keep contain a raw newline. A `<pre>` block keeps its line endings until its own
+        // ~keep handler trims and folds them inside the code span (issues #455 and #706).
         text::fold_cell_line_breaks_verbatim_cow(text.as_ref()).into_owned()
     } else if ctx.in_code && !ctx.in_code_block {
         // ~keep A code SPAN gives a raw line ending inside its content no hard-break

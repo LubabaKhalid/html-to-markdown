@@ -4,9 +4,7 @@
 //! HTML to Markdown. It tracks nesting levels, element types, and feature-specific collectors
 //! that are passed through the conversion pipeline.
 
-use std::cell::Cell;
-#[cfg(any(feature = "inline-images", feature = "visitor"))]
-use std::cell::RefCell;
+use std::cell::{Cell, RefCell};
 #[cfg(feature = "metadata")]
 use std::collections::BTreeMap;
 use std::collections::HashSet;
@@ -72,6 +70,8 @@ pub struct Context {
     /// SPAN must split the span in two rather than embed a newline inside the backticks
     /// (issue #487). ~keep
     pub(crate) in_code_block: bool,
+    /// Output offsets of real `<br>` nodes while a table-cell `<pre>` is collected. ~keep
+    pub(crate) pre_cell_break_offsets: Option<Rc<RefCell<Vec<usize>>>>,
     /// Current list item counter for ordered lists.
     ///
     /// Signed so a negative `start` attribute (permitted by the HTML spec and honored by
@@ -359,6 +359,7 @@ impl Context {
         Self {
             in_code: false,
             in_code_block: false,
+            pre_cell_break_offsets: None,
             list_counter: 0,
             in_ordered_list: false,
             blockquote_depth: 0,

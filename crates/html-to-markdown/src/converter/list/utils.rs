@@ -1022,7 +1022,7 @@ pub fn add_list_leading_separator(output: &mut String, ctx: &Context, options: &
         let is_table_continuation =
             !output.is_empty() && !output.ends_with('|') && !output.ends_with(' ') && !output.ends_with("<br>");
         if is_table_continuation {
-            crate::converter::main_helpers::emit_table_cell_break(output, options.br_in_tables);
+            crate::converter::main_helpers::emit_table_cell_break_in_context(output, options.br_in_tables, ctx);
         }
         return;
     }

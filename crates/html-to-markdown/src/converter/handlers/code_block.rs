@@ -241,9 +241,12 @@ pub fn handle_pre(
     depth: usize,
     dom_ctx: &DomContext,
 ) {
+    let cell_break_offsets =
+        (ctx.in_table_cell && options.br_in_tables).then(|| std::rc::Rc::new(std::cell::RefCell::new(Vec::new())));
     let code_ctx = Context {
         in_code: true,
         in_code_block: true,
+        pre_cell_break_offsets: cell_break_offsets.clone(),
         ..ctx.clone()
     };
 
@@ -312,6 +315,11 @@ pub fn handle_pre(
     }
 
     if !content.is_empty() {
+        let cell_break_offsets = cell_break_offsets
+            .as_ref()
+            .map(|offsets| offsets.borrow().clone())
+            .unwrap_or_default();
+        let segmented_cell_content = (!cell_break_offsets.is_empty()).then(|| content.clone());
         let leading_newlines = content.chars().take_while(|&c| c == '\n').count();
         let trailing_newlines = content.chars().rev().take_while(|&c| c == '\n').count();
         let core = content.trim_matches('\n');
@@ -382,12 +390,26 @@ pub fn handle_pre(
         if let Some(custom_output) = code_block_output {
             output.push_str(&custom_output);
         } else {
-            format_code_block(&processed_content, language.as_deref(), output, options, ctx);
+            format_code_block(
+                segmented_cell_content.as_deref().unwrap_or(&processed_content),
+                &cell_break_offsets,
+                language.as_deref(),
+                output,
+                options,
+                ctx,
+            );
         }
 
         #[cfg(not(feature = "visitor"))]
         {
-            format_code_block(&processed_content, language.as_deref(), output, options, ctx);
+            format_code_block(
+                segmented_cell_content.as_deref().unwrap_or(&processed_content),
+                &cell_break_offsets,
+                language.as_deref(),
+                output,
+                options,
+                ctx,
+            );
         }
 
         if let Some(ref sc) = ctx.structure_collector {
@@ -448,6 +470,7 @@ pub(in crate::converter) fn format_inline_code(content: &str, output: &mut Strin
 /// - Fenced style with tildes (~~~language)
 fn format_code_block(
     content: &str,
+    cell_break_offsets: &[usize],
     language: Option<&str>,
     output: &mut String,
     options: &ConversionOptions,
@@ -466,7 +489,13 @@ fn format_code_block(
         if !content.is_empty() && !ctx.convert_as_inline && !ctx.in_code {
             crate::converter::main_helpers::separate_block_in_cell(output, options.br_in_tables);
         }
-        output.push_str(crate::text::fold_cell_line_breaks_verbatim_cow(content).as_ref());
+        format_preformatted_cell_content(
+            content,
+            cell_break_offsets,
+            output,
+            options.br_in_tables,
+            options.whitespace_mode == crate::options::WhitespaceMode::Strict,
+        );
         return;
     }
 
@@ -535,6 +564,60 @@ fn format_code_block(
     }
 }
 
+/// Render preformatted table-cell content as code spans, keeping real `<br>` nodes outside. ~keep
+pub(in crate::converter) fn format_preformatted_cell_content(
+    content: &str,
+    break_offsets: &[usize],
+    output: &mut String,
+    br_in_tables: bool,
+    preserve_whitespace: bool,
+) {
+    if !br_in_tables || break_offsets.is_empty() {
+        let normalized = normalize_preformatted_cell_segment(content, preserve_whitespace);
+        let folded = crate::text::fold_cell_line_breaks_verbatim_cow(&normalized);
+        if !folded.is_empty() {
+            format_inline_code(folded.as_ref(), output);
+        }
+        return;
+    }
+
+    let mut start = 0;
+    let mut wrote_segment = false;
+    for &offset in break_offsets {
+        let offset = offset.min(content.len());
+        if offset < start || !content.is_char_boundary(offset) {
+            continue;
+        }
+        let normalized = normalize_preformatted_cell_segment(&content[start..offset], preserve_whitespace);
+        let segment = crate::text::fold_cell_line_breaks_verbatim_cow(&normalized);
+        if !segment.is_empty() {
+            if wrote_segment {
+                output.push_str("<br>");
+            }
+            format_inline_code(segment.as_ref(), output);
+            wrote_segment = true;
+        }
+        start = offset + usize::from(content.as_bytes().get(offset) == Some(&b'\n'));
+    }
+    let normalized = normalize_preformatted_cell_segment(&content[start..], preserve_whitespace);
+    let segment = crate::text::fold_cell_line_breaks_verbatim_cow(&normalized);
+    if !segment.is_empty() {
+        if wrote_segment {
+            output.push_str("<br>");
+        }
+        format_inline_code(segment.as_ref(), output);
+    }
+}
+
+fn normalize_preformatted_cell_segment(content: &str, preserve_whitespace: bool) -> String {
+    let content = content.trim_matches('\n');
+    if preserve_whitespace {
+        content.to_string()
+    } else {
+        dedent_code_block(content)
+    }
+}
+
 /// Format a code block that is a child of a list item.
 ///
 /// ~keep A fenced (or indented) code block spans several physical lines, but the
@@ -562,7 +645,7 @@ fn format_code_block_in_list_item(
         in_list_item: false,
         ..ctx.clone()
     };
-    format_code_block(content, language, &mut rendered, options, &plain_ctx);
+    format_code_block(content, &[], language, &mut rendered, options, &plain_ctx);
 
     // ~keep A plain suffix check like `output.ends_with("* ")` also matches the closing
     // ~keep "**"/"*" of `<strong>`/`<em>` immediately followed by a migrated trailing

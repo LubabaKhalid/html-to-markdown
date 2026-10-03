@@ -114,6 +114,9 @@ pub fn handle(
         // ~keep A `<pre>` code BLOCK reproduces its content literally, line structure
         // ~keep included: a `<br>` here is real content, so the byte pushed is a genuine
         // ~keep `\n`, not a marker -- `newline_style` is never consulted (issue #487).
+        if let Some(ref offsets) = ctx.pre_cell_break_offsets {
+            offsets.borrow_mut().push(output.len());
+        }
         output.push('\n');
     } else if ctx.in_code {
         // ~keep A code SPAN's content is otherwise reproduced literally too, but unlike a
