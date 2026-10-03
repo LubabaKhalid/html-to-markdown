@@ -68,6 +68,31 @@ fn should_remove_a_page_header_in_the_fast_converter() {
 }
 
 #[test]
+fn should_remove_a_header_only_navigation_document() {
+    let html = "<body><div><header><a href=\"/en\">English</a><a href=\"/de\">Deutsch</a></header></div></body>";
+    for tier_strategy in [TierStrategy::Tier1, TierStrategy::Tier2] {
+        assert_eq!(convert_with(html, PreprocessingPreset::Standard, tier_strategy), "");
+    }
+
+    let options = ConversionOptions {
+        extract_metadata: false,
+        output_format: OutputFormat::Plain,
+        preprocessing: PreprocessingOptions {
+            enabled: true,
+            ..PreprocessingOptions::default()
+        },
+        ..ConversionOptions::default()
+    };
+    assert_eq!(
+        convert(html, Some(options))
+            .expect("conversion should succeed")
+            .content
+            .unwrap_or_default(),
+        ""
+    );
+}
+
+#[test]
 fn should_remove_a_page_header_from_plain_text_output() {
     let html = "<body><header><a href=\"/\">Home</a></header><main><p>Content</p></main></body>";
     let options = ConversionOptions {
