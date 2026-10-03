@@ -665,6 +665,16 @@ fn convert_node(
                 None => normalized_tag_name(tag.name().as_utf8_str()),
             };
 
+            let djot_scope = (options.output_format == OutputFormat::Djot
+                && (ctx.djot_rule_like_text.is_none() || is_block_level_element(tag_name.as_ref())))
+            .then(|| Context {
+                djot_rule_like_text: Some(crate::text::is_djot_rule_like(
+                    &dom_ctx.text_content(*node_handle, parser),
+                )),
+                ..ctx.clone()
+            });
+            let ctx = djot_scope.as_ref().unwrap_or(ctx);
+
             #[cfg(feature = "visitor")]
             let visitor_element_state = if ctx.skip_visitor_hooks {
                 None

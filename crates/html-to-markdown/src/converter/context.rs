@@ -170,6 +170,10 @@ pub struct Context {
     pub(crate) link_allow_inline_images: bool,
     /// Are we inside a paragraph element?
     pub(crate) in_paragraph: bool,
+    /// ~keep `None` before a Djot text container is classified, then whether that container's
+    /// complete visible text consists only of dashes, stars and whitespace. Inline descendants
+    /// inherit the value so DOM segmentation cannot change which literal stars are escaped.
+    pub(crate) djot_rule_like_text: Option<bool>,
     /// Output buffer position where the current block's content starts.
     /// Used to distinguish paragraph-break newlines from a previous block
     /// vs. newlines generated within the current block.
@@ -364,6 +368,7 @@ impl Context {
             cell_allow_inline_images: false,
             link_allow_inline_images: false,
             in_paragraph: false,
+            djot_rule_like_text: None,
             block_content_start: 0,
             block_output_ptr: 0,
             at_fresh_block_start: Rc::new(Cell::new(true)),

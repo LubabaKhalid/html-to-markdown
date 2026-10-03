@@ -41,6 +41,32 @@ fn should_escape_literal_stars_outside_explicit_paragraphs() {
 }
 
 #[test]
+fn should_classify_rule_like_text_from_the_complete_container_text() {
+    for html in [
+        "<p>* <span>hello</span></p>",
+        "<div>* <span>hello</span></div>",
+        "<span>* <span>hello</span></span>",
+        "<section>* <span>hello</span></section>",
+    ] {
+        assert_eq!(djot(html), "* hello\n", "{html}");
+    }
+
+    assert_eq!(djot("<p>*<b>hello</b></p>"), "**hello*\n");
+}
+
+#[test]
+fn should_escape_segmented_rule_like_text_in_every_container() {
+    for html in [
+        "<p>* <span>-</span> *</p>",
+        "<div>* <span>-</span> *</div>",
+        "<span>* <span>-</span> *</span>",
+        "<section>* <span>-</span> *</section>",
+    ] {
+        assert_eq!(djot(html), "\\* - \\*\n", "{html}");
+    }
+}
+
+#[test]
 fn should_escape_only_literal_stars_around_djot_strong_markup() {
     assert_eq!(djot("<p>*<b>-</b>*</p>"), "\\**-*\\*\n");
     assert_eq!(djot("<p><b>- *</b></p>"), "*- \\**\n");
@@ -48,6 +74,7 @@ fn should_escape_only_literal_stars_around_djot_strong_markup() {
 
 #[test]
 fn should_not_escape_stars_in_ordinary_djot_text() {
+    assert_eq!(djot("* hello"), "* hello\n");
     assert_eq!(djot("<p>2 * 3</p>"), "2 * 3\n");
     assert_eq!(djot("<p>* hello</p>"), "* hello\n");
 }
