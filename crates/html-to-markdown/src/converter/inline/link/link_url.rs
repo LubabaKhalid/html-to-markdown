@@ -388,6 +388,26 @@ pub fn append_markdown_link(
     append_markdown_link_in_context(output, link, options, reference_collector, false);
 }
 
+fn append_link_destination_in_context(
+    output: &mut String,
+    href: &str,
+    options: &ConversionOptions,
+    title_follows: bool,
+    in_table_cell: bool,
+) {
+    if options.output_format == crate::options::OutputFormat::Djot && in_table_cell {
+        let mut destination = String::new();
+        append_url_destination(&mut destination, href, options.url_escape_style, title_follows);
+        output.push_str(&crate::converter::utility::escaping::escape_djot_table_cell_literal(
+            &destination,
+            options.output_format,
+            in_table_cell,
+        ));
+    } else {
+        append_url_destination(output, href, options.url_escape_style, title_follows);
+    }
+}
+
 /// Format and append a Markdown link with awareness of an enclosing table cell. ~keep
 pub fn append_markdown_link_in_context(
     output: &mut String,
@@ -419,7 +439,7 @@ pub fn append_markdown_link_in_context(
     output.push_str("](");
 
     let title_follows = title.is_some() || (options.default_title && raw_text == href);
-    append_url_destination(output, href, options.url_escape_style, title_follows);
+    append_link_destination_in_context(output, href, options, title_follows, in_table_cell);
 
     if let Some(title_text) = title {
         output.push_str(" \"");

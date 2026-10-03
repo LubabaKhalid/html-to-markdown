@@ -83,3 +83,28 @@ fn should_escape_a_backtick_in_a_djot_table_link_title() {
         "{output:?}"
     );
 }
+
+#[test]
+fn should_escape_a_backtick_in_a_djot_table_link_destination() {
+    let output = djot("<table><tr><td><a href=\"x`y\">a</a></td><td>z</td></tr></table>");
+
+    assert_eq!(output, "| [a](x\\`y) | z |\n| --------- | --- |\n");
+}
+
+#[test]
+fn should_leave_a_djot_link_destination_outside_a_table_unchanged() {
+    assert_eq!(djot("<a href=\"x`y\">a</a>"), "[a](x`y)\n");
+}
+
+#[test]
+fn should_leave_a_markdown_table_link_destination_unchanged() {
+    let output = convert(
+        "<table><tr><td><a href=\"x`y\">a</a></td><td>z</td></tr></table>",
+        Some(ConversionOptions::default()),
+    )
+    .expect("conversion should succeed")
+    .content
+    .unwrap_or_default();
+
+    assert_eq!(output, "| [a](x`y) | z |\n| -------- | --- |\n");
+}
