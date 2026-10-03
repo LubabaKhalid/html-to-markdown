@@ -178,7 +178,7 @@ fn move_leading_hard_breaks<'a>(
         let starts_on_empty_line = output.ends_with('\n');
         crate::converter::list::utils::indent_list_item_line_start(output, ctx, options);
         let marker = if marker == "\n" {
-            crate::converter::main_helpers::hard_break_marker(options.newline_style)
+            crate::converter::main_helpers::hard_break_marker(options)
         } else {
             marker
         };
