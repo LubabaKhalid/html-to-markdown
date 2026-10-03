@@ -523,6 +523,23 @@ pub fn escape_block_start(buffer: &mut String, from: usize, after_list_marker: b
     }
 }
 
+/// Escape numbered text at the start of a Djot list item so it stays literal text.
+pub fn escape_djot_list_item_start(buffer: &mut String, from: usize, after_list_marker: bool) {
+    if !after_list_marker {
+        return;
+    }
+    let text = &buffer[from..];
+    let first_line = &text[..text.find('\n').unwrap_or(text.len())];
+    let digits = first_line.bytes().take_while(u8::is_ascii_digit).count();
+    if digits == 0
+        || !matches!(first_line.as_bytes().get(digits), Some(b'.' | b')'))
+        || !matches!(first_line.as_bytes().get(digits + 1), Some(b' ' | b'\t'))
+    {
+        return;
+    }
+    buffer.insert(from + digits, '\\');
+}
+
 /// Whether `rest`, a line without its indentation, opens a block that can interrupt a paragraph.
 pub fn opens_block(rest: &str) -> bool {
     block_opener_offset(rest).is_some()

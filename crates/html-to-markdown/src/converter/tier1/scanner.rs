@@ -160,6 +160,7 @@ pub fn scan(
                         next_tag_is_span,
                         next_tag_is_inline,
                         options.br_in_tables,
+                        options.output_format,
                     )?;
                 }
 
@@ -224,7 +225,17 @@ pub fn scan(
                 // we don't bail on commonly-unescaped source like `x < 5`.
                 if !parse::is_tag_name_start(next) {
                     state.start_body(pos);
-                    flush_text(&mut state, "<", pos, false, false, false, false, options.br_in_tables)?;
+                    flush_text(
+                        &mut state,
+                        "<",
+                        pos,
+                        false,
+                        false,
+                        false,
+                        false,
+                        options.br_in_tables,
+                        options.output_format,
+                    )?;
                     pos += 1;
                     text_start = pos;
                     continue;
@@ -776,6 +787,7 @@ pub fn scan(
             false,
             false,
             options.br_in_tables,
+            options.output_format,
         )?;
     }
 
@@ -4438,6 +4450,7 @@ fn flush_text(
     next_tag_is_span: bool,
     next_tag_is_inline: bool,
     br_in_tables: bool,
+    output_format: crate::options::OutputFormat,
 ) -> Result<(), BailReason> {
     if raw.is_empty() {
         return Ok(());
@@ -5176,12 +5189,16 @@ fn flush_text(
     escape_backslash_run(dest, emitted_from, in_cell);
     if !folds_lines {
         if !inside_inline {
-            crate::converter::utility::escaping::escape_block_start(
-                dest,
-                emitted_from,
-                after_list_marker,
-                next_tag_is_inline,
-            );
+            if output_format == crate::options::OutputFormat::Markdown {
+                crate::converter::utility::escaping::escape_block_start(
+                    dest,
+                    emitted_from,
+                    after_list_marker,
+                    next_tag_is_inline,
+                );
+            } else if output_format == crate::options::OutputFormat::Djot {
+                crate::converter::utility::escaping::escape_djot_list_item_start(dest, emitted_from, after_list_marker);
+            }
         }
         crate::converter::utility::escaping::escape_continuation_line_start(dest, emitted_from);
     }
