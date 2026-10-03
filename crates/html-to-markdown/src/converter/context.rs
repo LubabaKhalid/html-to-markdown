@@ -123,6 +123,8 @@ pub struct Context {
     /// say): a list marker at the start of the empty buffer is written at that column, not at
     /// the start of a line.
     pub(crate) inline_buffer_column: Option<usize>,
+    /// ~keep Whether an inline wrapper's detached buffer starts immediately after a hard break.
+    pub(crate) inline_buffer_after_hard_break: bool,
     /// Whether the current output buffer escapes every `-` once it is written (a table
     /// caption): a `-` list marker there is text.
     pub(crate) escapes_hyphens: bool,
@@ -372,6 +374,7 @@ impl Context {
             text_in_markers: false,
             in_marker_span: false,
             inline_buffer_column: None,
+            inline_buffer_after_hard_break: false,
             escapes_hyphens: false,
             list_depth: 0,
             list_indent_columns: 0,
@@ -458,6 +461,11 @@ impl Context {
                 self.inline_buffer_column
             } else {
                 Some(indent_column + line[indent_length..].chars().count())
+            },
+            inline_buffer_after_hard_break: if output.is_empty() {
+                self.inline_buffer_after_hard_break
+            } else {
+                crate::converter::utility::escaping::ends_with_hard_break(output)
             },
             ..self.clone()
         }

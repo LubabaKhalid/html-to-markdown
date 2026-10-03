@@ -532,7 +532,11 @@ pub fn process_text_node(
                 next_sibling_is_inline_tag(node_handle, parser, dom_ctx),
             );
         }
-        crate::converter::utility::escaping::escape_continuation_line_start(output, text_start);
+        crate::converter::utility::escaping::escape_continuation_line_start(
+            output,
+            text_start,
+            ctx.inline_buffer_after_hard_break,
+        );
     } else if !ctx.in_code && options.output_format == crate::options::OutputFormat::Djot {
         if writes_to_block {
             crate::converter::utility::escaping::escape_djot_list_item_start(output, text_start, ctx.in_list_item);

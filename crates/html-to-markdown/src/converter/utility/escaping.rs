@@ -472,13 +472,15 @@ pub fn line_opens_block(line: &str) -> bool {
 /// ~keep when only its container's indent is before it on the line and the line above holds text;
 /// ~keep after a blank line it starts a paragraph of its own. The indent scan stops at the first
 /// ~keep other byte, and the line above is read once per line, so the check stays linear.
-pub fn escape_continuation_line_start(buffer: &mut String, from: usize) {
+pub fn escape_continuation_line_start(buffer: &mut String, from: usize, after_external_hard_break: bool) {
     let before = &buffer[..from];
-    let Some(line_end) = before.trim_end_matches([' ', '\t']).strip_suffix('\n') else {
-        return;
+    let continues_paragraph = if let Some(line_end) = before.trim_end_matches([' ', '\t']).strip_suffix('\n') {
+        let line_above = &line_end[line_end.rfind('\n').map_or(0, |pos| pos + 1)..];
+        !line_above.trim().is_empty()
+    } else {
+        after_external_hard_break && before.trim_matches([' ', '\t']).is_empty()
     };
-    let line_above = &line_end[line_end.rfind('\n').map_or(0, |pos| pos + 1)..];
-    if line_above.trim().is_empty() {
+    if !continues_paragraph {
         return;
     }
     let text = &buffer[from..];
@@ -486,6 +488,24 @@ pub fn escape_continuation_line_start(buffer: &mut String, from: usize) {
     if let Some(offset) = block_opener_escape_offset(line) {
         buffer.insert(from + offset, '\\');
     }
+}
+
+/// ~keep Whether `buffer` ends immediately after a Markdown or Djot hard-break marker.
+pub fn ends_with_hard_break(buffer: &str) -> bool {
+    let Some(before_newline) = buffer.strip_suffix('\n') else {
+        return false;
+    };
+    let line = &before_newline[before_newline.rfind('\n').map_or(0, |position| position + 1)..];
+    let without_spaces = line.trim_end_matches(' ');
+    let spaces = line.len() - without_spaces.len();
+    if without_spaces.trim_matches([' ', '\t']).is_empty() {
+        return false;
+    }
+    if spaces >= 2 {
+        return true;
+    }
+    let backslashes = without_spaces.len() - without_spaces.trim_end_matches('\\').len();
+    spaces == 0 && !backslashes.is_multiple_of(2)
 }
 
 /// ~keep Escape text just written at the start of a Markdown block or directly after a list-item
@@ -1351,7 +1371,7 @@ mod tests {
 
     fn escaped_continuation(before: &str, text: &str) -> String {
         let mut buffer = format!("{before}{text}");
-        escape_continuation_line_start(&mut buffer, before.len());
+        escape_continuation_line_start(&mut buffer, before.len(), false);
         buffer
     }
 
@@ -1361,6 +1381,13 @@ mod tests {
         assert_eq!(escaped_continuation("x\n- a  \n  ", "- t"), "x\n- a  \n  \\- t");
         assert_eq!(escaped_continuation("a\\\n\t", "> t"), "a\\\n\t\\> t");
         assert_eq!(escaped_continuation("a  \n", "-\nx"), "a  \n\\-\nx");
+    }
+
+    #[test]
+    fn escape_continuation_line_start_uses_the_enclosing_inline_buffer_context() {
+        let mut buffer = String::from("- t");
+        escape_continuation_line_start(&mut buffer, 0, true);
+        assert_eq!(buffer, "\\- t");
     }
 
     #[test]

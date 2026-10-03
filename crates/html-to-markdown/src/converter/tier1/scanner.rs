@@ -5203,7 +5203,7 @@ fn flush_text(
         let emitted_from = dest.len();
         decode_and_collapse_into_inline(dest, &staged, false, base_offset)?;
         if !folds_lines {
-            crate::converter::utility::escaping::escape_continuation_line_start(dest, emitted_from);
+            crate::converter::utility::escaping::escape_continuation_line_start(dest, emitted_from, false);
         }
         return Ok(());
     }
@@ -5245,7 +5245,7 @@ fn flush_text(
                     next_tag_is_inline,
                 );
             }
-            crate::converter::utility::escaping::escape_continuation_line_start(dest, emitted_from);
+            crate::converter::utility::escaping::escape_continuation_line_start(dest, emitted_from, false);
         } else if output_format == crate::options::OutputFormat::Djot {
             if !inside_inline {
                 crate::converter::utility::escaping::escape_djot_list_item_start(dest, emitted_from, in_list_item);
