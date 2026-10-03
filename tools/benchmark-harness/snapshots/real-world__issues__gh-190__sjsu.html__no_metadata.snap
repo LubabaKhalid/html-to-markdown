@@ -157,9 +157,9 @@ to val
 뿯½뿯½ }  
 }
 
-When activated, a **passive
+When activated, a **passive**
 
-filter** reads a single message from its input pipe, processes it, then
+**filter** reads a single message from its input pipe, processes it, then
 
 writes the result to its output pipe:
 
