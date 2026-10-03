@@ -4,6 +4,59 @@
 //! DOM context building.
 
 use crate::converter::DomContext;
+use crate::converter::main_helpers::is_inline_element;
+use crate::converter::utility::content::normalized_tag_name;
+
+fn inline_like_value(node_handle: tl::NodeHandle, parser: &tl::Parser) -> Option<bool> {
+    match node_handle.get(parser) {
+        Some(tl::Node::Tag(tag)) => {
+            let name = normalized_tag_name(tag.name().as_utf8_str());
+            Some(is_inline_element(&name) || matches!(name.as_ref(), "script" | "style"))
+        }
+        Some(tl::Node::Raw(raw)) if raw.as_utf8_str().trim().is_empty() => None,
+        Some(tl::Node::Raw(_)) => Some(false),
+        Some(tl::Node::Comment(_)) | None => None,
+    }
+}
+
+fn cache_sibling_context(siblings: &[tl::NodeHandle], parser: &tl::Parser, ctx: &mut DomContext) {
+    let mut previous_inline_like = false;
+    for sibling in siblings {
+        let id = sibling.get_inner();
+        ctx.ensure_capacity(id);
+        let _ = ctx.prev_inline_like_map[id as usize].set(previous_inline_like);
+        if let Some(value) = inline_like_value(*sibling, parser) {
+            previous_inline_like = value;
+        }
+    }
+
+    let mut next_inline_like = false;
+    let mut next_tag = None;
+    let mut next_whitespace = false;
+    for sibling in siblings.iter().rev() {
+        let id = sibling.get_inner();
+        let _ = ctx.next_inline_like_map[id as usize].set(next_inline_like);
+        let _ = ctx.next_tag_map[id as usize].set(next_tag);
+        let _ = ctx.next_whitespace_map[id as usize].set(next_whitespace);
+
+        match sibling.get(parser) {
+            Some(tl::Node::Tag(_)) => {
+                next_inline_like = inline_like_value(*sibling, parser).unwrap_or(false);
+                next_tag = Some(id);
+                next_whitespace = false;
+            }
+            Some(tl::Node::Raw(raw)) => {
+                let is_whitespace = raw.as_utf8_str().trim().is_empty();
+                if !is_whitespace {
+                    next_inline_like = false;
+                    next_tag = None;
+                }
+                next_whitespace = is_whitespace;
+            }
+            Some(tl::Node::Comment(_)) | None => {}
+        }
+    }
+}
 
 /// Build a DOM context with hierarchical node information.
 ///
@@ -38,6 +91,8 @@ pub fn build_dom_context(dom: &tl::VDom, parser: &tl::Parser, _input_len: usize)
         ctx.sibling_index_map[id as usize] = Some(index);
         record_node_hierarchy(*child_handle, None, parser, &mut ctx);
     }
+    let root_children = ctx.root_children.clone();
+    cache_sibling_context(&root_children, parser, &mut ctx);
 
     ctx
 }
@@ -71,6 +126,7 @@ pub fn record_node_hierarchy(
                 ctx.sibling_index_map[child_id as usize] = Some(index);
                 work.push((*child, Some(id)));
             }
+            cache_sibling_context(children, parser, ctx);
             ctx.children_map[id as usize] = Some(children.to_vec());
         }
     }
