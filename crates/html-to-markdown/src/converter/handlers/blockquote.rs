@@ -38,6 +38,23 @@ pub fn handle_blockquote(
     depth: usize,
     dom_ctx: &DomContext,
 ) {
+    if ctx.in_heading {
+        let mut content = String::new();
+        for child_handle in tag.children().top().iter() {
+            walk_node(child_handle, parser, &mut content, options, ctx, depth + 1, dom_ctx);
+        }
+        let trimmed = content.trim();
+        if !trimmed.is_empty() {
+            if !output.is_empty() && !output.ends_with(char::is_whitespace) {
+                output.push(' ');
+            }
+            output.push_str("> ");
+            output.push_str(trimmed);
+            output.push(' ');
+        }
+        return;
+    }
+
     if ctx.convert_as_inline {
         let children = tag.children();
         {
