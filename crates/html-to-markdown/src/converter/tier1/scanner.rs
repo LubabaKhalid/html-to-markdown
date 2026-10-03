@@ -1396,6 +1396,11 @@ fn emit_open(
         }
         // ~keep Summary: push accumulation buffer so children redirect into it (Phase R).
         TagKind::Summary => {
+            // ~keep The HTML parser repairs nested summaries before Tier-2 sees them; the byte
+            // ~keep scanner cannot reproduce that repair without parsing the malformed subtree.
+            if state.in_summary() {
+                return Err(BailReason::Classifier);
+            }
             if state.in_table_cell() {
                 break_cell_before_block(state, options.br_in_tables);
             }
