@@ -777,14 +777,19 @@ pub fn escape_cell_pipes(text: &str) -> Cow<'_, str> {
     Cow::Owned(out)
 }
 
-/// Escape every unescaped backtick in raw text for a Djot table cell. ~keep
+/// Escape every unescaped backtick in literal text emitted into a Djot table cell. ~keep
 ///
 /// Djot treats even an unmatched backtick as the start of a verbatim span, which then
-/// consumes the rest of the row and its delimiter row. This runs only on raw text nodes,
-/// before generated inline syntax is combined with the cell, so real verbatim delimiters
-/// remain unchanged. A backtick after an odd run of backslashes is already escaped.
-pub fn escape_djot_cell_backticks(text: &str) -> Cow<'_, str> {
-    if !text.contains('`') {
+/// consumes the rest of the row and its delimiter row. Callers pass only fragments in which
+/// every backtick came from literal text, before combining them with generated verbatim
+/// delimiters, so real verbatim spans remain unchanged. A backtick after an odd run of
+/// backslashes is already escaped.
+pub fn escape_djot_table_cell_literal(
+    text: &str,
+    output_format: crate::options::OutputFormat,
+    in_table_cell: bool,
+) -> Cow<'_, str> {
+    if output_format != crate::options::OutputFormat::Djot || !in_table_cell || !text.contains('`') {
         return Cow::Borrowed(text);
     }
     let mut out = String::with_capacity(text.len() + 4);
@@ -891,12 +896,30 @@ mod tests {
     }
 
     #[test]
-    fn escape_djot_cell_backticks_escapes_only_unescaped_backticks() {
-        assert!(matches!(escape_djot_cell_backticks("a b"), Cow::Borrowed("a b")));
-        assert_eq!(escape_djot_cell_backticks("a`b"), r"a\`b");
-        assert_eq!(escape_djot_cell_backticks(r"a\`b"), r"a\`b");
-        assert_eq!(escape_djot_cell_backticks(r"a\\`b"), r"a\\\`b");
-        assert_eq!(escape_djot_cell_backticks("``a``"), r"\`\`a\`\`");
+    fn escape_djot_table_cell_literal_escapes_only_unescaped_backticks_in_scope() {
+        use crate::options::OutputFormat;
+
+        assert!(matches!(
+            escape_djot_table_cell_literal("a`b", OutputFormat::Markdown, true),
+            Cow::Borrowed("a`b")
+        ));
+        assert!(matches!(
+            escape_djot_table_cell_literal("a`b", OutputFormat::Djot, false),
+            Cow::Borrowed("a`b")
+        ));
+        assert_eq!(escape_djot_table_cell_literal("a`b", OutputFormat::Djot, true), r"a\`b");
+        assert_eq!(
+            escape_djot_table_cell_literal(r"a\`b", OutputFormat::Djot, true),
+            r"a\`b"
+        );
+        assert_eq!(
+            escape_djot_table_cell_literal(r"a\\`b", OutputFormat::Djot, true),
+            r"a\\\`b"
+        );
+        assert_eq!(
+            escape_djot_table_cell_literal("``a``", OutputFormat::Djot, true),
+            r"\`\`a\`\`"
+        );
     }
 
     #[test]

@@ -14,7 +14,7 @@ use std::collections::BTreeMap;
 use crate::converter::Context;
 use crate::converter::block::heading::{find_single_heading_child, heading_allows_inline_images, push_heading};
 use crate::converter::dom_context::DomContext;
-use crate::converter::inline::link::{MarkdownLink, append_markdown_link, has_uri_scheme};
+use crate::converter::inline::link::{MarkdownLink, append_markdown_link_in_context, has_uri_scheme};
 use crate::converter::main::walk_node;
 use crate::converter::media::inline_data_treatment;
 use crate::converter::utility::content::{
@@ -166,7 +166,7 @@ pub fn handle_link(
                         if !trimmed_heading.is_empty() {
                             let escaped_label = escape_link_label(trimmed_heading);
                             let mut link_buffer = String::new();
-                            append_markdown_link(
+                            append_markdown_link_in_context(
                                 &mut link_buffer,
                                 &MarkdownLink {
                                     label: &escaped_label,
@@ -176,6 +176,7 @@ pub fn handle_link(
                                 },
                                 options,
                                 ctx.reference_collector.as_ref(),
+                                ctx.in_table_cell,
                             );
                             push_heading(output, ctx, options, heading_level, link_buffer.as_str());
                             return;
@@ -316,7 +317,7 @@ pub fn handle_link(
             if href_addr_dropped {
                 output.push_str(&label);
             } else {
-                append_markdown_link(
+                append_markdown_link_in_context(
                     output,
                     &MarkdownLink {
                         label: &escaped_label,
@@ -326,6 +327,7 @@ pub fn handle_link(
                     },
                     options,
                     ctx.reference_collector.as_ref(),
+                    ctx.in_table_cell,
                 );
             }
         };

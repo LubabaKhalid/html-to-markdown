@@ -323,9 +323,12 @@ pub fn process_text_node(
                 out = out.replace('|', r"\|");
             }
         }
-        if options.output_format == crate::options::OutputFormat::Djot {
-            out = crate::converter::utility::escaping::escape_djot_cell_backticks(&out).into_owned();
-        }
+        out = crate::converter::utility::escaping::escape_djot_table_cell_literal(
+            &out,
+            options.output_format,
+            ctx.in_table_cell,
+        )
+        .into_owned();
         out
     } else if options.whitespace_mode == crate::options::WhitespaceMode::Strict {
         text::escape(

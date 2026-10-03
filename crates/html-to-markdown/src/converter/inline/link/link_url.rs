@@ -385,6 +385,17 @@ pub fn append_markdown_link(
     options: &ConversionOptions,
     reference_collector: Option<&crate::converter::reference_collector::ReferenceCollectorHandle>,
 ) {
+    append_markdown_link_in_context(output, link, options, reference_collector, false);
+}
+
+/// Format and append a Markdown link with awareness of an enclosing table cell. ~keep
+pub fn append_markdown_link_in_context(
+    output: &mut String,
+    link: &MarkdownLink<'_>,
+    options: &ConversionOptions,
+    reference_collector: Option<&crate::converter::reference_collector::ReferenceCollectorHandle>,
+    in_table_cell: bool,
+) {
     let MarkdownLink {
         label,
         href,
@@ -412,11 +423,21 @@ pub fn append_markdown_link(
 
     if let Some(title_text) = title {
         output.push_str(" \"");
-        output.push_str(&escape_markdown_title(title_text));
+        let escaped = escape_markdown_title(title_text);
+        output.push_str(&crate::converter::utility::escaping::escape_djot_table_cell_literal(
+            &escaped,
+            options.output_format,
+            in_table_cell,
+        ));
         output.push('"');
     } else if options.default_title && raw_text == href {
         output.push_str(" \"");
-        output.push_str(&escape_markdown_title(href));
+        let escaped = escape_markdown_title(href);
+        output.push_str(&crate::converter::utility::escaping::escape_djot_table_cell_literal(
+            &escaped,
+            options.output_format,
+            in_table_cell,
+        ));
         output.push('"');
     }
 

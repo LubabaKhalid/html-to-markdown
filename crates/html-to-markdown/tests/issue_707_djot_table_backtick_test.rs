@@ -33,3 +33,53 @@ fn should_not_escape_the_delimiters_of_a_djot_verbatim_span() {
 
     assert_eq!(output, "| ``a`b`` | z |\n| ------- | --- |\n");
 }
+
+#[test]
+fn should_escape_a_backtick_in_a_djot_table_image_alt() {
+    let output = djot("<table><tr><td><img src=\"x\" alt=\"a`b\"></td><td>z</td></tr></table>");
+
+    assert!(
+        output.lines().next().is_some_and(|row| row == r"| ![a\`b](x) | z |"),
+        "{output:?}"
+    );
+}
+
+#[test]
+fn should_escape_a_backtick_in_a_djot_table_image_title() {
+    let output = djot("<table><tr><td><img src=\"x\" alt=\"a\" title=\"t`u\"></td><td>z</td></tr></table>");
+
+    assert!(
+        output
+            .lines()
+            .next()
+            .is_some_and(|row| row == r#"| ![a](x "t\`u") | z |"#),
+        "{output:?}"
+    );
+}
+
+#[test]
+fn should_escape_backticks_in_djot_table_graphic_text_attributes() {
+    let output =
+        djot("<table><tr><td><graphic src=\"x\" alt=\"a`b\" title=\"t`u\"></graphic></td><td>z</td></tr></table>");
+
+    assert!(
+        output
+            .lines()
+            .next()
+            .is_some_and(|row| row == r#"| ![a\`b](x "t\`u") | z |"#),
+        "{output:?}"
+    );
+}
+
+#[test]
+fn should_escape_a_backtick_in_a_djot_table_link_title() {
+    let output = djot("<table><tr><td><a href=\"x\" title=\"t`u\">a</a></td><td>z</td></tr></table>");
+
+    assert!(
+        output
+            .lines()
+            .next()
+            .is_some_and(|row| row == r#"| [a](x "t\`u") | z |"#),
+        "{output:?}"
+    );
+}

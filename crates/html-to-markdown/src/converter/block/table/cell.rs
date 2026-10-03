@@ -311,11 +311,8 @@ fn escape_cell_text(text: &str, options: &crate::options::ConversionOptions) -> 
     } else {
         escaped.replace('|', r"\|")
     };
-    if options.output_format == crate::options::OutputFormat::Djot {
-        crate::converter::utility::escaping::escape_djot_cell_backticks(&escaped).into_owned()
-    } else {
-        escaped
-    }
+    crate::converter::utility::escaping::escape_djot_table_cell_literal(&escaped, options.output_format, true)
+        .into_owned()
 }
 
 /// Convert a table cell (td or th) to Markdown format.

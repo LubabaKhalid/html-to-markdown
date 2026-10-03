@@ -143,7 +143,7 @@ pub fn handle_img(
         || (!keep_as_markdown && (ctx.convert_as_inline || (ctx.in_heading && !ctx.heading_allow_inline_images)));
     let render = || {
         (inline_data != InlineDataMedia::DropElement).then(|| {
-            format_image_markdown(
+            let rendered = format_image_markdown(
                 &src,
                 &alt,
                 title.as_deref(),
@@ -151,7 +151,13 @@ pub fn handle_img(
                 options.link_style,
                 options.url_escape_style,
                 ctx.reference_collector.as_ref(),
+            );
+            crate::converter::utility::escaping::escape_djot_table_cell_literal(
+                &rendered,
+                options.output_format,
+                ctx.in_table_cell,
             )
+            .into_owned()
         })
     };
 
