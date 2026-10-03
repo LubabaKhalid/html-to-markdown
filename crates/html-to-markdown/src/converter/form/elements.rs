@@ -334,10 +334,27 @@ pub fn handle_label(
     }
 }
 
+fn emit_checkbox_input(node_handle: &tl::NodeHandle, parser: &tl::Parser, output: &mut String) {
+    let Some(tl::Node::Tag(tag)) = node_handle.get(parser) else {
+        return;
+    };
+    let is_checkbox = tag
+        .attributes()
+        .get("type")
+        .flatten()
+        .is_some_and(|value| value.as_utf8_str().eq_ignore_ascii_case("checkbox"));
+    if is_checkbox {
+        output.push_str(if tag.attributes().get("checked").is_some() {
+            "[x]"
+        } else {
+            "[ ]"
+        });
+    }
+}
+
 /// Handles the `<input>` element.
 ///
-/// An input element represents a form control for user input. Since input
-/// elements typically have no text content, this handler produces no output.
+/// Checkbox inputs render their visible checked state; other inputs have no text output. ~keep
 #[cfg_attr(not(feature = "visitor"), allow(unused_variables))]
 #[allow(clippy::ptr_arg, clippy::needless_pass_by_ref_mut, clippy::missing_const_for_fn)]
 pub fn handle_input(
@@ -389,22 +406,27 @@ pub fn handle_input(
             };
             match visit_result {
                 VisitResult::Continue => {}
-                VisitResult::Skip => (),
+                VisitResult::Skip => return,
                 VisitResult::Custom(custom) => {
                     output.push_str(&custom);
+                    return;
                 }
                 VisitResult::PreserveHtml => {
                     use crate::converter::utility::serialization::serialize_node;
                     output.push_str(&serialize_node(node_handle, parser));
+                    return;
                 }
                 VisitResult::Error(err) => {
                     if ctx.visitor_error.borrow().is_none() {
                         *ctx.visitor_error.borrow_mut() = Some(err);
                     }
+                    return;
                 }
             }
         }
     }
+
+    emit_checkbox_input(node_handle, parser, output);
 }
 
 /// Handles the `<textarea>` element.

@@ -1960,6 +1960,7 @@ fn emit_void(
         {
             return Err(BailReason::ListItemCheckbox);
         }
+        return Err(BailReason::InlineMarkerNotReproduced);
     }
     // ~keep Closes the "just emitted an <img>" window too (see
     // `Tier1State::last_emitted_was_img`); the `TagKind::Image` arm below
