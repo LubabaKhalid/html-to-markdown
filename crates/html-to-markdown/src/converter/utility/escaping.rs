@@ -488,6 +488,13 @@ pub fn escape_block_start(buffer: &mut String, from: usize, after_list_marker: b
     let prefix = &before[line_start..];
     let text = &buffer[from..];
     let first_line = &text[..text.find('\n').unwrap_or(text.len())];
+    let continues_paragraph = before
+        .trim_end_matches([' ', '\t'])
+        .strip_suffix('\n')
+        .is_some_and(|preceding| {
+            let preceding_line = &preceding[preceding.rfind('\n').map_or(0, |position| position + 1)..];
+            !preceding_line.trim().is_empty()
+        });
 
     if followed_by_inline {
         let mut continued = String::with_capacity(first_line.len() + 1);
@@ -500,7 +507,7 @@ pub fn escape_block_start(buffer: &mut String, from: usize, after_list_marker: b
 
     let escape_at = if after_list_marker {
         fresh_block_opener_escape_offset(first_line).map(|offset| from + offset)
-    } else if prefix.trim().is_empty() {
+    } else if prefix.trim().is_empty() && !continues_paragraph {
         let mut line = String::with_capacity(prefix.len() + first_line.len());
         line.push_str(prefix);
         line.push_str(first_line);
