@@ -296,7 +296,8 @@ fn trim_in_place(text: &mut String) {
 /// Escape text for use inside a table cell.
 ///
 /// Applies every `escape_*` option exactly as outside a table (issue #638), and
-/// escapes `|` (pipe) when neither `escape_misc` nor `escape_ascii` already does.
+/// escapes `|` (pipe) when neither `escape_misc` nor `escape_ascii` already does. Raw
+/// backticks are always escaped for Djot because they otherwise consume the table syntax.
 fn escape_cell_text(text: &str, options: &crate::options::ConversionOptions) -> String {
     let escaped = crate::text::escape(
         text,
@@ -305,10 +306,15 @@ fn escape_cell_text(text: &str, options: &crate::options::ConversionOptions) -> 
         options.escape_underscores,
         options.escape_ascii,
     );
-    if options.escape_misc || options.escape_ascii {
+    let escaped = if options.escape_misc || options.escape_ascii {
         escaped.into_owned()
     } else {
         escaped.replace('|', r"\|")
+    };
+    if options.output_format == crate::options::OutputFormat::Djot {
+        crate::converter::utility::escaping::escape_djot_cell_backticks(&escaped).into_owned()
+    } else {
+        escaped
     }
 }
 

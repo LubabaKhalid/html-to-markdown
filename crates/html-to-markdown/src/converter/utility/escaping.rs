@@ -777,6 +777,28 @@ pub fn escape_cell_pipes(text: &str) -> Cow<'_, str> {
     Cow::Owned(out)
 }
 
+/// Escape every unescaped backtick in raw text for a Djot table cell. ~keep
+///
+/// Djot treats even an unmatched backtick as the start of a verbatim span, which then
+/// consumes the rest of the row and its delimiter row. This runs only on raw text nodes,
+/// before generated inline syntax is combined with the cell, so real verbatim delimiters
+/// remain unchanged. A backtick after an odd run of backslashes is already escaped.
+pub fn escape_djot_cell_backticks(text: &str) -> Cow<'_, str> {
+    if !text.contains('`') {
+        return Cow::Borrowed(text);
+    }
+    let mut out = String::with_capacity(text.len() + 4);
+    let mut backslashes = 0usize;
+    for c in text.chars() {
+        if c == '`' && backslashes.is_multiple_of(2) {
+            out.push('\\');
+        }
+        backslashes = if c == '\\' { backslashes + 1 } else { 0 };
+        out.push(c);
+    }
+    Cow::Owned(out)
+}
+
 /// Escape any bare pipe left in a nested table's rendered markdown: one that is neither
 /// already backslash-escaped nor inside a matched backtick code span (a `CommonMark`-
 /// compliant reparse does not treat either as a cell delimiter, so this must not touch
@@ -866,6 +888,15 @@ mod tests {
         assert_eq!(escape_cell_pipes(r"a\\|b"), r"a\\\|b");
         assert_eq!(escape_cell_pipes("`a|b` [t](u|v)"), r"`a\|b` [t](u\|v)");
         assert_eq!(escape_cell_pipes("||"), r"\|\|");
+    }
+
+    #[test]
+    fn escape_djot_cell_backticks_escapes_only_unescaped_backticks() {
+        assert!(matches!(escape_djot_cell_backticks("a b"), Cow::Borrowed("a b")));
+        assert_eq!(escape_djot_cell_backticks("a`b"), r"a\`b");
+        assert_eq!(escape_djot_cell_backticks(r"a\`b"), r"a\`b");
+        assert_eq!(escape_djot_cell_backticks(r"a\\`b"), r"a\\\`b");
+        assert_eq!(escape_djot_cell_backticks("``a``"), r"\`\`a\`\`");
     }
 
     #[test]
