@@ -14,7 +14,7 @@ use crate::converter::Context;
 use crate::converter::dom_context::DomContext;
 use crate::converter::inline::link::{append_url_destination, escape_markdown_title};
 use crate::converter::media::first_address;
-use crate::converter::utility::escaping::escape_link_label;
+use crate::converter::utility::escaping::escape_image_alt;
 use crate::converter::utility::preprocessing::sanitize_markdown_url;
 use crate::options::{ConversionOptions, InlineDataMedia};
 
@@ -208,7 +208,7 @@ fn format_graphic_markdown(
     if use_alt_only {
         return alt.to_string();
     }
-    let escaped_alt = escape_link_label(alt);
+    let escaped_alt = escape_image_alt(alt);
     if link_style == crate::options::validation::LinkStyle::Reference {
         if let Some(collector) = reference_collector {
             let ref_num = collector.borrow_mut().get_or_insert(src, title);

@@ -2176,7 +2176,7 @@ fn emit_void(
                 // emits `alt` as plain text with no `![...]` wrapping at all,
                 // matching `format_image_markdown`'s `use_alt_only` branch, which
                 // also does not call `escape_link_label`.
-                let escaped_alt = crate::converter::utility::escaping::escape_link_label(alt);
+                let escaped_alt = crate::converter::utility::escaping::escape_image_alt(alt);
                 if let Some(title_bytes) = title {
                     // ~keep Escaped exactly as Tier-2's `handlers/image.rs` does. Before
                     // issue #494 this path could not produce a raw `"` -- the entity

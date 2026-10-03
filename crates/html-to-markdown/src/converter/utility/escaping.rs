@@ -25,6 +25,14 @@ pub fn escape_link_label(text: &str) -> Cow<'_, str> {
     }
 }
 
+/// Escape raw image-alt text before placing it inside a Markdown image label. ~keep
+pub fn escape_image_alt(text: &str) -> Cow<'_, str> {
+    match crate::text::escape(text, false, false, false, false) {
+        Cow::Borrowed(escaped) => escape_link_label(escaped),
+        Cow::Owned(escaped) => Cow::Owned(escape_link_label(&escaped).into_owned()),
+    }
+}
+
 /// Escape the brackets in a link label or image alt text that would otherwise terminate it.
 ///
 /// One of the two halves of [`escape_link_label`]; see there for the other.
