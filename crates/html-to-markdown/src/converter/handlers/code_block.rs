@@ -402,7 +402,7 @@ pub fn handle_pre(
 /// - Single backticks for normal content
 /// - Double backticks when content contains backticks
 /// - Space padding when needed to avoid backtick adjacency
-fn format_inline_code(content: &str, output: &mut String) {
+pub(in crate::converter) fn format_inline_code(content: &str, output: &mut String) {
     let contains_backtick = content.contains('`');
 
     let needs_delimiter_spaces = {

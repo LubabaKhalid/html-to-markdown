@@ -53,7 +53,7 @@ pub fn handle(
 /// These elements are rendered as inline code with:
 /// - Whitespace normalization (via `text::normalize_whitespace`)
 /// - Chomp inline handling for prefix/suffix spacing
-/// - Simple single backtick wrapping (no smart escaping for keyboard/sample)
+/// - The same delimiter selection and padding as `<code>` ~keep
 fn handle_kbd_samp(
     _tag_name: &str,
     node_handle: &NodeHandle,
@@ -152,7 +152,7 @@ fn emit_kbd_samp_segments(
     for segment in body.split('\n').filter(|segment| !segment.is_empty()) {
         if first {
             let mut span = String::with_capacity(segment.len() + 2);
-            render_code_span(segment, &mut span);
+            crate::converter::handlers::code_block::format_inline_code(segment, &mut span);
             if may_merge_first {
                 emit_code_span(&span, segment, output, node_handle, parser, dom_ctx);
             } else {
@@ -163,18 +163,8 @@ fn emit_kbd_samp_segments(
             // ~keep (issue #483): every later segment is preceded by our own
             // ~keep separator, never a bare closing backtick.
             output.push_str(separator);
-            render_code_span(segment, output);
+            crate::converter::handlers::code_block::format_inline_code(segment, output);
         }
         first = false;
     }
-}
-
-/// Render `body` as an inline code span.
-///
-/// No delimiter-space padding: `CommonMark` strips one space from each end of a code span only
-/// when the content is not entirely spaces, so an all-spaces body round-trips as written. ~keep
-fn render_code_span(body: &str, span: &mut String) {
-    span.push('`');
-    span.push_str(body);
-    span.push('`');
 }
