@@ -1,5 +1,6 @@
 // ~keep Rust inner attributes below are crate-level attributes, not a shell shebang.
 #![allow(missing_docs)]
+#![cfg(feature = "testkit")]
 
 //! Regression tests for the checkbox of a task item whose first content is a block. GFM reads a
 //! checkbox only in a paragraph with content after the marker, so the checkbox line holds a space

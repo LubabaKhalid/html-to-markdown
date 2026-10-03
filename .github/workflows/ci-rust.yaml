@@ -93,6 +93,10 @@ jobs:
           cargo check -p html-to-markdown-rs --no-default-features --features metadata
           cargo check -p html-to-markdown-rs --no-default-features --features inline-images
 
+      - name: Test testkit without default features
+        shell: bash
+        run: cargo test -p html-to-markdown-rs --no-default-features --features testkit --no-fail-fast
+
   # ~keep Runs as its own job, not a step in validate-rust. When it lived there it never
   # executed once: `Check Rust Formatting` failed first and aborted the job, so 246 drifted
   # files went unreported while CI was red for an unrelated reason. A gate that cannot be

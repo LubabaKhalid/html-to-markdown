@@ -97,6 +97,7 @@ fn should_start_a_list_item_on_its_own_line_after_text_in_the_list() {
     );
 }
 
+#[cfg(feature = "testkit")]
 #[test]
 fn should_start_a_list_item_after_text_in_the_list_the_same_way_in_tier_1() {
     let tier1 = ConversionOptions {
@@ -129,6 +130,7 @@ fn should_leave_a_blank_line_before_an_item_that_cannot_interrupt_the_text() {
     );
 }
 
+#[cfg(feature = "testkit")]
 #[test]
 fn should_keep_text_after_a_quote_in_a_sibling_item_between_markers() {
     let options = tier2_options();

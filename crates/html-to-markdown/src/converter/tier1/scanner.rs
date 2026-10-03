@@ -2226,34 +2226,17 @@ fn emit_void(
 
 /// Decide whether an `<img>` should be emitted as `![alt](src)` markdown.
 ///
-/// When the `inline-images` feature is disabled, images are always kept as
-/// markdown (original Tier-1 behaviour).
-///
-/// When the feature is enabled this mirrors the Tier-2 logic in
-/// `converter.rs`:
-/// - `keep_inline_images_in` empty → always emit markdown image.
-/// - `keep_inline_images_in` non-empty → emit markdown when the nearest
-///   heading or link ancestor (`h1`–`h6`, or `a`, whichever is closer to the
-///   `<img>`) has a (lowercased) tag name in the list, walking outward past a
-///   non-matching link to a heading further out (#492); otherwise emit
-///   alt-text only.
+/// Mirrors the Tier-2 logic in `converter.rs` for every feature combination:
+/// - outside a heading → always emit a markdown image;
+/// - inside a heading → emit markdown only when a matching heading or link
+///   ancestor is in `keep_inline_images_in`, otherwise emit alt text only.
 ///
 /// Ancestor matching is ASCII-case-insensitive so callers may supply "H1" or
 /// "h1" interchangeably.
 #[inline]
 #[allow(clippy::missing_const_for_fn)]
 fn should_keep_image_as_markdown(html: &str, stack: &[OpenTag], options: &ConversionOptions) -> bool {
-    #[cfg(feature = "inline-images")]
-    {
-        keep_inline_image_for_ancestors(html.as_bytes(), stack, &options.keep_inline_images_in)
-    }
-    #[cfg(not(feature = "inline-images"))]
-    {
-        let _ = html;
-        let _ = stack;
-        let _ = options;
-        true
-    }
+    keep_inline_image_for_ancestors(html.as_bytes(), stack, &options.keep_inline_images_in)
 }
 
 /// Return `true` when the `<img>` should be emitted as `![alt](src)` markdown.
@@ -2270,7 +2253,6 @@ fn should_keep_image_as_markdown(html: &str, stack: &[OpenTag], options: &Conver
 ///
 /// The comparison is ASCII-case-insensitive on both the stack name bytes and the
 /// user-supplied strings, so callers may supply "H1" or "h1" interchangeably.
-#[cfg(feature = "inline-images")]
 fn keep_inline_image_for_ancestors(input: &[u8], stack: &[OpenTag], keep: &[String]) -> bool {
     // ~keep No `keep.is_empty()` short-circuit. One stood here returning `true`, described as
     // "the Tier-2 default", but Tier-2 strips an image in a heading to its alt text
@@ -2316,7 +2298,6 @@ fn keep_inline_image_for_ancestors(input: &[u8], stack: &[OpenTag], keep: &[Stri
 }
 
 /// Byte-level ASCII case-insensitive comparison — no allocation.
-#[cfg(feature = "inline-images")]
 fn eq_ascii_ignore_case(a: &[u8], b: &[u8]) -> bool {
     a.eq_ignore_ascii_case(b)
 }

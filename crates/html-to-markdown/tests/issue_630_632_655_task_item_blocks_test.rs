@@ -133,6 +133,7 @@ fn should_keep_a_block_inside_an_inline_marker_on_the_checkbox_line() {
     }
 }
 
+#[cfg(feature = "testkit")]
 #[test]
 fn should_write_the_checkbox_of_a_task_item_with_the_fast_converter() {
     let tier1 = ConversionOptions {

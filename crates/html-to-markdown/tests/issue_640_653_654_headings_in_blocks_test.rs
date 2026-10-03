@@ -51,6 +51,7 @@ fn assert_converts(html: &str, options: &ConversionOptions, expected: &str, rend
     }
 }
 
+#[cfg(feature = "testkit")]
 #[test]
 fn should_start_a_heading_after_text_in_a_quote_after_a_blank_line() {
     let html = "<blockquote>a<h2>q</h2></blockquote>";
@@ -662,6 +663,7 @@ fn should_start_a_list_in_a_quote_in_a_wrapper_without_markers_after_a_list_item
     }
 }
 
+#[cfg(feature = "testkit")]
 #[test]
 fn should_start_a_nested_list_that_starts_past_one_after_a_blank_line_under_the_tab_indent() {
     let html = r#"<ul><li>a<ul><li>b<ol start="3"><li>c</li></ol></li></ul></li></ul>"#;
