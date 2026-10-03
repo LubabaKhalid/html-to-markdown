@@ -910,25 +910,28 @@ pub fn escape_cell_pipes(text: &str) -> Cow<'_, str> {
     Cow::Owned(out)
 }
 
-/// Escape every unescaped backtick in literal text emitted into a Djot table cell. ~keep
+/// Escape every unescaped backtick and dash in literal text emitted into a Djot table cell. ~keep
 ///
 /// Djot treats even an unmatched backtick as the start of a verbatim span, which then
-/// consumes the rest of the row and its delimiter row. Callers pass only fragments in which
-/// every backtick came from literal text, before combining them with generated verbatim
-/// delimiters, so real verbatim spans remain unchanged. A backtick after an odd run of
-/// backslashes is already escaped.
+/// consumes the rest of the row and its delimiter row, and parses dash runs as en/em dashes.
+/// Callers pass only fragments in which these characters came from literal text, before
+/// combining them with generated markup delimiters, so generated syntax remains unchanged.
+/// A character after an odd run of backslashes is already escaped.
 pub fn escape_djot_table_cell_literal(
     text: &str,
     output_format: crate::options::OutputFormat,
     in_table_cell: bool,
 ) -> Cow<'_, str> {
-    if output_format != crate::options::OutputFormat::Djot || !in_table_cell || !text.contains('`') {
+    if output_format != crate::options::OutputFormat::Djot
+        || !in_table_cell
+        || (!text.contains('`') && !text.contains('-'))
+    {
         return Cow::Borrowed(text);
     }
     let mut out = String::with_capacity(text.len() + 4);
     let mut backslashes = 0usize;
     for c in text.chars() {
-        if c == '`' && backslashes.is_multiple_of(2) {
+        if matches!(c, '`' | '-') && backslashes.is_multiple_of(2) {
             out.push('\\');
         }
         backslashes = if c == '\\' { backslashes + 1 } else { 0 };
@@ -1052,6 +1055,14 @@ mod tests {
         assert_eq!(
             escape_djot_table_cell_literal("``a``", OutputFormat::Djot, true),
             r"\`\`a\`\`"
+        );
+        assert_eq!(
+            escape_djot_table_cell_literal("a---b", OutputFormat::Djot, true),
+            r"a\-\-\-b"
+        );
+        assert_eq!(
+            escape_djot_table_cell_literal(r"a\-b", OutputFormat::Djot, true),
+            r"a\-b"
         );
     }
 

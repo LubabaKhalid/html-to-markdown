@@ -173,10 +173,11 @@ fn should_keep_the_output_where_a_checkbox_is_text() {
         (false, format!("<em>{quote}</em>"), "*- [ ] > q*\n", "_- [ ] > q_\n"),
         same(false, format!(r#"<a href="u">{empty}</a>"#), "[- [ ]](u)\n"),
         same(false, format!(r#"<a href="u">{quote}</a>"#), "[- [ ] q](u)\n"),
-        same(
+        (
             false,
             format!("<table><tr><td>{quote}</td></tr></table>"),
             "| - [ ] q |\n| ------- |\n",
+            "| - [ ] q |\n|-------|\n",
         ),
         same(true, empty.to_string(), "- [ ]\n"),
         same(true, quote.to_string(), "- [ ] q\n"),

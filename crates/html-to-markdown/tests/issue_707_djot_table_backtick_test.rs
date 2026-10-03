@@ -17,21 +17,21 @@ fn djot(html: &str) -> String {
 fn should_escape_a_backtick_in_a_djot_table_text_cell() {
     let output = djot("<table><tr><td>a`b</td><td>z</td></tr></table>");
 
-    assert_eq!(output, "| a\\`b | z |\n| ---- | --- |\n");
+    assert_eq!(output, "| a\\`b | z |\n|----|---|\n");
 }
 
 #[test]
 fn should_escape_backticks_and_pipes_in_a_wrapped_djot_table_text_cell() {
     let output = djot("<table><tr><td><span>a`b|c</span></td><td>z</td></tr></table>");
 
-    assert_eq!(output, "| a\\`b\\|c | z |\n| ------- | --- |\n");
+    assert_eq!(output, "| a\\`b\\|c | z |\n|-------|---|\n");
 }
 
 #[test]
 fn should_not_escape_the_delimiters_of_a_djot_verbatim_span() {
     let output = djot("<table><tr><td><code>a`b</code></td><td>z</td></tr></table>");
 
-    assert_eq!(output, "| ``a`b`` | z |\n| ------- | --- |\n");
+    assert_eq!(output, "| ``a`b`` | z |\n|-------|---|\n");
 }
 
 #[test]
@@ -88,7 +88,7 @@ fn should_escape_a_backtick_in_a_djot_table_link_title() {
 fn should_escape_a_backtick_in_a_djot_table_link_destination() {
     let output = djot("<table><tr><td><a href=\"x`y\">a</a></td><td>z</td></tr></table>");
 
-    assert_eq!(output, "| [a](x\\`y) | z |\n| --------- | --- |\n");
+    assert_eq!(output, "| [a](x\\`y) | z |\n|---------|---|\n");
 }
 
 #[test]

@@ -4226,7 +4226,7 @@ fn close_table(
         // whole outer cell buffer, so any literal text already accumulated
         // alongside the nested table in the same cell is left untouched.
         let mut nested = String::new();
-        emit_gfm_table(&mut nested, ts);
+        emit_gfm_table(&mut nested, ts, options.output_format);
         if nested.contains('|') {
             nested = crate::converter::utility::escaping::escape_bare_pipes_outside_code_spans(&nested);
         }
@@ -4261,7 +4261,7 @@ fn close_table(
             write_nested(state.cell_or_output_mut());
         }
     } else {
-        emit_gfm_table(&mut state.output, ts);
+        emit_gfm_table(&mut state.output, ts, options.output_format);
     }
     Ok(())
 }
@@ -5238,6 +5238,16 @@ fn flush_text(
     }
 
     escape_backslash_run(dest, emitted_from, in_cell);
+    if in_cell && output_format == crate::options::OutputFormat::Djot {
+        let escaped = crate::converter::utility::escaping::escape_djot_table_cell_literal(
+            &dest[emitted_from..],
+            output_format,
+            true,
+        );
+        if let std::borrow::Cow::Owned(escaped) = escaped {
+            dest.replace_range(emitted_from.., &escaped);
+        }
+    }
     if !folds_lines {
         if output_format == crate::options::OutputFormat::Markdown {
             if !inside_inline {
@@ -5926,7 +5936,11 @@ fn indent_pre_lines(raw: &str) -> String {
 /// # Panics
 ///
 /// Never — empty-table guard returns early.
-fn emit_gfm_table(target: &mut String, ts: crate::converter::tier1::state::TableState) {
+fn emit_gfm_table(
+    target: &mut String,
+    ts: crate::converter::tier1::state::TableState,
+    output_format: crate::options::OutputFormat,
+) {
     // ~keep Emit caption (if any) BEFORE the table body.
     // ~keep
     // ~keep Mirrors Tier-2 builder.rs caption handling: `*escaped_text*\n\n`.
@@ -6013,17 +6027,28 @@ fn emit_gfm_table(target: &mut String, ts: crate::converter::tier1::state::Table
         // ~keep After row 0 (the header row), emit the separator row.
         // Tier-2: col_widths.get(i).unwrap_or(0).max(MIN_SEPARATOR_DASHES).
         if row_index == 0 {
-            target.push_str("| ");
+            let is_djot = output_format == crate::options::OutputFormat::Djot;
+            target.push('|');
+            if !is_djot {
+                target.push(' ');
+            }
             for i in 0..col_count.max(1) {
                 if i > 0 {
-                    target.push_str(" | ");
+                    if is_djot {
+                        target.push('|');
+                    } else {
+                        target.push_str(" | ");
+                    }
                 }
                 let dash_count = col_widths.get(i).copied().unwrap_or(0).max(MIN_SEPARATOR_DASHES);
                 for _ in 0..dash_count {
                     target.push('-');
                 }
             }
-            target.push_str(" |\n");
+            if !is_djot {
+                target.push(' ');
+            }
+            target.push_str("|\n");
         }
     }
 }

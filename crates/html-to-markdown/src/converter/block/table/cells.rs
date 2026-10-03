@@ -622,17 +622,28 @@ pub fn convert_table_row(
     let is_first_row = row_index == 0;
     if is_first_row {
         let total_cols = header_cols.clamp(1, MAX_TABLE_COLS);
-        output.push_str("| ");
+        let is_djot = options.output_format == crate::options::OutputFormat::Djot;
+        output.push('|');
+        if !is_djot {
+            output.push(' ');
+        }
         for i in 0..total_cols {
             if i > 0 {
-                output.push_str(" | ");
+                if is_djot {
+                    output.push('|');
+                } else {
+                    output.push_str(" | ");
+                }
             }
             let dash_count = col_widths.get(i).copied().unwrap_or(0).max(MIN_SEPARATOR_DASHES);
             for _ in 0..dash_count {
                 output.push('-');
             }
         }
-        output.push_str(" |\n");
+        if !is_djot {
+            output.push(' ');
+        }
+        output.push_str("|\n");
     }
 
     true
