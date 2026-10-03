@@ -30,6 +30,29 @@ pub type InlineCollectorHandle = ();
 #[cfg(feature = "metadata")]
 pub type ImageMetadataPayload = (BTreeMap<String, String>, Option<u32>, Option<u32>);
 
+#[derive(Clone)]
+pub(super) struct DjotRuleLikeText {
+    lines: Rc<[bool]>,
+    current_line: Rc<Cell<usize>>,
+}
+
+impl DjotRuleLikeText {
+    pub(super) fn new(lines: Vec<bool>) -> Self {
+        Self {
+            lines: lines.into(),
+            current_line: Rc::new(Cell::new(0)),
+        }
+    }
+
+    pub(super) fn current(&self) -> bool {
+        self.lines.get(self.current_line.get()).copied().unwrap_or(false)
+    }
+
+    pub(super) fn advance(&self) {
+        self.current_line.set(self.current_line.get().saturating_add(1));
+    }
+}
+
 /// Conversion context that tracks state during HTML to Markdown conversion.
 ///
 /// This context is passed through the recursive tree walker and maintains information
@@ -170,10 +193,10 @@ pub struct Context {
     pub(crate) link_allow_inline_images: bool,
     /// Are we inside a paragraph element?
     pub(crate) in_paragraph: bool,
-    /// ~keep `None` before a Djot text container is classified, then whether that container's
-    /// complete visible text consists only of dashes, stars and whitespace. Inline descendants
-    /// inherit the value so DOM segmentation cannot change which literal stars are escaped.
-    pub(crate) djot_rule_like_text: Option<bool>,
+    /// ~keep `None` before a Djot text container is classified, then the rule-like status of
+    /// each logical line. Inline descendants share the cursor so DOM segmentation cannot change
+    /// which literal stars are escaped, while a `<br>` can start an ordinary following line.
+    pub(super) djot_rule_like_text: Option<DjotRuleLikeText>,
     /// Output buffer position where the current block's content starts.
     /// Used to distinguish paragraph-break newlines from a previous block
     /// vs. newlines generated within the current block.

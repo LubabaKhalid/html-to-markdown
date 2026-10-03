@@ -5144,7 +5144,10 @@ fn flush_text(
         return Ok(());
     }
 
-    let after_list_marker = line_is_bare_list_marker(state.cell_or_output_mut());
+    let in_list_item = state
+        .stack
+        .iter()
+        .any(|frame| matches!(frame.spec.kind, TagKind::ListItem));
     let dest = state.cell_or_output_mut();
     let emitted_from = dest.len();
 
@@ -5174,11 +5177,11 @@ fn flush_text(
                 crate::converter::utility::escaping::escape_block_start(
                     dest,
                     emitted_from,
-                    after_list_marker,
+                    in_list_item,
                     next_tag_is_inline,
                 );
             } else if output_format == crate::options::OutputFormat::Djot {
-                crate::converter::utility::escaping::escape_djot_list_item_start(dest, emitted_from, after_list_marker);
+                crate::converter::utility::escaping::escape_djot_list_item_start(dest, emitted_from, in_list_item);
             }
         }
         crate::converter::utility::escaping::escape_continuation_line_start(dest, emitted_from);

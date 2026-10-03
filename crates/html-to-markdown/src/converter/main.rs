@@ -668,9 +668,11 @@ fn convert_node(
             let djot_scope = (options.output_format == OutputFormat::Djot
                 && (ctx.djot_rule_like_text.is_none() || is_block_level_element(tag_name.as_ref())))
             .then(|| Context {
-                djot_rule_like_text: Some(crate::text::is_djot_rule_like(
-                    &dom_ctx.text_content(*node_handle, parser),
-                )),
+                djot_rule_like_text: Some(crate::converter::context::DjotRuleLikeText::new(djot_rule_like_lines(
+                    *node_handle,
+                    parser,
+                    dom_ctx,
+                ))),
                 ..ctx.clone()
             });
             let ctx = djot_scope.as_ref().unwrap_or(ctx);
@@ -1080,4 +1082,30 @@ fn convert_node(
 
         tl::Node::Comment(_) => {}
     }
+}
+
+fn djot_rule_like_lines(node_handle: tl::NodeHandle, parser: &tl::Parser, dom_ctx: &DomContext) -> Vec<bool> {
+    let mut text = String::with_capacity(64);
+    let mut stack = vec![node_handle];
+    while let Some(handle) = stack.pop() {
+        match handle.get(parser) {
+            Some(tl::Node::Raw(bytes)) => {
+                let raw = bytes.as_utf8_str();
+                text.push_str(crate::text::decode_html_entities_cow(raw.as_ref()).as_ref());
+            }
+            Some(tl::Node::Tag(tag)) => {
+                if dom_ctx.tag_name_for(handle, parser).as_deref() == Some("br") {
+                    text.push('\n');
+                } else if let Some(children) = dom_ctx.children_of(handle.get_inner()) {
+                    stack.extend(children.iter().rev().copied());
+                } else {
+                    let mut children: Vec<_> = tag.children().top().iter().copied().collect();
+                    children.reverse();
+                    stack.extend(children);
+                }
+            }
+            Some(tl::Node::Comment(_)) | None => {}
+        }
+    }
+    text.split('\n').map(crate::text::is_djot_rule_like).collect()
 }

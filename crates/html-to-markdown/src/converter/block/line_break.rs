@@ -80,6 +80,10 @@ pub fn handle(
         }
     }
 
+    if let Some(rule_like_text) = &ctx.djot_rule_like_text {
+        rule_like_text.advance();
+    }
+
     if ctx.in_heading {
         // ~keep A single-line ATX heading cannot carry a hard break at all, so any marker
         // ~keep here is inherently lossy. A single space is the only choice that is

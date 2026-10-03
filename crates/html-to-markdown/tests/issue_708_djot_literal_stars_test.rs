@@ -67,6 +67,12 @@ fn should_escape_segmented_rule_like_text_in_every_container() {
 }
 
 #[test]
+fn should_classify_each_logical_line_across_inline_descendants() {
+    assert_eq!(djot("<p>* - *<br>hello</p>"), "\\* - \\*  \nhello\n");
+    assert_eq!(djot("<p>* <span>-</span> *<br>hello</p>"), "\\* - \\*  \nhello\n");
+}
+
+#[test]
 fn should_escape_only_literal_stars_around_djot_strong_markup() {
     assert_eq!(djot("<p>*<b>-</b>*</p>"), "\\**-*\\*\n");
     assert_eq!(djot("<p><b>- *</b></p>"), "*- \\**\n");

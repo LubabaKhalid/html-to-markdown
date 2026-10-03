@@ -21,6 +21,7 @@ fn convert_with(html: &str, tier_strategy: TierStrategy) -> String {
 fn should_escape_numbered_text_at_the_start_of_a_djot_list_item() {
     for (html, expected) in [
         ("<ol><li>2. z</li></ol>", "1. 2\\. z\n"),
+        ("<ol><li>2.<span> z</span></li></ol>", "1. 2\\. z\n"),
         ("<ul><li>42) z</li></ul>", "- 42\\) z\n"),
         ("<ul><li>123456789012. z</li></ul>", "- 123456789012\\. z\n"),
         ("<ol><li>1. z</li></ol>", "1. 1\\. z\n"),

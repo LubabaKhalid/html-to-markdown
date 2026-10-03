@@ -272,7 +272,11 @@ pub fn process_text_node(
     // ~keep The containing Djot block classifies its complete text once, then carries the
     // result through inline descendants. Testing this node alone makes equivalent DOM
     // segmentations emit different escapes (issue #708).
-    let escape_asterisks = options.escape_asterisks || ctx.djot_rule_like_text == Some(true);
+    let escape_asterisks = options.escape_asterisks
+        || ctx
+            .djot_rule_like_text
+            .as_ref()
+            .is_some_and(crate::converter::context::DjotRuleLikeText::current);
 
     let processed_text = if (ctx.in_code || ctx.in_ruby) && ctx.in_table_cell {
         // ~keep Code/ruby content is verbatim by design, but a GFM table cell cannot
@@ -482,7 +486,6 @@ pub fn process_text_node(
     crate::converter::list::utils::indent_list_item_line_start(output, ctx, options);
 
     let text_start = output.len();
-    let after_list_marker = ctx.in_list_item && crate::converter::list::utils::line_is_bare_list_marker(output);
     if ctx.in_list_item && final_text.contains("\n\n") {
         let indent = " ".repeat(4 * ctx.list_depth);
         let mut first = true;
@@ -514,13 +517,13 @@ pub fn process_text_node(
             crate::converter::utility::escaping::escape_block_start(
                 output,
                 text_start,
-                after_list_marker,
+                ctx.in_list_item,
                 next_sibling_is_inline_tag(node_handle, parser, dom_ctx),
             );
         }
         crate::converter::utility::escaping::escape_continuation_line_start(output, text_start);
     } else if !ctx.in_code && options.output_format == crate::options::OutputFormat::Djot && writes_to_block {
-        crate::converter::utility::escaping::escape_djot_list_item_start(output, text_start, after_list_marker);
+        crate::converter::utility::escaping::escape_djot_list_item_start(output, text_start, ctx.in_list_item);
     }
 }
 

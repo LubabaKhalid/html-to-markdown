@@ -482,11 +482,18 @@ pub fn escape_continuation_line_start(buffer: &mut String, from: usize) {
 
 /// ~keep Escape text just written at the start of a Markdown block or directly after a list-item
 /// marker when that text would otherwise be parsed as block structure (issue #735).
-pub fn escape_block_start(buffer: &mut String, from: usize, after_list_marker: bool, followed_by_inline: bool) {
+pub fn escape_block_start(buffer: &mut String, from: usize, in_list_item: bool, followed_by_inline: bool) {
     let before = &buffer[..from];
     let line_start = before.rfind('\n').map_or(0, |position| position + 1);
     let prefix = &before[line_start..];
-    let text = &buffer[from..];
+    let content_start = if in_list_item {
+        list_item_content_start(prefix).map_or(from, |offset| line_start + offset)
+    } else if prefix.trim().is_empty() || is_unfinished_ordered_marker(prefix) {
+        line_start
+    } else {
+        return;
+    };
+    let text = &buffer[content_start..];
     let first_line = &text[..text.find('\n').unwrap_or(text.len())];
     let continues_paragraph = before
         .trim_end_matches([' ', '\t'])
@@ -505,17 +512,10 @@ pub fn escape_block_start(buffer: &mut String, from: usize, after_list_marker: b
         }
     }
 
-    let escape_at = if after_list_marker {
-        fresh_block_opener_escape_offset(first_line).map(|offset| from + offset)
-    } else if prefix.trim().is_empty() && !continues_paragraph {
-        let mut line = String::with_capacity(prefix.len() + first_line.len());
-        line.push_str(prefix);
-        line.push_str(first_line);
-        fresh_block_opener_escape_offset(&line)
-            .filter(|&offset| offset >= prefix.len())
-            .map(|offset| line_start + offset)
-    } else {
+    let escape_at = if continues_paragraph {
         None
+    } else {
+        fresh_block_opener_escape_offset(first_line).map(|offset| content_start + offset)
     };
 
     if let Some(position) = escape_at {
@@ -523,12 +523,61 @@ pub fn escape_block_start(buffer: &mut String, from: usize, after_list_marker: b
     }
 }
 
+fn is_unfinished_ordered_marker(prefix: &str) -> bool {
+    let (indent_len, column) = leading_indent(prefix);
+    if column >= 4 {
+        return false;
+    }
+    let rest = &prefix[indent_len..];
+    let digits = rest.bytes().take_while(u8::is_ascii_digit).count();
+    (1..=9).contains(&digits) && matches!(rest.as_bytes().get(digits), Some(b'.' | b')')) && rest.len() == digits + 1
+}
+
+fn list_item_content_start(line: &str) -> Option<usize> {
+    let (indent_len, _) = leading_indent(line);
+    let mut position = indent_len;
+    let mut found = false;
+    loop {
+        let rest = &line[position..];
+        let marker_len = match rest.as_bytes().first() {
+            Some(b'-' | b'*' | b'+') => 1,
+            Some(b'0'..=b'9') => {
+                let digits = rest.bytes().take_while(u8::is_ascii_digit).count();
+                let Some(delimiter) = rest.as_bytes().get(digits) else {
+                    break;
+                };
+                if !matches!(delimiter, b'.' | b')') {
+                    break;
+                }
+                digits + 1
+            }
+            _ => break,
+        };
+        let spacing = rest[marker_len..]
+            .bytes()
+            .take_while(|byte| matches!(byte, b' ' | b'\t'))
+            .count();
+        if spacing == 0 {
+            break;
+        }
+        found = true;
+        position += marker_len + spacing;
+    }
+    found.then_some(position)
+}
+
 /// Escape numbered text at the start of a Djot list item so it stays literal text.
-pub fn escape_djot_list_item_start(buffer: &mut String, from: usize, after_list_marker: bool) {
-    if !after_list_marker {
+pub fn escape_djot_list_item_start(buffer: &mut String, from: usize, in_list_item: bool) {
+    if !in_list_item {
         return;
     }
-    let text = &buffer[from..];
+    let before = &buffer[..from];
+    let line_start = before.rfind('\n').map_or(0, |position| position + 1);
+    let Some(content_offset) = list_item_content_start(&before[line_start..]) else {
+        return;
+    };
+    let content_start = line_start + content_offset;
+    let text = &buffer[content_start..];
     let first_line = &text[..text.find('\n').unwrap_or(text.len())];
     let digits = first_line.bytes().take_while(u8::is_ascii_digit).count();
     if digits == 0
@@ -537,7 +586,7 @@ pub fn escape_djot_list_item_start(buffer: &mut String, from: usize, after_list_
     {
         return;
     }
-    buffer.insert(from + digits, '\\');
+    buffer.insert(content_start + digits, '\\');
 }
 
 /// Whether `rest`, a line without its indentation, opens a block that can interrupt a paragraph.
