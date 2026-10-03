@@ -200,7 +200,7 @@ fn emit_inline_code(
     parser: &tl::Parser,
     dom_ctx: &DomContext,
 ) {
-    let separator = crate::converter::main_helpers::hard_break_marker(options.newline_style);
+    let separator = crate::converter::main_helpers::hard_break_marker(options);
     let mut first = true;
     for segment in content.split('\n').filter(|segment| !segment.is_empty()) {
         if first {

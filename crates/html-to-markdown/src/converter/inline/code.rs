@@ -147,7 +147,7 @@ fn emit_kbd_samp_segments(
     parser: &Parser,
     dom_ctx: &DomContext,
 ) {
-    let separator = crate::converter::main_helpers::hard_break_marker(options.newline_style);
+    let separator = crate::converter::main_helpers::hard_break_marker(options);
     let mut first = true;
     for segment in body.split('\n').filter(|segment| !segment.is_empty()) {
         if first {

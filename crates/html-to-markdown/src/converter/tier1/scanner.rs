@@ -2080,7 +2080,9 @@ fn emit_void(
                 // line break, then A -- and `close_link` below, mirroring Tier-2's
                 // `normalize_link_label`, is where a break that turns out to have
                 // nothing to break away from is dropped again.
-                state.cell_or_output_mut().push_str("  \n");
+                state
+                    .cell_or_output_mut()
+                    .push_str(crate::converter::main_helpers::hard_break_marker(options));
             } else if state.escape_ctx.contains(EscapeCtx::CODE)
                 && !state.escape_ctx.contains(EscapeCtx::PRE)
                 && state.escape_ctx.contains(EscapeCtx::HEADING)
@@ -2147,7 +2149,7 @@ fn emit_void(
                 // same marker there as inside `<body>`, so the top level is not a case of its own.
                 let dest = state.cell_or_output_mut();
                 crate::converter::main_helpers::trim_trailing_whitespace(dest);
-                dest.push_str("  \n");
+                dest.push_str(crate::converter::main_helpers::hard_break_marker(options));
             }
         }
 
@@ -2445,7 +2447,7 @@ fn emit_close(
         TagKind::Inserted
             if state.escape_ctx.contains(EscapeCtx::CODE) || state.escape_ctx.contains(EscapeCtx::PRE) => {}
         TagKind::Inserted => close_inline_marker(state, &frame, "==")?,
-        TagKind::Code => close_code(state, &frame, matches!(name_lower, b"kbd" | b"samp"))?,
+        TagKind::Code => close_code(state, &frame, matches!(name_lower, b"kbd" | b"samp"), options)?,
         TagKind::Link => close_link(state, &frame, options)?,
         TagKind::List(ListKind::Definition) => close_dl(state, &frame),
         TagKind::List(kind) => close_list(state, kind),
@@ -2849,7 +2851,7 @@ fn emit_close_for_implicit(
         TagKind::Inserted
             if state.escape_ctx.contains(EscapeCtx::CODE) || state.escape_ctx.contains(EscapeCtx::PRE) => {}
         TagKind::Inserted => close_inline_marker(state, &frame, "==")?,
-        TagKind::Code => close_code(state, &frame, false)?,
+        TagKind::Code => close_code(state, &frame, false, options)?,
         TagKind::Link => close_link(state, &frame, options)?,
         TagKind::List(ListKind::Definition) => close_dl(state, &frame),
         TagKind::List(kind) => close_list(state, kind),
@@ -3469,7 +3471,12 @@ fn push_list_item_continuation_lines(state: &mut Tier1State, rendered: &str) {
     }
 }
 
-fn close_code(state: &mut Tier1State, frame: &OpenTag, trim_boundary_whitespace: bool) -> Result<(), BailReason> {
+fn close_code(
+    state: &mut Tier1State,
+    frame: &OpenTag,
+    trim_boundary_whitespace: bool,
+    options: &ConversionOptions,
+) -> Result<(), BailReason> {
     if state.escape_ctx.contains(EscapeCtx::PRE) || state.escape_ctx.contains(EscapeCtx::CODE) {
         return Ok(());
     }
@@ -3539,7 +3546,7 @@ fn close_code(state: &mut Tier1State, frame: &OpenTag, trim_boundary_whitespace:
     let mut first = true;
     for segment in content.split('\n').filter(|segment| !segment.is_empty()) {
         if !first {
-            buf.push_str("  \n");
+            buf.push_str(crate::converter::main_helpers::hard_break_marker(options));
         }
         format_inline_code_segment(buf, segment);
         first = false;

@@ -149,7 +149,7 @@ pub fn emit_table_cell_break_in_context(output: &mut String, br_in_tables: bool,
     }
 }
 
-/// The literal hard-break marker `line_break.rs` emits for a real `<br>` under `style`.
+/// The literal hard-break marker `line_break.rs` emits for a real `<br>`.
 ///
 /// Shared by `line_break.rs`'s own non-code fallback and by the split code-span emitters
 /// (`handlers::code_block::emit_inline_code`, `inline::code::handle_kbd_samp`) that join a
@@ -157,8 +157,11 @@ pub fn emit_table_cell_break_in_context(output: &mut String, br_in_tables: bool,
 /// now placed OUTSIDE the backticks where it is syntax rather than span content
 /// (issue #487).
 #[must_use]
-pub const fn hard_break_marker(style: NewlineStyle) -> &'static str {
-    match style {
+pub const fn hard_break_marker(options: &ConversionOptions) -> &'static str {
+    if matches!(options.output_format, crate::options::OutputFormat::Djot) {
+        return "\\\n";
+    }
+    match options.newline_style {
         NewlineStyle::Spaces => "  \n",
         NewlineStyle::Backslash => "\\\n",
     }

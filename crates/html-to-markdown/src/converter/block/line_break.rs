@@ -159,7 +159,7 @@ pub fn handle(
         // ~keep refers to the ENCLOSING block's buffer, so "nothing on this line yet" comes out
         // ~keep true or false by coincidence. Whether a break at either edge of the label
         // ~keep survives is `normalize_link_label`'s decision, not this one's.
-        output.push_str(hard_break_marker(options.newline_style));
+        output.push_str(hard_break_marker(options));
     } else if output.len() == ctx.block_content_start {
         // ~keep A <br> with nothing before it on the current line has no prior line to
         // ~keep break: emitting a style marker here would leave a leading artifact instead
@@ -183,6 +183,6 @@ pub fn handle(
         // ~keep A break on a line of its own (`<li>a<br><br>b</li>`) is written at the item's
         // ~keep content column like text there, or a backslash line leaves the item (issue #681).
         crate::converter::list::utils::indent_list_item_line_start(output, ctx, options);
-        output.push_str(hard_break_marker(options.newline_style));
+        output.push_str(hard_break_marker(options));
     }
 }
