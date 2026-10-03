@@ -78,3 +78,18 @@ fn should_preserve_a_menu_tag_when_requested() {
         .unwrap_or_default();
     assert_eq!(actual, "<menu><li>x</li></menu>\n");
 }
+
+#[test]
+fn should_not_treat_a_menu_after_an_implicitly_closed_item_as_nested() {
+    let options = ConversionOptions {
+        bullets: "*+".to_string(),
+        extract_metadata: false,
+        tier_strategy: TierStrategy::Tier2,
+        ..ConversionOptions::default()
+    };
+    let actual = convert("<ul><li>a</ul><menu><li>x</li></menu>", Some(options))
+        .expect("conversion should succeed")
+        .content
+        .unwrap_or_default();
+    assert_eq!(actual, "* a\n\n- x\n");
+}

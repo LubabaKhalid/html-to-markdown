@@ -83,13 +83,13 @@ pub fn convert_html_impl(
     // ~keep The `tl` parser does not handle such end-tags and leaves the element unclosed,
     // ~keep causing all subsequent siblings to be absorbed as children.
     let stripped = normalize_split_closing_tags(&stripped);
-    let stripped = normalize_menu_elements(&stripped, preserve_menu);
     // ~keep Insert missing `</li>`, `</dt>`, `</dd>` close tags that the HTML5 spec
     // ~keep says are implicitly added when a new list-item starts or the parent list
     // ~keep closes.  Without this, `tl` nests each item inside the previous one,
     // ~keep building a chain as deep as the number of items and causing a stack
     // ~keep overflow on large changelogs with hundreds of unclosed `<li>` tags.
     let stripped = normalize_unclosed_list_items(&stripped);
+    let stripped = normalize_menu_elements(&stripped, preserve_menu);
     let mut preprocessed = preprocess_html(&stripped).into_owned();
     let mut preprocessed_len = preprocessed.len();
 
@@ -103,6 +103,7 @@ pub fn convert_html_impl(
             let stripped = strip_hidden_elements(&stripped);
             let stripped = normalize_bogus_comment_endings(&stripped);
             let stripped = normalize_split_closing_tags(&stripped);
+            let stripped = normalize_unclosed_list_items(&stripped);
             let stripped = normalize_menu_elements(&stripped, preserve_menu);
             let repaired = preprocess_html(&stripped).into_owned();
             preprocessed = repaired;
@@ -128,6 +129,7 @@ pub fn convert_html_impl(
             let stripped = strip_hidden_elements(&stripped);
             let stripped = normalize_bogus_comment_endings(&stripped);
             let stripped = normalize_split_closing_tags(&stripped);
+            let stripped = normalize_unclosed_list_items(&stripped);
             let stripped = normalize_menu_elements(&stripped, preserve_menu);
             preprocessed = preprocess_html(&stripped).into_owned();
             preprocessed_len = preprocessed.len();
@@ -163,6 +165,7 @@ pub fn convert_html_impl(
             let stripped = strip_hidden_elements(&stripped);
             let stripped = normalize_bogus_comment_endings(&stripped);
             let stripped = normalize_split_closing_tags(&stripped);
+            let stripped = normalize_unclosed_list_items(&stripped);
             let stripped = normalize_menu_elements(&stripped, preserve_menu);
             preprocessed = preprocess_html(&stripped).into_owned();
             preprocessed_len = preprocessed.len();
