@@ -70,7 +70,7 @@ pub fn is_numbered_list(trimmed: &str) -> bool {
     }
 
     let digits = token.trim_end_matches(['.', ')']);
-    !digits.is_empty() && digits.chars().all(|c| c.is_ascii_digit())
+    (1..=9).contains(&digits.len()) && digits.bytes().all(|byte| byte.is_ascii_digit())
 }
 
 /// Check if a line is a Markdown heading.
@@ -97,7 +97,8 @@ pub fn parse_list_item(line: &str) -> Option<(String, String, String)> {
         1
     } else {
         let digits = bytes.iter().take_while(|byte| byte.is_ascii_digit()).count();
-        if digits == 0 || !matches!(bytes.get(digits), Some(b'.' | b')')) {
+        // ~keep CommonMark ordered-list markers contain at most nine digits (section 5.2).
+        if !(1..=9).contains(&digits) || !matches!(bytes.get(digits), Some(b'.' | b')')) {
             return None;
         }
         digits + 1
@@ -118,11 +119,8 @@ pub fn parse_list_item(line: &str) -> Option<(String, String, String)> {
 pub fn is_non_interrupting_ordered_item(line: &str) -> bool {
     parse_list_item(line).is_some_and(|(_, marker, content)| {
         !content.is_empty()
-            && marker
-                .trim_ascii_end()
-                .trim_end_matches(['.', ')'])
-                .parse::<u64>()
-                .is_ok_and(|start| start != 1)
+            && marker.as_bytes().first().is_some_and(u8::is_ascii_digit)
+            && first_ordered_marker_len(line.trim_ascii_start()).is_none()
     })
 }
 
