@@ -29,6 +29,18 @@ fn should_escape_literal_stars_in_thematic_break_shaped_djot_text() {
 }
 
 #[test]
+fn should_escape_literal_stars_outside_explicit_paragraphs() {
+    for html in [
+        "* - *",
+        "<div>* - *</div>",
+        "<span>* - *</span>",
+        "<section>* - *</section>",
+    ] {
+        assert_eq!(djot(html), "\\* - \\*\n", "{html}");
+    }
+}
+
+#[test]
 fn should_escape_only_literal_stars_around_djot_strong_markup() {
     assert_eq!(djot("<p>*<b>-</b>*</p>"), "\\**-*\\*\n");
     assert_eq!(djot("<p><b>- *</b></p>"), "*- \\**\n");

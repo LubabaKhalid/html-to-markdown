@@ -8,7 +8,7 @@
 //! - Visitor callbacks for custom paragraph processing
 
 use crate::converter::main_helpers::is_ascii_whitespace_only;
-use crate::options::{ConversionOptions, NewlineStyle, OutputFormat};
+use crate::options::{ConversionOptions, NewlineStyle};
 use tl::{NodeHandle, Parser};
 
 type Context = crate::converter::Context;
@@ -80,15 +80,6 @@ pub fn handle(
 
     if let Some(node) = node_handle.get(parser) {
         if let tl::Node::Tag(tag) = node {
-            let escaped_options = (options.output_format == OutputFormat::Djot
-                && !options.escape_asterisks
-                && djot_rule_like_text(&dom_ctx.text_content(*node_handle, parser)))
-            .then(|| {
-                let mut escaped = options.clone();
-                escaped.escape_asterisks = true;
-                escaped
-            });
-            let child_options = escaped_options.as_ref().unwrap_or(options);
             let id = node_handle.get_inner();
             let child_handles: std::borrow::Cow<'_, [tl::NodeHandle]> = match dom_ctx.children_of(id) {
                 Some(children) => std::borrow::Cow::Borrowed(children.as_slice()),
@@ -117,7 +108,7 @@ pub fn handle(
                     }
                 }
 
-                walk_node(child_handle, parser, output, child_options, &p_ctx, depth + 1, dom_ctx);
+                walk_node(child_handle, parser, output, options, &p_ctx, depth + 1, dom_ctx);
             }
         }
     }
@@ -145,15 +136,6 @@ pub fn handle(
             }
         }
     }
-}
-
-/// ~keep Djot parses a line made only of dashes, stars and whitespace as block syntax, so its
-/// literal stars must be escaped without changing the markers emitted by inline handlers.
-fn djot_rule_like_text(text: &str) -> bool {
-    text.contains('*')
-        && text
-            .chars()
-            .all(|character| matches!(character, '-' | '*') || character.is_whitespace())
 }
 
 /// Whether `output` ends with a bare list marker and nothing else: an ordered marker's

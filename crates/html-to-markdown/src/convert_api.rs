@@ -585,10 +585,13 @@ fn fast_text_only(html: &str, options: &ConversionOptions) -> Option<String> {
         Cow::Borrowed(trimmed)
     };
 
+    let escape_asterisks = options.escape_asterisks
+        || (options.output_format == crate::options::OutputFormat::Djot
+            && text::is_djot_rule_like(normalized.as_ref()));
     let escaped = if options.output_format == crate::options::OutputFormat::Plain {
         normalized.into_owned()
     } else if options.escape_misc
-        || options.escape_asterisks
+        || escape_asterisks
         || options.escape_underscores
         || options.escape_ascii
         // ~keep `text::escape` escapes a literal backslash regardless of the flags above,
@@ -599,7 +602,7 @@ fn fast_text_only(html: &str, options: &ConversionOptions) -> Option<String> {
         text::escape(
             normalized.as_ref(),
             options.escape_misc,
-            options.escape_asterisks,
+            escape_asterisks,
             options.escape_underscores,
             options.escape_ascii,
         )
