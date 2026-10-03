@@ -335,8 +335,20 @@ pub fn process_text_node(
         .into_owned();
         out
     } else if options.whitespace_mode == crate::options::WhitespaceMode::Strict {
+        let strict_text = if get_next_sibling_tag(node_handle, parser, dom_ctx) == Some("br")
+            || br_follows_enclosing_elements(node_handle.get_inner(), parser, dom_ctx)
+        {
+            strip_single_trailing_line_ending(text.as_ref()).unwrap_or_else(|| text.as_ref())
+        } else {
+            text.as_ref()
+        };
+        let strict_text = if get_previous_sibling_tag(node_handle, parser, dom_ctx) == Some("br") {
+            strip_single_leading_line_ending(strict_text).unwrap_or(strict_text)
+        } else {
+            strict_text
+        };
         text::escape(
-            text.as_ref(),
+            strict_text,
             options.escape_misc,
             escape_asterisks,
             options.escape_underscores,
@@ -525,6 +537,19 @@ pub fn process_text_node(
     } else if !ctx.in_code && options.output_format == crate::options::OutputFormat::Djot && writes_to_block {
         crate::converter::utility::escaping::escape_djot_list_item_start(output, text_start, ctx.in_list_item);
     }
+}
+
+/// Remove one source line ending only when it is not the end of a blank line. ~keep
+fn strip_single_trailing_line_ending(text: &str) -> Option<&str> {
+    let without_lf = text.strip_suffix('\n')?;
+    let without_line_ending = without_lf.strip_suffix('\r').unwrap_or(without_lf);
+    (!without_line_ending.ends_with('\n') && !without_line_ending.ends_with('\r')).then_some(without_line_ending)
+}
+
+/// Remove one leading source line ending only when it does not begin a blank line. ~keep
+fn strip_single_leading_line_ending(text: &str) -> Option<&str> {
+    let without_line_ending = text.strip_prefix("\r\n").or_else(|| text.strip_prefix('\n'))?;
+    (!without_line_ending.starts_with('\n') && !without_line_ending.starts_with('\r')).then_some(without_line_ending)
 }
 
 /// Whether a whitespace-only newline text node with no in-parent next sibling
