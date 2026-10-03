@@ -5,7 +5,7 @@
 //! - Strikethrough (del, s tags) with ~~ syntax
 //! - Inserted/underlined text (ins, u tags) with == syntax
 
-use crate::converter::inline::wrapped::{InlineDelimiters, InlineSite, emit_wrapped_inline};
+use crate::converter::inline::wrapped::{InlineDelimiters, InlineSite, emit_first_block_wrapped, emit_wrapped_inline};
 use crate::options::{ConversionOptions, OutputFormat};
 #[cfg(feature = "visitor")]
 use std::borrow::Cow;
@@ -185,43 +185,32 @@ fn emit_strikethrough_wrapped(
     parser: &Parser,
     dom_ctx: &DomContext,
 ) {
-    if options.output_format == OutputFormat::Djot {
-        emit_wrapped_inline(
-            output,
-            content,
-            &InlineDelimiters {
-                open: "{-",
-                close: "-}",
-                merge_symbol: None,
-                sibling_tag_names: &STRIKETHROUGH_SIBLING_TAGS,
-            },
-            InlineSite {
-                node_handle,
-                parser,
-                dom_ctx,
-                ctx,
-                options,
-            },
-        );
+    let (open, close, merge_symbol) = if options.output_format == OutputFormat::Djot {
+        ("{-", "-}", None)
     } else {
-        emit_wrapped_inline(
-            output,
-            content,
-            &InlineDelimiters {
-                open: "~~",
-                close: "~~",
-                merge_symbol: Some('~'),
-                sibling_tag_names: &STRIKETHROUGH_SIBLING_TAGS,
-            },
-            InlineSite {
-                node_handle,
-                parser,
-                dom_ctx,
-                ctx,
-                options,
-            },
-        );
+        ("~~", "~~", Some('~'))
+    };
+    if emit_first_block_wrapped(output, content, open, close, ctx, parser) {
+        return;
     }
+
+    emit_wrapped_inline(
+        output,
+        content,
+        &InlineDelimiters {
+            open,
+            close,
+            merge_symbol,
+            sibling_tag_names: &STRIKETHROUGH_SIBLING_TAGS,
+        },
+        InlineSite {
+            node_handle,
+            parser,
+            dom_ctx,
+            ctx,
+            options,
+        },
+    );
 }
 
 /// Resolve `<ins>`'s wrapping delimiters for the current output format, then emit via

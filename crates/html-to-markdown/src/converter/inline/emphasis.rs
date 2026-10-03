@@ -51,7 +51,7 @@ pub fn handle(
 
 use crate::converter::inline::wrapped::{
     EMPHASIS_SIBLING_TAGS, InlineDelimiters, InlineSite, STRONG_SIBLING_TAGS, block_runs_are_plain,
-    block_runs_are_single_line, emit_wrapped_inline, wrap_block_runs,
+    block_runs_are_single_line, emit_first_block_wrapped, emit_wrapped_inline, wrap_block_runs,
 };
 
 /// Resolve `<strong>`/`<b>`'s wrapping delimiters for the current context and options, then
@@ -72,17 +72,7 @@ pub fn emit_strong_wrapped(
     } else {
         [options.strong_em_symbol; 2].iter().collect()
     };
-    // ~keep A block that is the task item's first content keeps its opener outside the bold
-    // ~keep delimiters, so the checkbox line cannot turn the opener into literal text (#643).
-    if !marker.is_empty()
-        && ctx
-            .first_writer
-            .as_ref()
-            .is_some_and(|first_writer| first_writer.starts_with_block(parser))
-        && block_runs_are_single_line(content.trim_end_matches('\n'))
-        && crate::converter::utility::escaping::opens_block(content.trim_start())
-    {
-        output.push_str(&wrap_block_runs(content, &marker, &marker));
+    if emit_first_block_wrapped(output, content, &marker, &marker, ctx, parser) {
         return;
     }
     if !marker.is_empty() && content.contains("\n\n") && block_runs_are_plain(content) {
@@ -189,6 +179,9 @@ fn emit_emphasis_wrapped(
     } else {
         options.strong_em_symbol.to_string()
     };
+    if emit_first_block_wrapped(output, content, &marker, &marker, ctx, parser) {
+        return;
+    }
     if content.contains("\n\n") && block_runs_are_plain(content) {
         output.push_str(&wrap_block_runs(content, &marker, &marker));
         return;

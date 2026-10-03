@@ -122,6 +122,31 @@ pub fn block_runs_are_single_line(content: &str) -> bool {
     content.split("\n\n").all(|block| !block.contains('\n'))
 }
 
+/// ~keep A block that is a task item's first content keeps its opener outside inline
+/// delimiters, so the checkbox line cannot turn the opener into literal text (#643).
+pub fn emit_first_block_wrapped(
+    output: &mut String,
+    content: &str,
+    open: &str,
+    close: &str,
+    ctx: &Context,
+    parser: &Parser<'_>,
+) -> bool {
+    if open.is_empty()
+        || !ctx
+            .first_writer
+            .as_ref()
+            .is_some_and(|first_writer| first_writer.starts_with_block(parser))
+        || !block_runs_are_single_line(content.trim_end_matches('\n'))
+        || !crate::converter::utility::escaping::opens_block(content.trim_start())
+    {
+        return false;
+    }
+
+    output.push_str(&wrap_block_runs(content, open, close));
+    true
+}
+
 // ~keep Markdown block syntax stays outside the inline delimiters: `* **x**` remains a list,
 // ~keep whereas `*** x**` is an ambiguous delimiter run rather than a bold list item.
 fn markdown_block_prefix_len(block: &str) -> usize {
