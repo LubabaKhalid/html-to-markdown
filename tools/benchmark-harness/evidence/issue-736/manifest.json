@@ -1,0 +1,29 @@
+{
+  "schema": 1,
+  "issues": [548, 736],
+  "capture_sha": "695ce726d09f253565b6c16e58a953c701dec60e",
+  "workflow_run": {
+    "id": 37137737028,
+    "url": "https://github.com/xberg-io/html-to-markdown/actions/runs/37137737028",
+    "job_id": 111245597196,
+    "job_url": "https://github.com/xberg-io/html-to-markdown/actions/runs/37137737028/job/111245597196"
+  },
+  "artifact": {
+    "id": 11279997343,
+    "name": "benchmark-calibration-37137737028",
+    "url": "https://github.com/xberg-io/html-to-markdown/actions/runs/37137737028/artifacts/11279997343",
+    "size_bytes": 208974,
+    "sha256": "1000649f9bfc5e2645d5e51664746f09dd415bba7318a50f84939bef74cff657",
+    "retained_archive": "tools/benchmark-harness/evidence/issue-736/raw.zip"
+  },
+  "captures": {
+    "count": 40,
+    "first": "0001.json",
+    "last": "0040.json",
+    "schema": 2,
+    "fixtures_per_capture": 29
+  },
+  "cpu_model": "AMD EPYC 7763 64-Core Processor",
+  "runner_image": "ubuntu24",
+  "runner_class": "github-hosted"
+}

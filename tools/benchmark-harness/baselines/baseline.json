@@ -1,19 +1,19 @@
 {
   "schema": 2,
-  "campaign_id": "c551a90434913666fc347ec503d40f3005504a2a:2026-09-16T10:39:24.357274005Z",
-  "sha": "c551a90434913666fc347ec503d40f3005504a2a",
-  "hostname": "runnervmlun5p",
-  "created_at": "2026-09-16T10:39:24.357274005Z",
+  "campaign_id": "695ce726d09f253565b6c16e58a953c701dec60e:2026-10-03T17:03:15.089559869Z",
+  "sha": "695ce726d09f253565b6c16e58a953c701dec60e",
+  "hostname": "runnervm8df0l",
+  "created_at": "2026-10-03T17:03:15.089559869Z",
   "provenance": {
     "os": "linux",
     "arch": "x86_64",
-    "cpu_model": "AMD EPYC 9V74 80-Core Processor",
+    "cpu_model": "AMD EPYC 7763 64-Core Processor",
     "cpu_count": 4,
     "rustc_verbose": "rustc 1.95.0 (59807616e 2026-04-14)\nbinary: rustc\ncommit-hash: 59807616e1fa2540724bfbac14d7976d7e4a3860\ncommit-date: 2026-04-14\nhost: x86_64-unknown-linux-gnu\nrelease: 1.95.0\nLLVM version: 22.1.2",
     "rustc_host": "x86_64-unknown-linux-gnu",
     "cargo_version": "cargo 1.95.0 (f2d3ce0bd 2026-03-21)",
     "profile": "release",
-    "build_flags": "-D warnings -D warnings -A unpredictable-function-pointer-comparisons -A mismatched-lifetime-syntaxes",
+    "build_flags": "-D warnings -A unpredictable-function-pointer-comparisons -A mismatched-lifetime-syntaxes",
     "measurement_mode": "nine-batch-median-mad-v2",
     "tier_strategy": "auto",
     "visitor_mode": "disabled",
@@ -35,261 +35,261 @@
       "fixture": "mdream/nuxt-example.html",
       "group": "clean_small",
       "bytes": 3577,
-      "median_ms": 0.03885986875182269,
-      "mad_ms": 0.00017105815161134671,
-      "mb_per_s": 87.78447121299534,
+      "median_ms": 0.05126404967699168,
+      "mad_ms": 0.00012517083901570844,
+      "mb_per_s": 66.5435729576435,
       "output_bytes": 1917
     },
     {
       "fixture": "mdream/vuejs-docs.html",
       "group": "clean_medium",
       "bytes": 112232,
-      "median_ms": 4.1976295,
-      "mad_ms": 0.009124541666666541,
-      "mb_per_s": 25.49838566717388,
-      "output_bytes": 26014
+      "median_ms": 5.4856486,
+      "mad_ms": 0.009397044444444447,
+      "mb_per_s": 19.51141673181659,
+      "output_bytes": 26018
     },
     {
       "fixture": "mdream/wikipedia-small.html",
       "group": "clean_medium",
       "bytes": 166054,
-      "median_ms": 3.17119221875,
-      "mad_ms": 0.006872218750000103,
-      "mb_per_s": 49.9375074144655,
-      "output_bytes": 40657
+      "median_ms": 4.2013817499999995,
+      "mad_ms": 0.007192083333332988,
+      "mb_per_s": 37.692703105715985,
+      "output_bytes": 40648
     },
     {
       "fixture": "mdream/mdn-array.html",
       "group": "clean_medium",
       "bytes": 231446,
-      "median_ms": 7.652215428571429,
-      "mad_ms": 0.23676542857142868,
-      "mb_per_s": 28.844470976448623,
-      "output_bytes": 70964
+      "median_ms": 9.792242166666666,
+      "mad_ms": 0.03259875000000001,
+      "mb_per_s": 22.540711522261777,
+      "output_bytes": 70968
     },
     {
       "fixture": "mdream/react-learn.html",
       "group": "clean_medium",
       "bytes": 265127,
-      "median_ms": 8.548282666666665,
-      "mad_ms": 0.02450249999999965,
-      "mb_per_s": 29.578433510602974,
-      "output_bytes": 59193
+      "median_ms": 11.2530497,
+      "mad_ms": 0.059547700000000425,
+      "mb_per_s": 22.469003268139822,
+      "output_bytes": 59205
     },
     {
       "fixture": "mdream/github-markdown-complete.html",
       "group": "clean_medium",
       "bytes": 429661,
-      "median_ms": 7.809504857142857,
-      "mad_ms": 0.02087692857142809,
-      "mb_per_s": 52.46896800206833,
-      "output_bytes": 51609
+      "median_ms": 10.0925849,
+      "mad_ms": 0.039093000000000266,
+      "mb_per_s": 40.59977344965667,
+      "output_bytes": 51611
     },
     {
       "fixture": "real-world/wikipedia/small_html.html",
       "group": "clean_large",
       "bytes": 972853,
-      "median_ms": 16.560771250000002,
-      "mad_ms": 1.2979302083333346,
-      "mb_per_s": 56.02305023920727,
-      "output_bytes": 188694
+      "median_ms": 20.702064166666666,
+      "mad_ms": 0.23588433333333114,
+      "mb_per_s": 44.81605854708142,
+      "output_bytes": 188683
     },
     {
       "fixture": "real-world/wikipedia/lists_timeline.html",
       "group": "clean_large",
       "bytes": 251962,
-      "median_ms": 6.9747759375000005,
-      "mad_ms": 0.011870374999999989,
-      "mb_per_s": 34.45124119592574,
-      "output_bytes": 22263
+      "median_ms": 9.131580333333334,
+      "mad_ms": 0.026678916666666552,
+      "mb_per_s": 26.314140525404298,
+      "output_bytes": 22252
     },
     {
       "fixture": "real-world/wikipedia/tables_countries.html",
       "group": "clean_large",
       "bytes": 756394,
-      "median_ms": 10.1021754,
-      "mad_ms": 0.07285329999999934,
-      "mb_per_s": 71.4057618603404,
-      "output_bytes": 183841
+      "median_ms": 13.523123875,
+      "mad_ms": 0.10901675000000033,
+      "mb_per_s": 53.34222606784996,
+      "output_bytes": 183830
     },
     {
       "fixture": "real-world/wikipedia/medium_python.html",
       "group": "clean_large",
       "bytes": 1244134,
-      "median_ms": 41.24851175,
-      "mad_ms": 0.33408449999999945,
-      "mb_per_s": 28.76464123503252,
-      "output_bytes": 256335
+      "median_ms": 55.250820000000004,
+      "mad_ms": 0.37981900000000124,
+      "mb_per_s": 21.474769821837455,
+      "output_bytes": 256324
     },
     {
       "fixture": "real-world/wikipedia/large_rust.html",
       "group": "clean_large",
       "bytes": 1065167,
-      "median_ms": 16.374072625,
-      "mad_ms": 0.18214562499999865,
-      "mb_per_s": 62.038469832638604,
-      "output_bytes": 190880
+      "median_ms": 21.6927905,
+      "mad_ms": 0.15314100000000153,
+      "mb_per_s": 46.82765043913996,
+      "output_bytes": 190869
     },
     {
       "fixture": "real-world/issues/gh-190/mitrade.html",
       "group": "clean_small",
       "bytes": 2346,
-      "median_ms": 0.052500412586060884,
-      "mad_ms": 0.0002444289041157767,
-      "mb_per_s": 42.61528312032888,
+      "median_ms": 0.07985528150130478,
+      "mad_ms": 0.0005552898082771332,
+      "mb_per_s": 28.01718188486389,
       "output_bytes": 458
     },
     {
       "fixture": "real-world/issues/gh-190/flex2025.html",
       "group": "clean_small",
       "bytes": 6304,
-      "median_ms": 0.09099659996437115,
-      "mad_ms": 0.00022682841656625208,
-      "mb_per_s": 66.06799477100164,
-      "output_bytes": 2447
+      "median_ms": 0.13152905637121565,
+      "mad_ms": 0.0007944478686403994,
+      "mb_per_s": 45.70824923777589,
+      "output_bytes": 2451
     },
     {
       "fixture": "real-world/issues/gh-190/insight.html",
       "group": "clean_medium",
       "bytes": 12340,
-      "median_ms": 0.1318946959039855,
-      "mad_ms": 0.0010711212959167576,
-      "mb_per_s": 89.22527918044594,
-      "output_bytes": 1422
+      "median_ms": 0.19728255016618199,
+      "mad_ms": 0.0013426417001747154,
+      "mb_per_s": 59.65221482863031,
+      "output_bytes": 1427
     },
     {
       "fixture": "real-world/issues/gh-190/plusblog.html",
       "group": "clean_medium",
       "bytes": 29182,
-      "median_ms": 1.5131390240641711,
-      "mad_ms": 0.0034723850267378564,
-      "mb_per_s": 18.39231125413558,
-      "output_bytes": 7573
+      "median_ms": 2.000125285384615,
+      "mad_ms": 0.0032923492307692648,
+      "mb_per_s": 13.914190328340144,
+      "output_bytes": 7577
     },
     {
       "fixture": "real-world/issues/gh-190/rbloggers.html",
       "group": "fallthrough_bare_lt",
       "bytes": 47085,
-      "median_ms": 1.0290141428571429,
-      "mad_ms": 0.001999598852040818,
-      "mb_per_s": 43.63764628473355,
+      "median_ms": 1.326241592105263,
+      "mad_ms": 0.0045290684885290755,
+      "mb_per_s": 33.85789998993207,
       "output_bytes": 20149
     },
     {
       "fixture": "real-world/issues/gh-190/ozonekorea.html",
       "group": "clean_medium",
       "bytes": 67037,
-      "median_ms": 2.114463875,
-      "mad_ms": 0.004641687499999714,
-      "mb_per_s": 30.235307353702492,
+      "median_ms": 2.6348023749999996,
+      "mad_ms": 0.008418386842105052,
+      "mb_per_s": 24.26423543394817,
       "output_bytes": 25382
     },
     {
       "fixture": "real-world/issues/gh-190/firsteigen.html",
       "group": "clean_medium",
       "bytes": 69450,
-      "median_ms": 1.5488539242424244,
-      "mad_ms": 0.003281106060606276,
-      "mb_per_s": 42.762380775714405,
-      "output_bytes": 25610
+      "median_ms": 2.02843646,
+      "mad_ms": 0.005187359999999863,
+      "mb_per_s": 32.65208577172492,
+      "output_bytes": 25614
     },
     {
       "fixture": "real-world/issues/gh-190/sjsu.html",
       "group": "clean_medium",
       "bytes": 134697,
-      "median_ms": 0.7435535075757576,
-      "mad_ms": 0.0033550281620553513,
-      "mb_per_s": 172.76102941910298,
+      "median_ms": 0.9403611851851852,
+      "mad_ms": 0.005821030808080774,
+      "mb_per_s": 136.60396815684774,
       "output_bytes": 7678
     },
     {
       "fixture": "real-world/issues/gh-190/kimbrain.html",
       "group": "clean_medium",
       "bytes": 163213,
-      "median_ms": 2.2751427727272726,
-      "mad_ms": 0.00588450000000007,
-      "mb_per_s": 68.41418836191504,
-      "output_bytes": 39984
+      "median_ms": 2.805736277777778,
+      "mad_ms": 0.0058021111111108414,
+      "mb_per_s": 55.47636370403781,
+      "output_bytes": 40013
     },
     {
       "fixture": "real-world/issues/gh-121-hacker-news.html",
       "group": "clean_medium",
       "bytes": 56676,
-      "median_ms": 1.2716746115384616,
-      "mad_ms": 0.0036613884615385173,
-      "mb_per_s": 42.50336136792952,
+      "median_ms": 1.69421685,
+      "mad_ms": 0.004569750000000039,
+      "mb_per_s": 31.9029087431403,
       "output_bytes": 11943
     },
     {
       "fixture": "real-world/issues/gh-127-issue.html",
       "group": "fallthrough_custom_elements",
       "bytes": 650928,
-      "median_ms": 12.757546375,
-      "mad_ms": 0.06392637500000031,
-      "mb_per_s": 48.65930306521716,
+      "median_ms": 16.594149708333333,
+      "mad_ms": 0.0897917916666664,
+      "mb_per_s": 37.409166865473345,
       "output_bytes": 42138
     },
     {
       "fixture": "synthetic/optional_li.html",
       "group": "spec_rules",
       "bytes": 25,
-      "median_ms": 0.003503416718524747,
-      "mad_ms": 0.0000468193686228031,
-      "mb_per_s": 6.805316017386539,
+      "median_ms": 0.0053530523687138525,
+      "mad_ms": 0.00004397717285162077,
+      "mb_per_s": 4.45388093893888,
       "output_bytes": 12
     },
     {
       "fixture": "synthetic/table_no_tbody.html",
       "group": "spec_rules",
       "bytes": 46,
-      "median_ms": 0.013758032523550658,
-      "mad_ms": 0.00008393287132702192,
-      "mb_per_s": 3.188611342471651,
+      "median_ms": 0.01879446936753886,
+      "mad_ms": 0.00012002427731944154,
+      "mb_per_s": 2.334145098581847,
       "output_bytes": 38
     },
     {
       "fixture": "synthetic/bare_fragment.html",
       "group": "adversarial",
       "bytes": 19,
-      "median_ms": 0.00045061262035673904,
-      "mad_ms": 3.901811622661252e-6,
-      "mb_per_s": 40.21150583260126,
+      "median_ms": 0.0003792224960837401,
+      "mad_ms": 4.509169490597047e-6,
+      "mb_per_s": 47.781479735098635,
       "output_bytes": 12
     },
     {
       "fixture": "synthetic/unescaped_lt.html",
       "group": "adversarial",
       "bytes": 27,
-      "median_ms": 0.0023813186794458966,
-      "mad_ms": 0.00002358498553629851,
-      "mb_per_s": 10.813003217595503,
+      "median_ms": 0.003039970529253206,
+      "mad_ms": 0.000031540926813443306,
+      "mb_per_s": 8.470215844261574,
       "output_bytes": 20
     },
     {
       "fixture": "synthetic/unclosed_p.html",
       "group": "adversarial",
       "bytes": 21,
-      "median_ms": 0.0028405594843771264,
-      "mad_ms": 0.000028897648232893095,
-      "mb_per_s": 7.050428183137582,
+      "median_ms": 0.0040182091712213375,
+      "mad_ms": 0.00004425190851896658,
+      "mb_per_s": 4.984101073674067,
       "output_bytes": 16
     },
     {
       "fixture": "synthetic/unclosed_at_eof.html",
       "group": "adversarial",
       "bytes": 18,
-      "median_ms": 0.00250273011684529,
-      "mad_ms": 0.00003310852347204502,
-      "mb_per_s": 6.8589647680232275,
+      "median_ms": 0.0034694473849136423,
+      "mad_ms": 0.00003053078317114379,
+      "mb_per_s": 4.947801707544783,
       "output_bytes": 16
     },
     {
       "fixture": "synthetic/cdata_in_svg.html",
       "group": "adversarial",
       "bytes": 47,
-      "median_ms": 0.008808122848632052,
-      "mad_ms": 0.00005004380622890443,
-      "mb_per_s": 5.0887906130935665,
+      "median_ms": 0.012293813057529517,
+      "mad_ms": 0.00009349611330956766,
+      "mb_per_s": 3.6459552997384703,
       "output_bytes": 120
     }
   ]
