@@ -150,6 +150,7 @@ pub fn scan(
                     // `trailing_single_newline_join`'s doc comment for why that one
                     // tag is special-cased.
                     let next_tag_is_span = upcoming_tag_is_named(bytes, pos, b"span");
+                    let next_tag_is_inline = upcoming_tag_is_inline(bytes, pos);
                     flush_text(
                         &mut state,
                         &html[text_start..pos],
@@ -157,6 +158,7 @@ pub fn scan(
                         next_tag_is_list,
                         next_tag_is_img,
                         next_tag_is_span,
+                        next_tag_is_inline,
                         options.br_in_tables,
                     )?;
                 }
@@ -230,7 +232,7 @@ pub fn scan(
                 // we don't bail on commonly-unescaped source like `x < 5`.
                 if !parse::is_tag_name_start(next) {
                     state.start_body(pos);
-                    flush_text(&mut state, "<", pos, false, false, false, options.br_in_tables)?;
+                    flush_text(&mut state, "<", pos, false, false, false, false, options.br_in_tables)?;
                     pos += 1;
                     text_start = pos;
                     continue;
@@ -777,6 +779,7 @@ pub fn scan(
             &mut state,
             &html[text_start..pos],
             text_start,
+            false,
             false,
             false,
             false,
@@ -4395,6 +4398,7 @@ fn flush_text(
     next_tag_is_list: bool,
     next_tag_is_img: bool,
     next_tag_is_span: bool,
+    next_tag_is_inline: bool,
     br_in_tables: bool,
 ) -> Result<(), BailReason> {
     if raw.is_empty() {
@@ -5108,6 +5112,7 @@ fn flush_text(
         return Ok(());
     }
 
+    let after_list_marker = line_is_bare_list_marker(state.cell_or_output_mut());
     let dest = state.cell_or_output_mut();
     let emitted_from = dest.len();
 
@@ -5132,6 +5137,14 @@ fn flush_text(
 
     escape_backslash_run(dest, emitted_from, in_cell);
     if !folds_lines {
+        if !inside_inline {
+            crate::converter::utility::escaping::escape_block_start(
+                dest,
+                emitted_from,
+                after_list_marker,
+                next_tag_is_inline,
+            );
+        }
         crate::converter::utility::escaping::escape_continuation_line_start(dest, emitted_from);
     }
     if ends_in_newline_join {
@@ -6228,6 +6241,11 @@ fn upcoming_tag_is_list_open(bytes: &[u8], lt_pos: usize) -> bool {
         upcoming_open_tag_name(bytes, lt_pos, &mut name_buf),
         Some(b"ul" | b"ol")
     )
+}
+
+fn upcoming_tag_is_inline(bytes: &[u8], lt_pos: usize) -> bool {
+    let mut name_buf = [0u8; MAX_TAG_NAME_BYTES];
+    upcoming_open_tag_name(bytes, lt_pos, &mut name_buf).is_some_and(is_inline_tag)
 }
 
 /// Peek whether the upcoming tag at `bytes[lt_pos]` is an opening tag named

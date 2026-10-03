@@ -471,6 +471,7 @@ pub fn process_text_node(
     crate::converter::list::utils::indent_list_item_line_start(output, ctx, options);
 
     let text_start = output.len();
+    let after_list_marker = ctx.in_list_item && crate::converter::list::utils::line_is_bare_list_marker(output);
     if ctx.in_list_item && final_text.contains("\n\n") {
         let indent = " ".repeat(4 * ctx.list_depth);
         let mut first = true;
@@ -489,6 +490,19 @@ pub fn process_text_node(
     // ~keep Code keeps its bytes; a Djot paragraph ends only at a blank line, so no line in it
     // ~keep needs the escape.
     if !ctx.in_code && options.output_format == crate::options::OutputFormat::Markdown {
+        let writes_to_block = !ctx.convert_as_inline
+            && !ctx.in_heading
+            && !ctx.in_table_cell
+            && !ctx.in_marker_text()
+            && (ctx.block_output_ptr == 0 || std::ptr::from_ref::<String>(output) as usize == ctx.block_output_ptr);
+        if writes_to_block {
+            crate::converter::utility::escaping::escape_block_start(
+                output,
+                text_start,
+                after_list_marker,
+                next_sibling_is_inline_tag(node_handle, parser, dom_ctx),
+            );
+        }
         crate::converter::utility::escaping::escape_continuation_line_start(output, text_start);
     }
 }

@@ -296,12 +296,27 @@ fn block_opener_escape_offset(line: &str) -> Option<usize> {
 /// ~keep reference definition (spec section 4.7). An underlined heading writes its text as such a
 /// ~keep line (issues #653, #661).
 pub fn escape_paragraph_start(rest: &str, underline: u8) -> Cow<'_, str> {
-    block_opener_offset(rest)
-        .or_else(|| list_marker_offset(rest))
+    fresh_block_opener_offset(rest)
         .or_else(|| starts_link_reference_definition(rest, underline).then_some(0))
         .map_or(Cow::Borrowed(rest), |at| {
             Cow::Owned(format!("{}\\{}", &rest[..at], &rest[at..]))
         })
+}
+
+fn fresh_block_opener_escape_offset(line: &str) -> Option<usize> {
+    let (indent, column) = leading_indent(line);
+    if column >= 4 {
+        return None;
+    }
+    fresh_block_opener_offset(line.get(indent..)?).map(|offset| indent + offset)
+}
+
+fn fresh_block_opener_offset(rest: &str) -> Option<usize> {
+    let structural_opener = match rest.as_bytes().first() {
+        Some(b'<' | b'=') | None => None,
+        Some(_) => block_opener_offset(rest),
+    };
+    structural_opener.or_else(|| list_marker_offset(rest))
 }
 
 /// Whether `rest`, the first line of a paragraph without its indentation, starts a link reference
@@ -462,6 +477,42 @@ pub fn escape_continuation_line_start(buffer: &mut String, from: usize) {
     let line = &text[..text.find('\n').unwrap_or(text.len())];
     if let Some(offset) = block_opener_escape_offset(line) {
         buffer.insert(from + offset, '\\');
+    }
+}
+
+/// ~keep Escape text just written at the start of a Markdown block or directly after a list-item
+/// marker when that text would otherwise be parsed as block structure (issue #735).
+pub fn escape_block_start(buffer: &mut String, from: usize, after_list_marker: bool, followed_by_inline: bool) {
+    let before = &buffer[..from];
+    let line_start = before.rfind('\n').map_or(0, |position| position + 1);
+    let prefix = &before[line_start..];
+    let text = &buffer[from..];
+    let first_line = &text[..text.find('\n').unwrap_or(text.len())];
+
+    if followed_by_inline {
+        let mut continued = String::with_capacity(first_line.len() + 1);
+        continued.push_str(first_line);
+        continued.push('x');
+        if fresh_block_opener_escape_offset(&continued).is_none() {
+            return;
+        }
+    }
+
+    let escape_at = if after_list_marker {
+        fresh_block_opener_escape_offset(first_line).map(|offset| from + offset)
+    } else if prefix.trim().is_empty() {
+        let mut line = String::with_capacity(prefix.len() + first_line.len());
+        line.push_str(prefix);
+        line.push_str(first_line);
+        fresh_block_opener_escape_offset(&line)
+            .filter(|&offset| offset >= prefix.len())
+            .map(|offset| line_start + offset)
+    } else {
+        None
+    };
+
+    if let Some(position) = escape_at {
+        buffer.insert(position, '\\');
     }
 }
 
