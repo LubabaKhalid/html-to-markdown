@@ -61,6 +61,30 @@ fn should_resolve_relative_link_against_base_url_on_both_tiers() {
 }
 
 #[test]
+fn should_report_the_effective_document_base_in_frontmatter() {
+    let html = r#"<html><head><base href="/other/"></head><body><a href="x">x</a></body></html>"#;
+
+    for tier_strategy in [TierStrategy::Tier1, TierStrategy::Tier2] {
+        let options = ConversionOptions {
+            base_url: Some("https://example.com/docs/index.html".to_string()),
+            tier_strategy,
+            ..ConversionOptions::default()
+        };
+        let output = convert(html, Some(options))
+            .expect("conversion should succeed")
+            .content
+            .unwrap_or_default();
+
+        let expected = match tier_strategy {
+            TierStrategy::Tier1 => "---\nbase: https://example.com/other/\n---\n\n[x](https://example.com/other/x)\n",
+            TierStrategy::Tier2 => "---\nbase: https://example.com/other/\n---\n[x](https://example.com/other/x)\n",
+            TierStrategy::Auto => unreachable!("the test enumerates forced tiers only"),
+        };
+        assert_eq!(output, expected, "tier: {tier_strategy:?}");
+    }
+}
+
+#[test]
 fn should_resolve_absolute_path_link_against_base_url_on_both_tiers() {
     let html = r#"<a href="/about">about</a>"#;
     let out = assert_tier1_matches_tier2(html, "https://example.com/blog/index.html");
