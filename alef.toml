@@ -1,5 +1,5 @@
 [workspace]
-alef_version = "0.101.0"
+alef_version = "0.103.12"
 languages = [
   "python",
   "node",
@@ -775,7 +775,6 @@ traineddata = "traineddata"
 # but src/HtmlVisitor.php is hand-written and must keep its quality metrics. ~keep
 "crates/html-to-markdown-php/**" = ["comment", "doc-comment"]
 "crates/html-to-markdown-php/src/lib.rs" = ["file-too-long", "function-too-long", "too-many-parameters"]
-"crates/html-to-markdown-php/src/HtmlVisitorInterface.php" = ["type-too-long"]
 "crates/html-to-markdown-php/stubs/**" = [
   "comment",
   "doc-comment",
@@ -2249,3 +2248,4 @@ bind_via = "options_field"
 options_type = "ConversionOptions"
 context_type = "NodeContext"
 result_type = "VisitResult"
+exclude_languages = ["php"]

@@ -280,3 +280,25 @@ describe("borrowed values stay usable", () => {
     expect(image.dimensions?.height).toBe(4);
   });
 });
+
+describe("detached class-valued getters", () => {
+  it("updates preprocessing through explicit reassignment", () => {
+    const options = WasmConversionOptions.default();
+    const preprocessing = options.preprocessing;
+    preprocessing.enabled = false;
+
+    expect(options.preprocessing.enabled).toBe(true);
+
+    options.preprocessing = preprocessing;
+    expect(options.preprocessing.enabled).toBe(false);
+  });
+
+  it("provides an independent transfer-safe copy", () => {
+    const preprocessing = WasmPreprocessingOptions.default();
+    const copy = preprocessing.copyForTransfer();
+    copy.enabled = false;
+
+    expect(preprocessing.enabled).toBe(true);
+    expect(copy.enabled).toBe(false);
+  });
+});
