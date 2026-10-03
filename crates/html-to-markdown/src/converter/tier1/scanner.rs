@@ -199,7 +199,7 @@ pub fn scan(
                     let len_before_close = state.cell_or_output_mut().len();
                     let join_open = state.pending_newline_join == Some(len_before_close);
                     emit_close(&mut state, tag_name_bytes, options, &mut table_probes)?;
-                    // ~keep Tier-2 ends a block and the form elements its form handlers write with a
+                    // ~keep Tier-2 ends a block and the block-like form elements with a
                     // ~keep line of their own before the `<br>`. An inline close can write its marker
                     // ~keep before the join (`~~First~~\n`), so the join is followed to the new end.
                     let mut name_buf = [0u8; MAX_TAG_NAME_BYTES];
@@ -207,15 +207,7 @@ pub fn scan(
                     let ends_own_line = tier1::lookup(name_lower).is_some_and(|spec| spec.is_block)
                         || matches!(
                             name_lower,
-                            b"label"
-                                | b"select"
-                                | b"option"
-                                | b"optgroup"
-                                | b"button"
-                                | b"progress"
-                                | b"meter"
-                                | b"output"
-                                | b"datalist"
+                            b"optgroup" | b"button" | b"progress" | b"meter" | b"output" | b"datalist"
                         );
                     let dest = state.cell_or_output_mut();
                     let (dest_len, ends_in_newline) = (dest.len(), dest.ends_with('\n'));
@@ -2425,7 +2417,7 @@ fn emit_close(
         TagKind::Inserted
             if state.escape_ctx.contains(EscapeCtx::CODE) || state.escape_ctx.contains(EscapeCtx::PRE) => {}
         TagKind::Inserted => close_inline_marker(state, &frame, "==")?,
-        TagKind::Code => close_code(state, &frame)?,
+        TagKind::Code => close_code(state, &frame, matches!(name_lower, b"kbd" | b"samp"))?,
         TagKind::Link => close_link(state, &frame, options)?,
         TagKind::List(ListKind::Definition) => close_dl(state, &frame),
         TagKind::List(kind) => close_list(state, kind),
@@ -2457,9 +2449,14 @@ fn emit_close(
             if name_lower == b"abbr" {
                 if let Some(Some(title)) = state.abbr_titles.pop() {
                     let dest = state.cell_or_output_mut();
+                    let content_start = clamp_to_char_boundary(dest, frame.content_start);
+                    let trailing_start = content_start + dest[content_start..].trim_end().len();
+                    let trailing = dest[trailing_start..].to_owned();
+                    dest.truncate(trailing_start);
                     dest.push_str(" (");
                     dest.push_str(&title);
                     dest.push(')');
+                    dest.push_str(&trailing);
                 }
             }
         }
@@ -2824,7 +2821,7 @@ fn emit_close_for_implicit(
         TagKind::Inserted
             if state.escape_ctx.contains(EscapeCtx::CODE) || state.escape_ctx.contains(EscapeCtx::PRE) => {}
         TagKind::Inserted => close_inline_marker(state, &frame, "==")?,
-        TagKind::Code => close_code(state, &frame)?,
+        TagKind::Code => close_code(state, &frame, false)?,
         TagKind::Link => close_link(state, &frame, options)?,
         TagKind::List(ListKind::Definition) => close_dl(state, &frame),
         TagKind::List(kind) => close_list(state, kind),
@@ -3429,7 +3426,7 @@ fn push_list_item_continuation_lines(state: &mut Tier1State, rendered: &str) {
     }
 }
 
-fn close_code(state: &mut Tier1State, frame: &OpenTag) -> Result<(), BailReason> {
+fn close_code(state: &mut Tier1State, frame: &OpenTag, trim_boundary_whitespace: bool) -> Result<(), BailReason> {
     if state.escape_ctx.contains(EscapeCtx::PRE) || state.escape_ctx.contains(EscapeCtx::CODE) {
         return Ok(());
     }
@@ -3475,8 +3472,26 @@ fn close_code(state: &mut Tier1State, frame: &OpenTag) -> Result<(), BailReason>
     // adjacent to a preceding sibling's closing backtick -- checked once, above,
     // against `buf[..content_start]` before this loop runs -- every later segment is
     // preceded by our own separator instead.
-    let content = buf[content_start..].to_owned();
+    let original = &buf[content_start..];
+    let trimmed = original.trim();
+    let migrate_boundary = trim_boundary_whitespace && !trimmed.is_empty();
+    let leading = if migrate_boundary {
+        original[..original.len() - original.trim_start().len()].to_owned()
+    } else {
+        String::new()
+    };
+    let trailing = if migrate_boundary {
+        original[original.trim_end().len()..].to_owned()
+    } else {
+        String::new()
+    };
+    let content = if migrate_boundary {
+        trimmed.to_owned()
+    } else {
+        original.to_owned()
+    };
     buf.truncate(content_start);
+    buf.push_str(&leading);
 
     let mut first = true;
     for segment in content.split('\n').filter(|segment| !segment.is_empty()) {
@@ -3486,6 +3501,7 @@ fn close_code(state: &mut Tier1State, frame: &OpenTag) -> Result<(), BailReason>
         format_inline_code_segment(buf, segment);
         first = false;
     }
+    buf.push_str(&trailing);
     Ok(())
 }
 

@@ -293,13 +293,12 @@ pub fn handle_legend(
 /// Handles the `<label>` element.
 ///
 /// A label element associates text with a form control. It's rendered as
-/// a block or inline element depending on context.
+/// inline content.
 ///
 /// # Behavior
 ///
 /// - Content is collected from children
-/// - Non-empty content is output followed by blank lines (in block mode)
-/// - Blank lines are suppressed in inline mode
+/// - Non-empty content is output without adding block separators
 pub fn handle_label(
     _tag_name: &str,
     node_handle: &tl::NodeHandle,
@@ -331,9 +330,6 @@ pub fn handle_label(
         let trimmed = content.trim();
         if !trimmed.is_empty() {
             output.push_str(trimmed);
-            if !ctx.convert_as_inline {
-                output.push_str("\n\n");
-            }
         }
     }
 }
@@ -448,12 +444,12 @@ pub fn handle_textarea(
 /// Handles the `<select>` element.
 ///
 /// A select element represents a dropdown list of options. Its options are
-/// rendered as a list, with newlines between options.
+/// rendered as inline text.
 ///
 /// # Behavior
 ///
 /// - Content (options) is collected from children
-/// - A single newline is added after the select in block mode
+/// - No block separator is added after the select
 pub fn handle_select(
     _tag_name: &str,
     node_handle: &tl::NodeHandle,
@@ -465,16 +461,11 @@ pub fn handle_select(
     dom_ctx: &super::DomContext,
 ) {
     if let Some(tl::Node::Tag(tag)) = node_handle.get(parser) {
-        let start_len = output.len();
         let children = tag.children();
         {
             for child_handle in children.top().iter() {
                 walk_node(child_handle, parser, output, options, ctx, depth + 1, dom_ctx);
             }
-        }
-
-        if !ctx.convert_as_inline && output.len() > start_len {
-            output.push('\n');
         }
     }
 }
@@ -482,13 +473,13 @@ pub fn handle_select(
 /// Handles the `<option>` element.
 ///
 /// An option element represents a choice within a select element.
-/// Selected options are marked with a bullet point (`*`) in block mode.
+/// Options are rendered as inline text.
 ///
 /// # Behavior
 ///
 /// - Content is collected from children
-/// - If the option has the `selected` attribute, it's prefixed with `* ` in block mode
-/// - A newline is added after each option in block mode
+/// - Selection state does not change the visible label
+/// - No block separator is added after an option
 pub fn handle_option(
     _tag_name: &str,
     node_handle: &tl::NodeHandle,
@@ -500,8 +491,6 @@ pub fn handle_option(
     dom_ctx: &super::DomContext,
 ) {
     if let Some(tl::Node::Tag(tag)) = node_handle.get(parser) {
-        let selected = tag.attributes().iter().any(|(name, _)| name.as_ref() == "selected");
-
         let mut text = String::new();
         let children = tag.children();
         {
@@ -512,13 +501,7 @@ pub fn handle_option(
 
         let trimmed = text.trim();
         if !trimmed.is_empty() {
-            if selected && !ctx.convert_as_inline {
-                output.push_str("* ");
-            }
             output.push_str(trimmed);
-            if !ctx.convert_as_inline {
-                output.push('\n');
-            }
         }
     }
 }
