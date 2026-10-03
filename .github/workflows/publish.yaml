@@ -17,7 +17,9 @@ on:
         type: string
         default: "all"
       dry_run:
-        description: "Prepare artifacts without publishing"
+        # ~keep Before tagging, dispatch this on main with both tag and ref empty. A commit SHA
+        # as ref prevents prepare-release-metadata from synthesizing the dry-run tag.
+        description: "Prepare artifacts without publishing (before tagging: dispatch on main, leave tag/ref empty)"
         required: false
         type: boolean
         default: false
@@ -867,6 +869,7 @@ jobs:
         with:
           package-dir: packages/python
           output-dir: dist
+          dry-run: ${{ needs.prepare.outputs.dry_run }}
 
       - uses: actions/upload-artifact@v7
         with:
@@ -1168,6 +1171,7 @@ jobs:
         if: matrix.dock_platform == ''
         with:
           package-dir: packages/ruby
+          dry-run: ${{ needs.prepare.outputs.dry_run }}
 
       - name: Build platform gem
         shell: bash
@@ -1283,6 +1287,7 @@ jobs:
           lib-name: html_to_markdown_php
           php-version: ${{ matrix.php }}
           php-ts: nts
+          dry-run: ${{ needs.prepare.outputs.dry_run }}
 
       - name: Determine Windows compiler
         if: runner.os == 'Windows'
@@ -1608,6 +1613,7 @@ jobs:
           cache-key-prefix: publish-elixir-${{ matrix.label }}
 
       - name: Rewrite native dependencies to registry versions
+        if: needs.prepare.outputs.dry_run != 'true'
         uses: xberg-io/actions/rewrite-native-deps@v1
         with:
           lang: elixir
