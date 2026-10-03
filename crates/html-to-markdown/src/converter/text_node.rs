@@ -533,8 +533,11 @@ pub fn process_text_node(
             );
         }
         crate::converter::utility::escaping::escape_continuation_line_start(output, text_start);
-    } else if !ctx.in_code && options.output_format == crate::options::OutputFormat::Djot && writes_to_block {
-        crate::converter::utility::escaping::escape_djot_list_item_start(output, text_start, ctx.in_list_item);
+    } else if !ctx.in_code && options.output_format == crate::options::OutputFormat::Djot {
+        if writes_to_block {
+            crate::converter::utility::escaping::escape_djot_list_item_start(output, text_start, ctx.in_list_item);
+        }
+        crate::converter::utility::escaping::escape_djot_continuation_line_start(output);
     }
 }
 

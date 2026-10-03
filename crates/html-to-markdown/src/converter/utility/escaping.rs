@@ -597,6 +597,62 @@ pub fn escape_djot_list_item_start(buffer: &mut String, from: usize, in_list_ite
     buffer.insert(content_start + digits, '\\');
 }
 
+/// ~keep Djot parses leading dash runs as typographic dashes and leading backticks as verbatim
+/// markup even on a continuation line. Escape every marker in those runs after a hard break.
+pub fn escape_djot_continuation_line_start(buffer: &mut String) {
+    let Some(line_start) = buffer.rfind('\n').map(|position| position + 1) else {
+        return;
+    };
+    let previous_line = &buffer[..line_start - 1];
+    let previous_line_start = previous_line.rfind('\n').map_or(0, |position| position + 1);
+    let previous_line = &previous_line[previous_line_start..];
+    let trailing_backslashes = previous_line.len() - previous_line.trim_end_matches('\\').len();
+    if trailing_backslashes.is_multiple_of(2) {
+        return;
+    }
+
+    let indent = buffer[line_start..]
+        .bytes()
+        .take_while(|byte| matches!(byte, b' ' | b'\t'))
+        .count();
+    let run_start = line_start + indent;
+    let Some(marker) = buffer.as_bytes().get(run_start).and_then(|byte| match byte {
+        b'-' | b'`' => Some(*byte),
+        b'\\' => buffer
+            .as_bytes()
+            .get(run_start + 1)
+            .filter(|next| matches!(next, b'-' | b'`'))
+            .copied(),
+        _ => None,
+    }) else {
+        return;
+    };
+
+    let mut position = run_start;
+    let mut count = 0usize;
+    while position < buffer.len() {
+        if buffer.as_bytes()[position] == marker {
+            position += 1;
+            count += 1;
+        } else if buffer.as_bytes()[position] == b'\\' && buffer.as_bytes().get(position + 1) == Some(&marker) {
+            position += 2;
+            count += 1;
+        } else {
+            break;
+        }
+    }
+    if count == 0 || (marker == b'-' && count < 2) {
+        return;
+    }
+
+    let mut escaped = String::with_capacity(count * 2);
+    for _ in 0..count {
+        escaped.push('\\');
+        escaped.push(char::from(marker));
+    }
+    buffer.replace_range(run_start..position, &escaped);
+}
+
 /// Whether `rest`, a line without its indentation, opens a block that can interrupt a paragraph.
 pub fn opens_block(rest: &str) -> bool {
     block_opener_offset(rest).is_some()

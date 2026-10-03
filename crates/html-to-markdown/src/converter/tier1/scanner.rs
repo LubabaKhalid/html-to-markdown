@@ -5229,19 +5229,22 @@ fn flush_text(
 
     escape_backslash_run(dest, emitted_from, in_cell);
     if !folds_lines {
-        if !inside_inline {
-            if output_format == crate::options::OutputFormat::Markdown {
+        if output_format == crate::options::OutputFormat::Markdown {
+            if !inside_inline {
                 crate::converter::utility::escaping::escape_block_start(
                     dest,
                     emitted_from,
                     in_list_item,
                     next_tag_is_inline,
                 );
-            } else if output_format == crate::options::OutputFormat::Djot {
+            }
+            crate::converter::utility::escaping::escape_continuation_line_start(dest, emitted_from);
+        } else if output_format == crate::options::OutputFormat::Djot {
+            if !inside_inline {
                 crate::converter::utility::escaping::escape_djot_list_item_start(dest, emitted_from, in_list_item);
             }
+            crate::converter::utility::escaping::escape_djot_continuation_line_start(dest);
         }
-        crate::converter::utility::escaping::escape_continuation_line_start(dest, emitted_from);
     }
     if ends_in_newline_join {
         let join_end = dest.len();
