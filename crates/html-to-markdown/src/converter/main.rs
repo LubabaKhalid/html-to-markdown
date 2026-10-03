@@ -26,8 +26,9 @@ use crate::converter::preprocessing_helpers::{
 use crate::converter::utility::caching::build_dom_context;
 use crate::converter::utility::content::{is_block_level_element, normalized_tag_name};
 use crate::converter::utility::preprocessing::{
-    normalize_bogus_comment_endings, normalize_split_closing_tags, normalize_unclosed_list_items, preprocess_html,
-    strip_bogus_comments, strip_hidden_elements, strip_script_and_style_tags,
+    normalize_bogus_comment_endings, normalize_menu_elements, normalize_split_closing_tags,
+    normalize_unclosed_list_items, preprocess_html, strip_bogus_comments, strip_hidden_elements,
+    strip_script_and_style_tags,
 };
 use crate::converter::utility::serialization::serialize_tag_to_html;
 use crate::options::{NewlineStyle, OutputFormat};
@@ -81,6 +82,7 @@ pub fn convert_html_impl(
     // ~keep The `tl` parser does not handle such end-tags and leaves the element unclosed,
     // ~keep causing all subsequent siblings to be absorbed as children.
     let stripped = normalize_split_closing_tags(&stripped);
+    let stripped = normalize_menu_elements(&stripped);
     // ~keep Insert missing `</li>`, `</dt>`, `</dd>` close tags that the HTML5 spec
     // ~keep says are implicitly added when a new list-item starts or the parent list
     // ~keep closes.  Without this, `tl` nests each item inside the previous one,
@@ -100,6 +102,7 @@ pub fn convert_html_impl(
             let stripped = strip_hidden_elements(&stripped);
             let stripped = normalize_bogus_comment_endings(&stripped);
             let stripped = normalize_split_closing_tags(&stripped);
+            let stripped = normalize_menu_elements(&stripped);
             let repaired = preprocess_html(&stripped).into_owned();
             preprocessed = repaired;
             preprocessed_len = preprocessed.len();
@@ -124,6 +127,7 @@ pub fn convert_html_impl(
             let stripped = strip_hidden_elements(&stripped);
             let stripped = normalize_bogus_comment_endings(&stripped);
             let stripped = normalize_split_closing_tags(&stripped);
+            let stripped = normalize_menu_elements(&stripped);
             preprocessed = preprocess_html(&stripped).into_owned();
             preprocessed_len = preprocessed.len();
             continue;
@@ -158,6 +162,7 @@ pub fn convert_html_impl(
             let stripped = strip_hidden_elements(&stripped);
             let stripped = normalize_bogus_comment_endings(&stripped);
             let stripped = normalize_split_closing_tags(&stripped);
+            let stripped = normalize_menu_elements(&stripped);
             preprocessed = preprocess_html(&stripped).into_owned();
             preprocessed_len = preprocessed.len();
             dom = tl::parse(&preprocessed, parser_options)

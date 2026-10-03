@@ -783,6 +783,86 @@ fn looks_like_tag_start(bytes: &[u8], idx: usize, len: usize) -> bool {
     }
 }
 
+/// Normalize `<menu>` elements to `<ul>` before parsing.
+///
+/// ~keep The bundled parser foster-parents `<li>` children out of `<menu>`, so the converter
+/// ~keep cannot preserve a menu nested in a list item after the DOM has been built (issue #657).
+pub fn normalize_menu_elements(input: &str) -> Cow<'_, str> {
+    let mut replacements = menu_name_replacements(input.as_bytes());
+    if replacements.is_empty() {
+        return Cow::Borrowed(input);
+    }
+    replacements.sort_unstable_by_key(|&(start, _)| start);
+
+    let mut output = String::with_capacity(input.len());
+    let mut last = 0;
+    for (start, end) in replacements {
+        output.push_str(&input[last..start]);
+        output.push_str("ul");
+        last = end;
+    }
+    output.push_str(&input[last..]);
+    Cow::Owned(output)
+}
+
+struct OpenMenuTag {
+    name_start: usize,
+    name_end: usize,
+    has_list_item: bool,
+}
+
+fn menu_name_replacements(bytes: &[u8]) -> Vec<(usize, usize)> {
+    let mut idx = 0;
+    let mut menus: Vec<OpenMenuTag> = Vec::new();
+    let mut replacements = Vec::new();
+    while idx < bytes.len() {
+        if bytes[idx] != b'<' {
+            idx += 1;
+            continue;
+        }
+        if let Some(region_end) = skip_opaque_region(bytes, idx) {
+            idx = region_end;
+            continue;
+        }
+        if matches_end_tag_start(bytes, idx + 1, b"menu") {
+            let close_start = idx + 2;
+            let close_end = close_start + b"menu".len();
+            let tag_end = find_tag_end(bytes, close_end).unwrap_or(bytes.len());
+            if let Some(menu) = menus.pop().filter(|menu| menu.has_list_item) {
+                replacements.push((menu.name_start, menu.name_end));
+                replacements.push((close_start, close_end));
+            }
+            idx = tag_end;
+            continue;
+        }
+        if matches_tag_start(bytes, idx + 1, b"menu") {
+            let name_start = idx + 1;
+            let name_end = name_start + b"menu".len();
+            let tag_end = find_tag_end(bytes, name_end).unwrap_or(bytes.len());
+            if !bytes[idx..tag_end].ends_with(b"/>") {
+                menus.push(OpenMenuTag {
+                    name_start,
+                    name_end,
+                    has_list_item: false,
+                });
+            }
+            idx = tag_end;
+            continue;
+        }
+        if matches_tag_start(bytes, idx + 1, b"li") {
+            if let Some(menu) = menus.last_mut() {
+                menu.has_list_item = true;
+            }
+        }
+        if opens_a_tag(bytes, idx) {
+            idx = find_tag_end(bytes, idx + 1).unwrap_or(bytes.len());
+            continue;
+        }
+        idx += 1;
+    }
+    replacements
+}
+
 /// Preprocess HTML to normalize tags and fix common issues.
 pub fn preprocess_html(input: &str) -> Cow<'_, str> {
     let bytes = input.as_bytes();
@@ -1983,8 +2063,8 @@ mod tests {
 
     use super::{
         find_closing_tag_bytes, find_closing_tag_bytes_nested, find_tag_end, normalize_bogus_comment_endings,
-        normalize_split_closing_tags, normalize_unclosed_list_items, sanitize_markdown_url, strip_bogus_comments,
-        strip_hidden_elements,
+        normalize_menu_elements, normalize_split_closing_tags, normalize_unclosed_list_items, sanitize_markdown_url,
+        strip_bogus_comments, strip_hidden_elements,
     };
 
     #[test]
@@ -2239,6 +2319,24 @@ mod tests {
     fn normalize_split_closing_tags_empty_input() {
         let result = normalize_split_closing_tags("");
         assert_eq!(result.as_ref(), "");
+    }
+
+    #[test]
+    fn normalize_menu_elements_rewrites_open_and_close_tags() {
+        let input = "<MeNu class='commands'><li>x</li></MENU>";
+        assert_eq!(normalize_menu_elements(input), "<ul class='commands'><li>x</li></ul>");
+    }
+
+    #[test]
+    fn normalize_menu_elements_ignores_opaque_and_attribute_content() {
+        let input = "<!-- <menu><li>x</li></menu> --><div data-x='<menu><li>x</li></menu>'>x</div>";
+        assert!(matches!(normalize_menu_elements(input), Cow::Borrowed(_)));
+    }
+
+    #[test]
+    fn normalize_menu_elements_leaves_text_only_menu_unchanged() {
+        let input = "<menu>b</menu>";
+        assert!(matches!(normalize_menu_elements(input), Cow::Borrowed(_)));
     }
 
     #[test]

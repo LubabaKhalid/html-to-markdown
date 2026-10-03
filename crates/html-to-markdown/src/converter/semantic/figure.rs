@@ -127,29 +127,18 @@ pub fn handle_figure(
             }
         }
 
-        if !output.is_empty() && !output.ends_with("\n\n") {
-            output.push_str("\n\n");
-        }
-
         let figure_start = output.len();
 
         let mut figure_content = String::new();
         let children = tag.children();
         {
-            // ~keep The figure is written at the start of the line, so inside it the list item
-            // ~keep has ended (issue #583).
-            let figure_ctx = super::Context {
-                list_item_open: false,
-                real_item_columns: 0,
-                ..ctx.clone()
-            };
             for child_handle in children.top().iter() {
                 super::walk_node(
                     child_handle,
                     parser,
                     &mut figure_content,
                     options,
-                    &figure_ctx,
+                    ctx,
                     depth + 1,
                     dom_ctx,
                 );
@@ -171,13 +160,7 @@ pub fn handle_figure(
 
         let trimmed = figure_content.trim_matches(|c| c == '\n' || c == ' ' || c == '\t');
         if !trimmed.is_empty() {
-            output.push_str(trimmed);
-            if !output.ends_with('\n') {
-                output.push('\n');
-            }
-            if !output.ends_with("\n\n") {
-                output.push('\n');
-            }
+            crate::converter::block::div::push_block(output, options, ctx, trimmed);
         }
 
         #[cfg(feature = "visitor")]

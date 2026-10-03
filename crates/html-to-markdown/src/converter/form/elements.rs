@@ -181,49 +181,7 @@ pub fn handle_fieldset(
     depth: usize,
     dom_ctx: &super::DomContext,
 ) {
-    if let Some(tl::Node::Tag(tag)) = node_handle.get(parser) {
-        if ctx.convert_as_inline {
-            let children = tag.children();
-            {
-                for child_handle in children.top().iter() {
-                    super::walk_node(child_handle, parser, output, options, ctx, depth + 1, dom_ctx);
-                }
-            }
-            return;
-        }
-
-        let mut content = String::new();
-        let children = tag.children();
-        {
-            // ~keep The element is written at the start of the line, so inside it a list item
-            // ~keep has ended (issue #583).
-            let block_ctx = super::Context {
-                list_item_open: false,
-                ..ctx.clone()
-            };
-            for child_handle in children.top().iter() {
-                walk_node(
-                    child_handle,
-                    parser,
-                    &mut content,
-                    options,
-                    &block_ctx,
-                    depth + 1,
-                    dom_ctx,
-                );
-            }
-        }
-
-        let trimmed = content.trim();
-        if !trimmed.is_empty() {
-            if !output.is_empty() && !output.ends_with("\n\n") {
-                output.push_str("\n\n");
-            }
-
-            output.push_str(trimmed);
-            output.push_str("\n\n");
-        }
-    }
+    crate::converter::block::div::handle(node_handle, parser, output, options, ctx, depth, dom_ctx);
 }
 
 /// Handles the `<legend>` element.
