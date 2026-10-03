@@ -38,7 +38,7 @@ pub fn handle_blockquote(
     depth: usize,
     dom_ctx: &DomContext,
 ) {
-    if ctx.in_heading {
+    if ctx.in_heading && !ctx.in_table_cell {
         let mut content = String::new();
         for child_handle in tag.children().top().iter() {
             walk_node(child_handle, parser, &mut content, options, ctx, depth + 1, dom_ctx);
