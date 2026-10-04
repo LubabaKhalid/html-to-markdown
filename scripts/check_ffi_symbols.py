@@ -371,22 +371,29 @@ def compare_php_functions() -> Comparison:
     # ~keep missing probe root counts as a root with no call site, not as a skipped diff.
     sites_by_root = dict.fromkeys(PHP_PROBE_ROOTS, 0)
     for root_name in PHP_PROBE_ROOTS:
-        root = ROOT / root_name
-        if not root.is_dir():
-            continue
-        for path in sorted(root.rglob("*.php")):
-            for line_number, line in enumerate(strip_php_comments(read_text(path)).splitlines(), start=1):
-                for match in PHP_FUNCTION_CALL_RE.finditer(line):
-                    symbol = next(group for group in match.groups() if group)
-                    sites_by_root[root_name] += 1
-                    if symbol not in comparison.exported:
-                        comparison.findings.append(Finding(symbol, "php-ext", str(path.relative_to(ROOT)), line_number))
+        sites_by_root[root_name] = scan_php_probe_root(root_name, comparison)
     comparison.call_sites = sum(sites_by_root.values())
     if comparison.exported:
         comparison.languages.add("php-ext")
         comparison.sites_by_language["php-ext"] = comparison.call_sites
         comparison.sites_by_root["php-ext"] = sites_by_root
     return comparison
+
+
+def scan_php_probe_root(root_name: str, comparison: Comparison) -> int:
+    """Scan one PHP smoke-app root and return its number of global function calls."""
+    root = ROOT / root_name
+    if not root.is_dir():
+        return 0
+    call_sites = 0
+    for path in sorted(root.rglob("*.php")):
+        for line_number, line in enumerate(strip_php_comments(read_text(path)).splitlines(), start=1):
+            for match in PHP_FUNCTION_CALL_RE.finditer(line):
+                symbol = next(group for group in match.groups() if group)
+                call_sites += 1
+                if symbol not in comparison.exported:
+                    comparison.findings.append(Finding(symbol, "php-ext", str(path.relative_to(ROOT)), line_number))
+    return call_sites
 
 
 def group_by_symbol(findings: list[Finding]) -> dict[str, list[Finding]]:
@@ -479,7 +486,7 @@ def report_comparison(
     return blocking, allowed, resolved, orphaned, silent
 
 
-def main() -> int:
+def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument(
         "--allow-known",
@@ -493,7 +500,32 @@ def main() -> int:
         help="list every call site instead of the first few per symbol",
     )
     parser.add_argument("--json", action="store_true", help="emit a machine-readable summary on stdout")
-    args = parser.parse_args()
+    return parser.parse_args()
+
+
+def emit_json_summary(c_abi: Comparison, php: Comparison, disagreements: list[str]) -> None:
+    print(
+        json.dumps(
+            {
+                "exported_c_abi": len(c_abi.exported),
+                "call_sites_c_abi": c_abi.call_sites,
+                "languages_c_abi": sorted(c_abi.languages),
+                "sites_by_language_c_abi": c_abi.sites_by_language,
+                "sites_by_root_c_abi": c_abi.sites_by_root,
+                "silent_detectors": silent_languages(c_abi) + silent_languages(php),
+                "export_source_disagreements": disagreements,
+                "missing": [
+                    {"symbol": f.symbol, "language": f.language, "path": f.path, "line": f.line}
+                    for f in c_abi.findings + php.findings
+                ],
+            },
+            indent=2,
+        )
+    )
+
+
+def main() -> int:
+    args = parse_args()
 
     if not FFI_HEADER.is_file():
         print(f"FATAL: canonical header not found: {FFI_HEADER}", file=sys.stderr)
@@ -503,24 +535,7 @@ def main() -> int:
     php = compare_php_functions()
 
     if args.json:
-        print(
-            json.dumps(
-                {
-                    "exported_c_abi": len(c_abi.exported),
-                    "call_sites_c_abi": c_abi.call_sites,
-                    "languages_c_abi": sorted(c_abi.languages),
-                    "sites_by_language_c_abi": c_abi.sites_by_language,
-                    "sites_by_root_c_abi": c_abi.sites_by_root,
-                    "silent_detectors": silent_languages(c_abi) + silent_languages(php),
-                    "export_source_disagreements": disagreements,
-                    "missing": [
-                        {"symbol": f.symbol, "language": f.language, "path": f.path, "line": f.line}
-                        for f in c_abi.findings + php.findings
-                    ],
-                },
-                indent=2,
-            )
-        )
+        emit_json_summary(c_abi, php, disagreements)
 
     print("=" * 78)
     print("FFI symbol export/caller diff")
