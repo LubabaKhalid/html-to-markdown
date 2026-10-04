@@ -923,6 +923,10 @@ jobs:
     if: ${{ needs.prepare.outputs.release_node == 'true' && (needs.check-npm.outputs.node_exists != 'true' || needs.prepare.outputs.force_republish == 'true') }}
     runs-on: ${{ matrix.os }}
     timeout-minutes: 180
+    # ~keep The NAPI action recreates npm/ after deleting it. pnpm 12 otherwise rejects the
+    # temporarily missing workspace importers before napi can recreate them.
+    env:
+      PNPM_CONFIG_FROZEN_LOCKFILE: "false"
     strategy:
       fail-fast: false
       matrix:

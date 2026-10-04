@@ -30,3 +30,10 @@ def test_elixir_dry_run_skips_registry_dependency_rewrite() -> None:
     rewrite = next(step for step in steps if step.get("uses") == "xberg-io/actions/rewrite-native-deps@v1")
 
     assert rewrite["if"] == "needs.prepare.outputs.dry_run != 'true'"
+
+
+def test_node_release_builds_allow_napi_platform_regeneration() -> None:
+    """The NAPI action deletes and recreates workspace platform packages."""
+    workflow = yaml.safe_load((ROOT / ".github/workflows/publish.yaml").read_text())
+
+    assert workflow["jobs"]["node-bindings"]["env"] == {"PNPM_CONFIG_FROZEN_LOCKFILE": "false"}
