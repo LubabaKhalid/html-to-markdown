@@ -3,54 +3,8 @@ name: CI E2E
 on:
   push:
     branches: [main]
-    paths:
-      - "crates/**"
-      - "packages/**"
-      - "e2e/**"
-      - "fixtures/**"
-      - "alef.toml"
-      - "tools/**"
-      - "scripts/**"
-      - "Cargo.toml"
-      - "Cargo.lock"
-      - "Taskfile.yaml"
-      - ".task/**"
-      - "pyproject.toml"
-      - "uv.lock"
-      - "uv.toml"
-      - "pnpm-lock.yaml"
-      - "pnpm-workspace.yaml"
-      - "package.json"
-      - "composer.json"
-      - "composer.lock"
-      - "rust-toolchain.toml"
-      - ".cargo/config.toml"
-      - ".github/workflows/ci-e2e.yaml"
   pull_request:
     branches: [main]
-    paths:
-      - "crates/**"
-      - "packages/**"
-      - "e2e/**"
-      - "fixtures/**"
-      - "alef.toml"
-      - "tools/**"
-      - "scripts/**"
-      - "Cargo.toml"
-      - "Cargo.lock"
-      - "Taskfile.yaml"
-      - ".task/**"
-      - "pyproject.toml"
-      - "uv.lock"
-      - "uv.toml"
-      - "pnpm-lock.yaml"
-      - "pnpm-workspace.yaml"
-      - "package.json"
-      - "composer.json"
-      - "composer.lock"
-      - "rust-toolchain.toml"
-      - ".cargo/config.toml"
-      - ".github/workflows/ci-e2e.yaml"
   workflow_dispatch: {}
 
 # ~keep `github.sha` not `github.ref` for pushes: a cancelled run reports neither pass

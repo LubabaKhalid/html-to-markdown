@@ -26,3 +26,10 @@ def test_r_configure_changes_start_lint_for_pushes_and_pull_requests() -> None:
 
     for event in ("push", "pull_request"):
         assert "packages/r/configure" in workflow["on"][event]["paths"]
+
+
+def test_e2e_result_reports_for_every_push_and_pull_request() -> None:
+    workflow = _workflow("ci-e2e.yaml")
+
+    for event in ("push", "pull_request"):
+        assert set(workflow["on"][event]) == {"branches"}
