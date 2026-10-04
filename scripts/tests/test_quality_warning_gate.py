@@ -55,6 +55,29 @@ def test_no_quality_warning_passes(monkeypatch: pytest.MonkeyPatch) -> None:
     assert check_quality_warnings.main() == 0
 
 
+def test_baseline_only_change_scans_unchanged_source_files(monkeypatch: pytest.MonkeyPatch) -> None:
+    payload = {
+        "results": [
+            {
+                "path": "crates/html-to-markdown/src/lib.rs",
+                "diagnostics": [
+                    {
+                        "engine": "quality",
+                        "severity": "warning",
+                        "code": "file-too-long",
+                        "title": "file is 801 lines (max 800)",
+                    }
+                ],
+            }
+        ]
+    }
+    run = Mock(side_effect=[_git_result("alef.toml"), _poly_result(payload)])
+    monkeypatch.setattr(check_quality_warnings.subprocess, "run", run)
+
+    assert check_quality_warnings.main() == 1
+    assert run.call_args_list[1].args[0] == ["poly", "lint", ".", "--format", "json", "--no-workspace"]
+
+
 def test_poly_failure_is_not_hidden(monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]) -> None:
     run = Mock(side_effect=[_git_result("scripts/check_quality_warnings.py"), _poly_result({}, returncode=2)])
     monkeypatch.setattr(check_quality_warnings.subprocess, "run", run)

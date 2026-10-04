@@ -11,6 +11,7 @@ from pathlib import Path
 from typing import Any
 
 ROOT = Path(__file__).resolve().parents[1]
+REPO_WIDE_QUALITY_CONFIGS = {"alef.toml", "poly.toml"}
 
 
 def _quality_warnings(payload: dict[str, Any]) -> list[str]:
@@ -42,8 +43,9 @@ def main() -> int:
     paths = [path for path in changed.stdout.splitlines() if (ROOT / path).is_file()]
     if not paths:
         return 0
+    lint_paths = ["."] if REPO_WIDE_QUALITY_CONFIGS.intersection(paths) else paths
     result = subprocess.run(
-        ["poly", "lint", *paths, "--format", "json", "--no-workspace"],
+        ["poly", "lint", *lint_paths, "--format", "json", "--no-workspace"],
         cwd=ROOT,
         check=False,
         capture_output=True,
