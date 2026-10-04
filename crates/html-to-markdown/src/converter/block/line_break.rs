@@ -161,24 +161,11 @@ pub fn handle(
         // ~keep survives is `normalize_link_label`'s decision, not this one's.
         output.push_str(hard_break_marker(options));
     } else if output.len() == ctx.block_content_start {
-        // ~keep A <br> with nothing before it on the current line has no prior line to
-        // ~keep break: emitting a style marker here would leave a leading artifact instead
-        // ~keep of being invisible. A leading run of <br> therefore collapses to no output
-        // ~keep at all (issue #464), rather than the previous "swallow every break after the
-        // ~keep first" check (`output.ends_with('\n')`), which also matched — and silently
-        // ~keep collapsed — a run of *consecutive* breaks with real content before them.
-        // ~keep Unguarded by `ctx.in_paragraph` (unlike `text_node.rs`'s identical-looking
-        // ~keep check): a bare top-level <br> with no enclosing paragraph/div takes the
-        // ~keep same two arms -- the default `block_content_start: 0` from a fresh `Context`
-        // ~keep equals `output.len()` only at true document start, so `a<br>b` gets the
-        // ~keep marker below exactly as it would inside `<body>` (Tier-1 matches, issue #679).
-        //
-        // ~keep The bare `\n` (rather than no output at all) is load-bearing and predates
-        // ~keep #464: `integration_test.rs::test_breaks_and_newlines_issue_112` pins that a
-        // ~keep leading top-level `<br>` still opens a line. Only the CONDITION changed for
-        // ~keep #464 -- the old `output.ends_with('\n')` also matched a break that followed
-        // ~keep another break's marker, which is what swallowed consecutive runs.
-        output.push('\n');
+        // ~keep A paragraph-leading break has no preceding line and therefore emits nothing
+        // ~keep (#572). A bare top-level break remains an intentional leading line (#112).
+        if !ctx.in_paragraph {
+            output.push('\n');
+        }
     } else {
         // ~keep A break on a line of its own (`<li>a<br><br>b</li>`) is written at the item's
         // ~keep content column like text there, or a backslash line leaves the item (issue #681).

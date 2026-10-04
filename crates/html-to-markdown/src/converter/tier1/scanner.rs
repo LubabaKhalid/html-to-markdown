@@ -2150,11 +2150,19 @@ fn emit_void(
                 // this buffer (`flush_text`'s `in_code && !in_pre` branch).
                 state.cell_or_output_mut().push('\n');
             } else {
-                // ~keep Also a `<br>` that no element encloses (`a<br>b`): Tier-2 writes the
-                // same marker there as inside `<body>`, so the top level is not a case of its own.
+                let paragraph_start = state
+                    .stack
+                    .iter()
+                    .rev()
+                    .find(|frame| matches!(frame.spec.kind, TagKind::Paragraph))
+                    .map(|frame| frame.content_start);
                 let dest = state.cell_or_output_mut();
-                crate::converter::main_helpers::trim_trailing_whitespace(dest);
-                dest.push_str(crate::converter::main_helpers::hard_break_marker(options));
+                // ~keep Match Tier-2: a paragraph-leading break has no preceding line and
+                // ~keep emits nothing, while a bare top-level break still opens a line (#572).
+                if paragraph_start != Some(dest.len()) {
+                    crate::converter::main_helpers::trim_trailing_whitespace(dest);
+                    dest.push_str(crate::converter::main_helpers::hard_break_marker(options));
+                }
             }
         }
 

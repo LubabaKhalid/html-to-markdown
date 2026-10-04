@@ -22,7 +22,7 @@ fn should_escape_any_ordered_list_number_at_a_fresh_block_start() {
         ("<p>2. z</p>", "2\\. z\n", "2\\. z\n"),
         ("<p>2.<span> z</span></p>", "2\\. z\n", "2\\. z\n"),
         ("<span>2. z</span>", "2\\. z\n", "2\\. z\n"),
-        ("<p><br>2. z</p>", "\n2\\. z\n", "\n2\\. z\n"),
+        ("<p><br>2. z</p>", "2\\. z\n", "2\\. z\n"),
         ("<dl><dd><br>2. z</dd></dl>", "\n2\\. z\n", "2\\. z\n"),
         ("<p>42) answer</p>", "42\\) answer\n", "42\\) answer\n"),
     ];
