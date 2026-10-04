@@ -232,8 +232,8 @@ fn run_tier2(prepared: PreparedConversion<'_>, options: ConversionOptions) -> Re
     finish_conversion(markdown, document, tables, depth_warning, collectors)
 }
 
+#[cfg(any(feature = "metadata", feature = "inline-images"))]
 fn create_collectors(options: &ConversionOptions) -> Result<Tier2Collectors> {
-    let _ = options;
     #[cfg(feature = "metadata")]
     let metadata = options.extract_metadata.then(|| {
         std::rc::Rc::new(std::cell::RefCell::new(crate::metadata::MetadataCollector::new(
@@ -257,6 +257,11 @@ fn create_collectors(options: &ConversionOptions) -> Result<Tier2Collectors> {
         #[cfg(feature = "inline-images")]
         images,
     })
+}
+
+#[cfg(not(any(feature = "metadata", feature = "inline-images")))]
+const fn create_collectors(_: &ConversionOptions) -> Result<Tier2Collectors> {
+    Ok(Tier2Collectors {})
 }
 
 fn invoke_converter(

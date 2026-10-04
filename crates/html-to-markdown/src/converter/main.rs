@@ -953,7 +953,7 @@ fn collect_document_attributes(tag_name: &str, tag: &tl::HTMLTag<'_>, ctx: &Cont
 }
 
 #[cfg(not(feature = "metadata"))]
-fn collect_document_attributes(_tag_name: &str, _tag: &tl::HTMLTag<'_>, _ctx: &Context) {}
+const fn collect_document_attributes(_tag_name: &str, _tag: &tl::HTMLTag<'_>, _ctx: &Context) {}
 
 /// ~keep Block dispatch is where a trailing hard-break run becomes knowably
 /// ineffective; container endings handle the no-following-sibling case themselves.
