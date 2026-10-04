@@ -1232,6 +1232,13 @@ const _: fn() = || {
         crate::ConversionError::InvalidInput { field0 } => {
             let _: String = field0;
         }
+        crate::ConversionError::InputTooLarge {
+            observed_size,
+            max_size,
+        } => {
+            let _: i64 = observed_size;
+            let _: i64 = max_size;
+        }
         crate::ConversionError::Other { field0 } => {
             let _: String = field0;
         }
@@ -1277,6 +1284,7 @@ const _: fn() = || {
         let _: bool = ConversionOptions.include_document_structure;
         let _: bool = ConversionOptions.extract_images;
         let _: i64 = ConversionOptions.max_image_size;
+        let _: Option<i64> = ConversionOptions.max_input_size;
         let _: bool = ConversionOptions.capture_svg;
         let _: bool = ConversionOptions.infer_dimensions;
         let _: Option<i64> = ConversionOptions.max_depth;
@@ -1326,6 +1334,7 @@ const _: fn() = || {
         let _: Option<bool> = ConversionOptionsUpdate.include_document_structure;
         let _: Option<bool> = ConversionOptionsUpdate.extract_images;
         let _: Option<i64> = ConversionOptionsUpdate.max_image_size;
+        let _: Option<i64> = ConversionOptionsUpdate.max_input_size;
         let _: Option<bool> = ConversionOptionsUpdate.capture_svg;
         let _: Option<bool> = ConversionOptionsUpdate.infer_dimensions;
         let _: Option<i64> = ConversionOptionsUpdate.max_depth;
@@ -2212,6 +2221,14 @@ impl SseDecode for crate::ConversionError {
                 return crate::ConversionError::InvalidInput { field0: var_field0 };
             }
             6 => {
+                let mut var_observedSize = <i64>::sse_decode(deserializer);
+                let mut var_maxSize = <i64>::sse_decode(deserializer);
+                return crate::ConversionError::InputTooLarge {
+                    observed_size: var_observedSize,
+                    max_size: var_maxSize,
+                };
+            }
+            7 => {
                 let mut var_field0 = <String>::sse_decode(deserializer);
                 return crate::ConversionError::Other { field0: var_field0 };
             }
@@ -2264,6 +2281,7 @@ impl SseDecode for crate::ConversionOptions {
         let mut var_includeDocumentStructure = <bool>::sse_decode(deserializer);
         let mut var_extractImages = <bool>::sse_decode(deserializer);
         let mut var_maxImageSize = <i64>::sse_decode(deserializer);
+        let mut var_maxInputSize = <Option<i64>>::sse_decode(deserializer);
         let mut var_captureSvg = <bool>::sse_decode(deserializer);
         let mut var_inferDimensions = <bool>::sse_decode(deserializer);
         let mut var_maxDepth = <Option<i64>>::sse_decode(deserializer);
@@ -2311,6 +2329,7 @@ impl SseDecode for crate::ConversionOptions {
             include_document_structure: var_includeDocumentStructure,
             extract_images: var_extractImages,
             max_image_size: var_maxImageSize,
+            max_input_size: var_maxInputSize,
             capture_svg: var_captureSvg,
             infer_dimensions: var_inferDimensions,
             max_depth: var_maxDepth,
@@ -2364,6 +2383,7 @@ impl SseDecode for crate::ConversionOptionsUpdate {
         let mut var_includeDocumentStructure = <Option<bool>>::sse_decode(deserializer);
         let mut var_extractImages = <Option<bool>>::sse_decode(deserializer);
         let mut var_maxImageSize = <Option<i64>>::sse_decode(deserializer);
+        let mut var_maxInputSize = <Option<i64>>::sse_decode(deserializer);
         let mut var_captureSvg = <Option<bool>>::sse_decode(deserializer);
         let mut var_inferDimensions = <Option<bool>>::sse_decode(deserializer);
         let mut var_maxDepth = <Option<i64>>::sse_decode(deserializer);
@@ -2411,6 +2431,7 @@ impl SseDecode for crate::ConversionOptionsUpdate {
             include_document_structure: var_includeDocumentStructure,
             extract_images: var_extractImages,
             max_image_size: var_maxImageSize,
+            max_input_size: var_maxInputSize,
             capture_svg: var_captureSvg,
             infer_dimensions: var_inferDimensions,
             max_depth: var_maxDepth,
@@ -3795,8 +3816,17 @@ impl flutter_rust_bridge::IntoDart for FrbWrapper<crate::ConversionError> {
             crate::ConversionError::InvalidInput { field0 } => {
                 [5.into_dart(), field0.into_into_dart().into_dart()].into_dart()
             }
+            crate::ConversionError::InputTooLarge {
+                observed_size,
+                max_size,
+            } => [
+                6.into_dart(),
+                observed_size.into_into_dart().into_dart(),
+                max_size.into_into_dart().into_dart(),
+            ]
+            .into_dart(),
             crate::ConversionError::Other { field0 } => {
-                [6.into_dart(), field0.into_into_dart().into_dart()].into_dart()
+                [7.into_dart(), field0.into_into_dart().into_dart()].into_dart()
             }
             _ => {
                 unimplemented!("");
@@ -3853,6 +3883,7 @@ impl flutter_rust_bridge::IntoDart for FrbWrapper<crate::ConversionOptions> {
             self.0.include_document_structure.into_into_dart().into_dart(),
             self.0.extract_images.into_into_dart().into_dart(),
             self.0.max_image_size.into_into_dart().into_dart(),
+            self.0.max_input_size.into_into_dart().into_dart(),
             self.0.capture_svg.into_into_dart().into_dart(),
             self.0.infer_dimensions.into_into_dart().into_dart(),
             self.0.max_depth.into_into_dart().into_dart(),
@@ -3913,6 +3944,7 @@ impl flutter_rust_bridge::IntoDart for FrbWrapper<crate::ConversionOptionsUpdate
             self.0.include_document_structure.into_into_dart().into_dart(),
             self.0.extract_images.into_into_dart().into_dart(),
             self.0.max_image_size.into_into_dart().into_dart(),
+            self.0.max_input_size.into_into_dart().into_dart(),
             self.0.capture_svg.into_into_dart().into_dart(),
             self.0.infer_dimensions.into_into_dart().into_dart(),
             self.0.max_depth.into_into_dart().into_dart(),
@@ -4890,8 +4922,16 @@ impl SseEncode for crate::ConversionError {
                 <i32>::sse_encode(5, serializer);
                 <String>::sse_encode(field0, serializer);
             }
-            crate::ConversionError::Other { field0 } => {
+            crate::ConversionError::InputTooLarge {
+                observed_size,
+                max_size,
+            } => {
                 <i32>::sse_encode(6, serializer);
+                <i64>::sse_encode(observed_size, serializer);
+                <i64>::sse_encode(max_size, serializer);
+            }
+            crate::ConversionError::Other { field0 } => {
+                <i32>::sse_encode(7, serializer);
                 <String>::sse_encode(field0, serializer);
             }
             _ => {
@@ -4943,6 +4983,7 @@ impl SseEncode for crate::ConversionOptions {
         <bool>::sse_encode(self.include_document_structure, serializer);
         <bool>::sse_encode(self.extract_images, serializer);
         <i64>::sse_encode(self.max_image_size, serializer);
+        <Option<i64>>::sse_encode(self.max_input_size, serializer);
         <bool>::sse_encode(self.capture_svg, serializer);
         <bool>::sse_encode(self.infer_dimensions, serializer);
         <Option<i64>>::sse_encode(self.max_depth, serializer);
@@ -4995,6 +5036,7 @@ impl SseEncode for crate::ConversionOptionsUpdate {
         <Option<bool>>::sse_encode(self.include_document_structure, serializer);
         <Option<bool>>::sse_encode(self.extract_images, serializer);
         <Option<i64>>::sse_encode(self.max_image_size, serializer);
+        <Option<i64>>::sse_encode(self.max_input_size, serializer);
         <Option<bool>>::sse_encode(self.capture_svg, serializer);
         <Option<bool>>::sse_encode(self.infer_dimensions, serializer);
         <Option<i64>>::sse_encode(self.max_depth, serializer);

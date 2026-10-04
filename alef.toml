@@ -1,5 +1,5 @@
 [workspace]
-alef_version = "0.103.12"
+alef_version = "0.103.13"
 languages = [
   "python",
   "node",
@@ -920,6 +920,7 @@ output = "packages/ruby/sig/"
 [crates.php]
 extension_name = "html_to_markdown"
 namespace = "HtmlToMarkdown"
+exclude_functions = ["visitor"]
 
 [crates.elixir]
 app_name = "html_to_markdown"
@@ -1798,7 +1799,7 @@ Note: The package was previously published as `goldziher/html-to-markdown`, whic
 migration_version = ""
 
 [crates.readme.languages.php.features]
-visitor_pattern = true
+visitor_pattern = false
 metadata_extraction = true
 cli_proxy = false
 
@@ -1826,7 +1827,6 @@ ops_sec = 485
 basic_usage = "getting-started/basic_usage.md"
 with_options = "getting-started/with_options.md"
 metadata_extraction = "metadata/basic_extraction.md"
-visitor_basic = "visitor/basic_visitor.md"
 table_extraction = "table-extraction/basic_extraction.md"
 
 [crates.readme.languages.go]

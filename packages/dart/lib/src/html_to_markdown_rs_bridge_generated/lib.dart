@@ -20,7 +20,8 @@ part 'lib.freezed.dart';
 ///
 /// **Errors:**
 ///
-/// Returns an error if HTML parsing fails or if the input contains invalid UTF-8.
+/// Returns an error if the configured input-size limit is exceeded, HTML parsing fails,
+/// or the input contains invalid UTF-8.
 ///
 /// # Observability
 ///
@@ -353,6 +354,12 @@ sealed class ConversionError with _$ConversionError {
   const factory ConversionError.invalidInput({required String field0}) =
       ConversionError_InvalidInput;
 
+  /// Input exceeds the configured byte limit.
+  const factory ConversionError.inputTooLarge({
+    required PlatformInt64 observedSize,
+    required PlatformInt64 maxSize,
+  }) = ConversionError_InputTooLarge;
+
   /// Generic conversion error
   const factory ConversionError.other({required String field0}) =
       ConversionError_Other;
@@ -530,6 +537,13 @@ class ConversionOptions {
   /// Maximum decoded image size in bytes (default 5MB).
   final PlatformInt64 maxImageSize;
 
+  /// Maximum accepted HTML input size in bytes.
+  ///
+  /// WebAssembly builds default to [`DEFAULT_WASM_MAX_INPUT_SIZE`] (2 MiB) to avoid
+  /// an uncatchable stack-exhaustion trap on unusually large DOMs. Native builds default
+  /// to `None`. Set `Some(bytes)` to choose another limit or `None` to disable it.
+  final PlatformInt64? maxInputSize;
+
   /// Capture SVG elements as images.
   final bool captureSvg;
 
@@ -631,6 +645,7 @@ class ConversionOptions {
     required this.includeDocumentStructure,
     required this.extractImages,
     required this.maxImageSize,
+    this.maxInputSize,
     required this.captureSvg,
     required this.inferDimensions,
     this.maxDepth,
@@ -681,6 +696,7 @@ class ConversionOptions {
       includeDocumentStructure.hashCode ^
       extractImages.hashCode ^
       maxImageSize.hashCode ^
+      maxInputSize.hashCode ^
       captureSvg.hashCode ^
       inferDimensions.hashCode ^
       maxDepth.hashCode ^
@@ -733,6 +749,7 @@ class ConversionOptions {
           includeDocumentStructure == other.includeDocumentStructure &&
           extractImages == other.extractImages &&
           maxImageSize == other.maxImageSize &&
+          maxInputSize == other.maxInputSize &&
           captureSvg == other.captureSvg &&
           inferDimensions == other.inferDimensions &&
           maxDepth == other.maxDepth &&
@@ -864,6 +881,9 @@ class ConversionOptionsUpdate {
   /// Optional override for [`ConversionOptions::max_image_size`].
   final PlatformInt64? maxImageSize;
 
+  /// Optional override for [`ConversionOptions::max_input_size`].
+  final PlatformInt64? maxInputSize;
+
   /// Optional override for [`ConversionOptions::capture_svg`].
   final bool? captureSvg;
 
@@ -925,6 +945,7 @@ class ConversionOptionsUpdate {
     this.includeDocumentStructure,
     this.extractImages,
     this.maxImageSize,
+    this.maxInputSize,
     this.captureSvg,
     this.inferDimensions,
     this.maxDepth,
@@ -975,6 +996,7 @@ class ConversionOptionsUpdate {
       includeDocumentStructure.hashCode ^
       extractImages.hashCode ^
       maxImageSize.hashCode ^
+      maxInputSize.hashCode ^
       captureSvg.hashCode ^
       inferDimensions.hashCode ^
       maxDepth.hashCode ^
@@ -1027,6 +1049,7 @@ class ConversionOptionsUpdate {
           includeDocumentStructure == other.includeDocumentStructure &&
           extractImages == other.extractImages &&
           maxImageSize == other.maxImageSize &&
+          maxInputSize == other.maxInputSize &&
           captureSvg == other.captureSvg &&
           inferDimensions == other.inferDimensions &&
           maxDepth == other.maxDepth &&

@@ -2797,6 +2797,11 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       case 5:
         return ConversionError_InvalidInput(field0: dco_decode_String(raw[1]));
       case 6:
+        return ConversionError_InputTooLarge(
+          observedSize: dco_decode_i_64(raw[1]),
+          maxSize: dco_decode_i_64(raw[2]),
+        );
+      case 7:
         return ConversionError_Other(field0: dco_decode_String(raw[1]));
       default:
         throw Exception("unreachable");
@@ -2807,8 +2812,8 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   ConversionOptions dco_decode_conversion_options(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     final arr = raw as List<dynamic>;
-    if (arr.length != 46)
-      throw Exception('unexpected arr length: expect 46 but see ${arr.length}');
+    if (arr.length != 47)
+      throw Exception('unexpected arr length: expect 47 but see ${arr.length}');
     return ConversionOptions(
       headingStyle: dco_decode_heading_style(arr[0]),
       listIndentType: dco_decode_list_indent_type(arr[1]),
@@ -2849,15 +2854,16 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       includeDocumentStructure: dco_decode_bool(arr[36]),
       extractImages: dco_decode_bool(arr[37]),
       maxImageSize: dco_decode_i_64(arr[38]),
-      captureSvg: dco_decode_bool(arr[39]),
-      inferDimensions: dco_decode_bool(arr[40]),
-      maxDepth: dco_decode_opt_box_autoadd_i_64(arr[41]),
-      excludeSelectors: dco_decode_list_String(arr[42]),
-      tierStrategy: dco_decode_tier_strategy(arr[43]),
-      baseUrl: dco_decode_opt_String(arr[44]),
+      maxInputSize: dco_decode_opt_box_autoadd_i_64(arr[39]),
+      captureSvg: dco_decode_bool(arr[40]),
+      inferDimensions: dco_decode_bool(arr[41]),
+      maxDepth: dco_decode_opt_box_autoadd_i_64(arr[42]),
+      excludeSelectors: dco_decode_list_String(arr[43]),
+      tierStrategy: dco_decode_tier_strategy(arr[44]),
+      baseUrl: dco_decode_opt_String(arr[45]),
       visitor:
           dco_decode_opt_box_autoadd_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerVisitorHandle(
-            arr[45],
+            arr[46],
           ),
     );
   }
@@ -2866,8 +2872,8 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   ConversionOptionsUpdate dco_decode_conversion_options_update(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     final arr = raw as List<dynamic>;
-    if (arr.length != 46)
-      throw Exception('unexpected arr length: expect 46 but see ${arr.length}');
+    if (arr.length != 47)
+      throw Exception('unexpected arr length: expect 47 but see ${arr.length}');
     return ConversionOptionsUpdate(
       headingStyle: dco_decode_opt_box_autoadd_heading_style(arr[0]),
       listIndentType: dco_decode_opt_box_autoadd_list_indent_type(arr[1]),
@@ -2910,15 +2916,16 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       includeDocumentStructure: dco_decode_opt_box_autoadd_bool(arr[36]),
       extractImages: dco_decode_opt_box_autoadd_bool(arr[37]),
       maxImageSize: dco_decode_opt_box_autoadd_i_64(arr[38]),
-      captureSvg: dco_decode_opt_box_autoadd_bool(arr[39]),
-      inferDimensions: dco_decode_opt_box_autoadd_bool(arr[40]),
-      maxDepth: dco_decode_opt_box_autoadd_i_64(arr[41]),
-      excludeSelectors: dco_decode_opt_list_String(arr[42]),
-      tierStrategy: dco_decode_opt_box_autoadd_tier_strategy(arr[43]),
-      baseUrl: dco_decode_opt_String(arr[44]),
+      maxInputSize: dco_decode_opt_box_autoadd_i_64(arr[39]),
+      captureSvg: dco_decode_opt_box_autoadd_bool(arr[40]),
+      inferDimensions: dco_decode_opt_box_autoadd_bool(arr[41]),
+      maxDepth: dco_decode_opt_box_autoadd_i_64(arr[42]),
+      excludeSelectors: dco_decode_opt_list_String(arr[43]),
+      tierStrategy: dco_decode_opt_box_autoadd_tier_strategy(arr[44]),
+      baseUrl: dco_decode_opt_String(arr[45]),
       visitor:
           dco_decode_opt_box_autoadd_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerVisitorHandle(
-            arr[45],
+            arr[46],
           ),
     );
   }
@@ -3951,6 +3958,13 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
         var var_field0 = sse_decode_String(deserializer);
         return ConversionError_InvalidInput(field0: var_field0);
       case 6:
+        var var_observedSize = sse_decode_i_64(deserializer);
+        var var_maxSize = sse_decode_i_64(deserializer);
+        return ConversionError_InputTooLarge(
+          observedSize: var_observedSize,
+          maxSize: var_maxSize,
+        );
+      case 7:
         var var_field0 = sse_decode_String(deserializer);
         return ConversionError_Other(field0: var_field0);
       default:
@@ -4002,6 +4016,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     var var_includeDocumentStructure = sse_decode_bool(deserializer);
     var var_extractImages = sse_decode_bool(deserializer);
     var var_maxImageSize = sse_decode_i_64(deserializer);
+    var var_maxInputSize = sse_decode_opt_box_autoadd_i_64(deserializer);
     var var_captureSvg = sse_decode_bool(deserializer);
     var var_inferDimensions = sse_decode_bool(deserializer);
     var var_maxDepth = sse_decode_opt_box_autoadd_i_64(deserializer);
@@ -4052,6 +4067,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       includeDocumentStructure: var_includeDocumentStructure,
       extractImages: var_extractImages,
       maxImageSize: var_maxImageSize,
+      maxInputSize: var_maxInputSize,
       captureSvg: var_captureSvg,
       inferDimensions: var_inferDimensions,
       maxDepth: var_maxDepth,
@@ -4127,6 +4143,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     );
     var var_extractImages = sse_decode_opt_box_autoadd_bool(deserializer);
     var var_maxImageSize = sse_decode_opt_box_autoadd_i_64(deserializer);
+    var var_maxInputSize = sse_decode_opt_box_autoadd_i_64(deserializer);
     var var_captureSvg = sse_decode_opt_box_autoadd_bool(deserializer);
     var var_inferDimensions = sse_decode_opt_box_autoadd_bool(deserializer);
     var var_maxDepth = sse_decode_opt_box_autoadd_i_64(deserializer);
@@ -4179,6 +4196,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       includeDocumentStructure: var_includeDocumentStructure,
       extractImages: var_extractImages,
       maxImageSize: var_maxImageSize,
+      maxInputSize: var_maxInputSize,
       captureSvg: var_captureSvg,
       inferDimensions: var_inferDimensions,
       maxDepth: var_maxDepth,
@@ -5751,8 +5769,15 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       case ConversionError_InvalidInput(field0: final field0):
         sse_encode_i_32(5, serializer);
         sse_encode_String(field0, serializer);
-      case ConversionError_Other(field0: final field0):
+      case ConversionError_InputTooLarge(
+        observedSize: final observedSize,
+        maxSize: final maxSize,
+      ):
         sse_encode_i_32(6, serializer);
+        sse_encode_i_64(observedSize, serializer);
+        sse_encode_i_64(maxSize, serializer);
+      case ConversionError_Other(field0: final field0):
+        sse_encode_i_32(7, serializer);
         sse_encode_String(field0, serializer);
     }
   }
@@ -5802,6 +5827,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     sse_encode_bool(self.includeDocumentStructure, serializer);
     sse_encode_bool(self.extractImages, serializer);
     sse_encode_i_64(self.maxImageSize, serializer);
+    sse_encode_opt_box_autoadd_i_64(self.maxInputSize, serializer);
     sse_encode_bool(self.captureSvg, serializer);
     sse_encode_bool(self.inferDimensions, serializer);
     sse_encode_opt_box_autoadd_i_64(self.maxDepth, serializer);
@@ -5874,6 +5900,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     sse_encode_opt_box_autoadd_bool(self.includeDocumentStructure, serializer);
     sse_encode_opt_box_autoadd_bool(self.extractImages, serializer);
     sse_encode_opt_box_autoadd_i_64(self.maxImageSize, serializer);
+    sse_encode_opt_box_autoadd_i_64(self.maxInputSize, serializer);
     sse_encode_opt_box_autoadd_bool(self.captureSvg, serializer);
     sse_encode_opt_box_autoadd_bool(self.inferDimensions, serializer);
     sse_encode_opt_box_autoadd_i_64(self.maxDepth, serializer);

@@ -2482,11 +2482,6 @@
     "php/edge-cases/malformed_uppercase_void_tag_keeps_following_content.md",
     "php/edge-cases/script_tags_only.md",
     "php/edge-cases/style_tags_only.md",
-    "php/edge-cases/visitor_custom_element_with_nesting.md",
-    "php/edge-cases/visitor_deeply_nested_skip.md",
-    "php/edge-cases/visitor_element_end_modification.md",
-    "php/edge-cases/visitor_element_start_skip_entire_subtree.md",
-    "php/edge-cases/visitor_unknown_tag_preservation.md",
     "php/edge-cases/whitespace_only.md",
     "php/edge-cases/xss_onclick_handler_removed.md",
     "php/edge-cases/xss_script_tag_stripped.md",
@@ -2626,55 +2621,6 @@
     "php/structure/structure_list.md",
     "php/structure/structure_multiple_headings.md",
     "php/structure/structure_sibling_h1_groups.md",
-    "php/visitor/visitor_audio_custom.md",
-    "php/visitor/visitor_audio_skip.md",
-    "php/visitor/visitor_button_custom.md",
-    "php/visitor/visitor_button_skip.md",
-    "php/visitor/visitor_continue_default.md",
-    "php/visitor/visitor_custom_blockquote.md",
-    "php/visitor/visitor_custom_emphasis.md",
-    "php/visitor/visitor_custom_heading.md",
-    "php/visitor/visitor_custom_image.md",
-    "php/visitor/visitor_custom_link_format.md",
-    "php/visitor/visitor_custom_link_static.md",
-    "php/visitor/visitor_custom_output.md",
-    "php/visitor/visitor_definition_list_custom.md",
-    "php/visitor/visitor_definition_list_custom_format.md",
-    "php/visitor/visitor_definition_list_skip.md",
-    "php/visitor/visitor_details_summary_custom.md",
-    "php/visitor/visitor_details_summary_skip.md",
-    "php/visitor/visitor_figure_custom.md",
-    "php/visitor/visitor_figure_custom_wrap.md",
-    "php/visitor/visitor_figure_skip.md",
-    "php/visitor/visitor_form_custom.md",
-    "php/visitor/visitor_form_skip.md",
-    "php/visitor/visitor_heading_bare_string_preserves_case.md",
-    "php/visitor/visitor_horizontal_rule_custom.md",
-    "php/visitor/visitor_horizontal_rule_skip.md",
-    "php/visitor/visitor_iframe_custom.md",
-    "php/visitor/visitor_iframe_skip.md",
-    "php/visitor/visitor_image_bare_string_preserves_case.md",
-    "php/visitor/visitor_input_custom.md",
-    "php/visitor/visitor_input_skip.md",
-    "php/visitor/visitor_line_break_custom.md",
-    "php/visitor/visitor_line_break_skip.md",
-    "php/visitor/visitor_link_bare_string_preserves_case.md",
-    "php/visitor/visitor_mark_custom.md",
-    "php/visitor/visitor_mark_skip.md",
-    "php/visitor/visitor_preserve_html.md",
-    "php/visitor/visitor_skip_code_blocks.md",
-    "php/visitor/visitor_skip_heading.md",
-    "php/visitor/visitor_skip_images.md",
-    "php/visitor/visitor_skip_links.md",
-    "php/visitor/visitor_skip_strong.md",
-    "php/visitor/visitor_subscript_custom.md",
-    "php/visitor/visitor_subscript_skip.md",
-    "php/visitor/visitor_superscript_custom.md",
-    "php/visitor/visitor_superscript_skip.md",
-    "php/visitor/visitor_underline_custom.md",
-    "php/visitor/visitor_underline_skip.md",
-    "php/visitor/visitor_video_custom.md",
-    "php/visitor/visitor_video_skip.md",
     "python/conversion/adjacent_code_spans_merged.md",
     "python/conversion/adjacent_emphasis_merged.md",
     "python/conversion/adjacent_inserted_merged.md",
@@ -35179,66 +35125,6 @@
     },
     {
       "key": {
-        "fixture_id": "visitor_custom_element_with_nesting",
-        "language": "php"
-      },
-      "path": "php/edge-cases/visitor_custom_element_with_nesting.md",
-      "language": "php",
-      "target": "php",
-      "session": "php",
-      "requires": [],
-      "side_effect": "safe"
-    },
-    {
-      "key": {
-        "fixture_id": "visitor_deeply_nested_skip",
-        "language": "php"
-      },
-      "path": "php/edge-cases/visitor_deeply_nested_skip.md",
-      "language": "php",
-      "target": "php",
-      "session": "php",
-      "requires": [],
-      "side_effect": "safe"
-    },
-    {
-      "key": {
-        "fixture_id": "visitor_element_end_modification",
-        "language": "php"
-      },
-      "path": "php/edge-cases/visitor_element_end_modification.md",
-      "language": "php",
-      "target": "php",
-      "session": "php",
-      "requires": [],
-      "side_effect": "safe"
-    },
-    {
-      "key": {
-        "fixture_id": "visitor_element_start_skip_entire_subtree",
-        "language": "php"
-      },
-      "path": "php/edge-cases/visitor_element_start_skip_entire_subtree.md",
-      "language": "php",
-      "target": "php",
-      "session": "php",
-      "requires": [],
-      "side_effect": "safe"
-    },
-    {
-      "key": {
-        "fixture_id": "visitor_unknown_tag_preservation",
-        "language": "php"
-      },
-      "path": "php/edge-cases/visitor_unknown_tag_preservation.md",
-      "language": "php",
-      "target": "php",
-      "session": "php",
-      "requires": [],
-      "side_effect": "safe"
-    },
-    {
-      "key": {
         "fixture_id": "whitespace_only",
         "language": "php"
       },
@@ -36899,594 +36785,6 @@
         "language": "php"
       },
       "path": "php/structure/structure_sibling_h1_groups.md",
-      "language": "php",
-      "target": "php",
-      "session": "php",
-      "requires": [],
-      "side_effect": "safe"
-    },
-    {
-      "key": {
-        "fixture_id": "visitor_audio_custom",
-        "language": "php"
-      },
-      "path": "php/visitor/visitor_audio_custom.md",
-      "language": "php",
-      "target": "php",
-      "session": "php",
-      "requires": [],
-      "side_effect": "safe"
-    },
-    {
-      "key": {
-        "fixture_id": "visitor_audio_skip",
-        "language": "php"
-      },
-      "path": "php/visitor/visitor_audio_skip.md",
-      "language": "php",
-      "target": "php",
-      "session": "php",
-      "requires": [],
-      "side_effect": "safe"
-    },
-    {
-      "key": {
-        "fixture_id": "visitor_button_custom",
-        "language": "php"
-      },
-      "path": "php/visitor/visitor_button_custom.md",
-      "language": "php",
-      "target": "php",
-      "session": "php",
-      "requires": [],
-      "side_effect": "safe"
-    },
-    {
-      "key": {
-        "fixture_id": "visitor_button_skip",
-        "language": "php"
-      },
-      "path": "php/visitor/visitor_button_skip.md",
-      "language": "php",
-      "target": "php",
-      "session": "php",
-      "requires": [],
-      "side_effect": "safe"
-    },
-    {
-      "key": {
-        "fixture_id": "visitor_continue_default",
-        "language": "php"
-      },
-      "path": "php/visitor/visitor_continue_default.md",
-      "language": "php",
-      "target": "php",
-      "session": "php",
-      "requires": [],
-      "side_effect": "safe"
-    },
-    {
-      "key": {
-        "fixture_id": "visitor_custom_blockquote",
-        "language": "php"
-      },
-      "path": "php/visitor/visitor_custom_blockquote.md",
-      "language": "php",
-      "target": "php",
-      "session": "php",
-      "requires": [],
-      "side_effect": "safe"
-    },
-    {
-      "key": {
-        "fixture_id": "visitor_custom_emphasis",
-        "language": "php"
-      },
-      "path": "php/visitor/visitor_custom_emphasis.md",
-      "language": "php",
-      "target": "php",
-      "session": "php",
-      "requires": [],
-      "side_effect": "safe"
-    },
-    {
-      "key": {
-        "fixture_id": "visitor_custom_heading",
-        "language": "php"
-      },
-      "path": "php/visitor/visitor_custom_heading.md",
-      "language": "php",
-      "target": "php",
-      "session": "php",
-      "requires": [],
-      "side_effect": "safe"
-    },
-    {
-      "key": {
-        "fixture_id": "visitor_custom_image",
-        "language": "php"
-      },
-      "path": "php/visitor/visitor_custom_image.md",
-      "language": "php",
-      "target": "php",
-      "session": "php",
-      "requires": [],
-      "side_effect": "safe"
-    },
-    {
-      "key": {
-        "fixture_id": "visitor_custom_link_format",
-        "language": "php"
-      },
-      "path": "php/visitor/visitor_custom_link_format.md",
-      "language": "php",
-      "target": "php",
-      "session": "php",
-      "requires": [],
-      "side_effect": "safe"
-    },
-    {
-      "key": {
-        "fixture_id": "visitor_custom_link_static",
-        "language": "php"
-      },
-      "path": "php/visitor/visitor_custom_link_static.md",
-      "language": "php",
-      "target": "php",
-      "session": "php",
-      "requires": [],
-      "side_effect": "safe"
-    },
-    {
-      "key": {
-        "fixture_id": "visitor_custom_output",
-        "language": "php"
-      },
-      "path": "php/visitor/visitor_custom_output.md",
-      "language": "php",
-      "target": "php",
-      "session": "php",
-      "requires": [],
-      "side_effect": "safe"
-    },
-    {
-      "key": {
-        "fixture_id": "visitor_definition_list_custom",
-        "language": "php"
-      },
-      "path": "php/visitor/visitor_definition_list_custom.md",
-      "language": "php",
-      "target": "php",
-      "session": "php",
-      "requires": [],
-      "side_effect": "safe"
-    },
-    {
-      "key": {
-        "fixture_id": "visitor_definition_list_custom_format",
-        "language": "php"
-      },
-      "path": "php/visitor/visitor_definition_list_custom_format.md",
-      "language": "php",
-      "target": "php",
-      "session": "php",
-      "requires": [],
-      "side_effect": "safe"
-    },
-    {
-      "key": {
-        "fixture_id": "visitor_definition_list_skip",
-        "language": "php"
-      },
-      "path": "php/visitor/visitor_definition_list_skip.md",
-      "language": "php",
-      "target": "php",
-      "session": "php",
-      "requires": [],
-      "side_effect": "safe"
-    },
-    {
-      "key": {
-        "fixture_id": "visitor_details_summary_custom",
-        "language": "php"
-      },
-      "path": "php/visitor/visitor_details_summary_custom.md",
-      "language": "php",
-      "target": "php",
-      "session": "php",
-      "requires": [],
-      "side_effect": "safe"
-    },
-    {
-      "key": {
-        "fixture_id": "visitor_details_summary_skip",
-        "language": "php"
-      },
-      "path": "php/visitor/visitor_details_summary_skip.md",
-      "language": "php",
-      "target": "php",
-      "session": "php",
-      "requires": [],
-      "side_effect": "safe"
-    },
-    {
-      "key": {
-        "fixture_id": "visitor_figure_custom",
-        "language": "php"
-      },
-      "path": "php/visitor/visitor_figure_custom.md",
-      "language": "php",
-      "target": "php",
-      "session": "php",
-      "requires": [],
-      "side_effect": "safe"
-    },
-    {
-      "key": {
-        "fixture_id": "visitor_figure_custom_wrap",
-        "language": "php"
-      },
-      "path": "php/visitor/visitor_figure_custom_wrap.md",
-      "language": "php",
-      "target": "php",
-      "session": "php",
-      "requires": [],
-      "side_effect": "safe"
-    },
-    {
-      "key": {
-        "fixture_id": "visitor_figure_skip",
-        "language": "php"
-      },
-      "path": "php/visitor/visitor_figure_skip.md",
-      "language": "php",
-      "target": "php",
-      "session": "php",
-      "requires": [],
-      "side_effect": "safe"
-    },
-    {
-      "key": {
-        "fixture_id": "visitor_form_custom",
-        "language": "php"
-      },
-      "path": "php/visitor/visitor_form_custom.md",
-      "language": "php",
-      "target": "php",
-      "session": "php",
-      "requires": [],
-      "side_effect": "safe"
-    },
-    {
-      "key": {
-        "fixture_id": "visitor_form_skip",
-        "language": "php"
-      },
-      "path": "php/visitor/visitor_form_skip.md",
-      "language": "php",
-      "target": "php",
-      "session": "php",
-      "requires": [],
-      "side_effect": "safe"
-    },
-    {
-      "key": {
-        "fixture_id": "visitor_heading_bare_string_preserves_case",
-        "language": "php"
-      },
-      "path": "php/visitor/visitor_heading_bare_string_preserves_case.md",
-      "language": "php",
-      "target": "php",
-      "session": "php",
-      "requires": [],
-      "side_effect": "safe"
-    },
-    {
-      "key": {
-        "fixture_id": "visitor_horizontal_rule_custom",
-        "language": "php"
-      },
-      "path": "php/visitor/visitor_horizontal_rule_custom.md",
-      "language": "php",
-      "target": "php",
-      "session": "php",
-      "requires": [],
-      "side_effect": "safe"
-    },
-    {
-      "key": {
-        "fixture_id": "visitor_horizontal_rule_skip",
-        "language": "php"
-      },
-      "path": "php/visitor/visitor_horizontal_rule_skip.md",
-      "language": "php",
-      "target": "php",
-      "session": "php",
-      "requires": [],
-      "side_effect": "safe"
-    },
-    {
-      "key": {
-        "fixture_id": "visitor_iframe_custom",
-        "language": "php"
-      },
-      "path": "php/visitor/visitor_iframe_custom.md",
-      "language": "php",
-      "target": "php",
-      "session": "php",
-      "requires": [],
-      "side_effect": "safe"
-    },
-    {
-      "key": {
-        "fixture_id": "visitor_iframe_skip",
-        "language": "php"
-      },
-      "path": "php/visitor/visitor_iframe_skip.md",
-      "language": "php",
-      "target": "php",
-      "session": "php",
-      "requires": [],
-      "side_effect": "safe"
-    },
-    {
-      "key": {
-        "fixture_id": "visitor_image_bare_string_preserves_case",
-        "language": "php"
-      },
-      "path": "php/visitor/visitor_image_bare_string_preserves_case.md",
-      "language": "php",
-      "target": "php",
-      "session": "php",
-      "requires": [],
-      "side_effect": "safe"
-    },
-    {
-      "key": {
-        "fixture_id": "visitor_input_custom",
-        "language": "php"
-      },
-      "path": "php/visitor/visitor_input_custom.md",
-      "language": "php",
-      "target": "php",
-      "session": "php",
-      "requires": [],
-      "side_effect": "safe"
-    },
-    {
-      "key": {
-        "fixture_id": "visitor_input_skip",
-        "language": "php"
-      },
-      "path": "php/visitor/visitor_input_skip.md",
-      "language": "php",
-      "target": "php",
-      "session": "php",
-      "requires": [],
-      "side_effect": "safe"
-    },
-    {
-      "key": {
-        "fixture_id": "visitor_line_break_custom",
-        "language": "php"
-      },
-      "path": "php/visitor/visitor_line_break_custom.md",
-      "language": "php",
-      "target": "php",
-      "session": "php",
-      "requires": [],
-      "side_effect": "safe"
-    },
-    {
-      "key": {
-        "fixture_id": "visitor_line_break_skip",
-        "language": "php"
-      },
-      "path": "php/visitor/visitor_line_break_skip.md",
-      "language": "php",
-      "target": "php",
-      "session": "php",
-      "requires": [],
-      "side_effect": "safe"
-    },
-    {
-      "key": {
-        "fixture_id": "visitor_link_bare_string_preserves_case",
-        "language": "php"
-      },
-      "path": "php/visitor/visitor_link_bare_string_preserves_case.md",
-      "language": "php",
-      "target": "php",
-      "session": "php",
-      "requires": [],
-      "side_effect": "safe"
-    },
-    {
-      "key": {
-        "fixture_id": "visitor_mark_custom",
-        "language": "php"
-      },
-      "path": "php/visitor/visitor_mark_custom.md",
-      "language": "php",
-      "target": "php",
-      "session": "php",
-      "requires": [],
-      "side_effect": "safe"
-    },
-    {
-      "key": {
-        "fixture_id": "visitor_mark_skip",
-        "language": "php"
-      },
-      "path": "php/visitor/visitor_mark_skip.md",
-      "language": "php",
-      "target": "php",
-      "session": "php",
-      "requires": [],
-      "side_effect": "safe"
-    },
-    {
-      "key": {
-        "fixture_id": "visitor_preserve_html",
-        "language": "php"
-      },
-      "path": "php/visitor/visitor_preserve_html.md",
-      "language": "php",
-      "target": "php",
-      "session": "php",
-      "requires": [],
-      "side_effect": "safe"
-    },
-    {
-      "key": {
-        "fixture_id": "visitor_skip_code_blocks",
-        "language": "php"
-      },
-      "path": "php/visitor/visitor_skip_code_blocks.md",
-      "language": "php",
-      "target": "php",
-      "session": "php",
-      "requires": [],
-      "side_effect": "safe"
-    },
-    {
-      "key": {
-        "fixture_id": "visitor_skip_heading",
-        "language": "php"
-      },
-      "path": "php/visitor/visitor_skip_heading.md",
-      "language": "php",
-      "target": "php",
-      "session": "php",
-      "requires": [],
-      "side_effect": "safe"
-    },
-    {
-      "key": {
-        "fixture_id": "visitor_skip_images",
-        "language": "php"
-      },
-      "path": "php/visitor/visitor_skip_images.md",
-      "language": "php",
-      "target": "php",
-      "session": "php",
-      "requires": [],
-      "side_effect": "safe"
-    },
-    {
-      "key": {
-        "fixture_id": "visitor_skip_links",
-        "language": "php"
-      },
-      "path": "php/visitor/visitor_skip_links.md",
-      "language": "php",
-      "target": "php",
-      "session": "php",
-      "requires": [],
-      "side_effect": "safe"
-    },
-    {
-      "key": {
-        "fixture_id": "visitor_skip_strong",
-        "language": "php"
-      },
-      "path": "php/visitor/visitor_skip_strong.md",
-      "language": "php",
-      "target": "php",
-      "session": "php",
-      "requires": [],
-      "side_effect": "safe"
-    },
-    {
-      "key": {
-        "fixture_id": "visitor_subscript_custom",
-        "language": "php"
-      },
-      "path": "php/visitor/visitor_subscript_custom.md",
-      "language": "php",
-      "target": "php",
-      "session": "php",
-      "requires": [],
-      "side_effect": "safe"
-    },
-    {
-      "key": {
-        "fixture_id": "visitor_subscript_skip",
-        "language": "php"
-      },
-      "path": "php/visitor/visitor_subscript_skip.md",
-      "language": "php",
-      "target": "php",
-      "session": "php",
-      "requires": [],
-      "side_effect": "safe"
-    },
-    {
-      "key": {
-        "fixture_id": "visitor_superscript_custom",
-        "language": "php"
-      },
-      "path": "php/visitor/visitor_superscript_custom.md",
-      "language": "php",
-      "target": "php",
-      "session": "php",
-      "requires": [],
-      "side_effect": "safe"
-    },
-    {
-      "key": {
-        "fixture_id": "visitor_superscript_skip",
-        "language": "php"
-      },
-      "path": "php/visitor/visitor_superscript_skip.md",
-      "language": "php",
-      "target": "php",
-      "session": "php",
-      "requires": [],
-      "side_effect": "safe"
-    },
-    {
-      "key": {
-        "fixture_id": "visitor_underline_custom",
-        "language": "php"
-      },
-      "path": "php/visitor/visitor_underline_custom.md",
-      "language": "php",
-      "target": "php",
-      "session": "php",
-      "requires": [],
-      "side_effect": "safe"
-    },
-    {
-      "key": {
-        "fixture_id": "visitor_underline_skip",
-        "language": "php"
-      },
-      "path": "php/visitor/visitor_underline_skip.md",
-      "language": "php",
-      "target": "php",
-      "session": "php",
-      "requires": [],
-      "side_effect": "safe"
-    },
-    {
-      "key": {
-        "fixture_id": "visitor_video_custom",
-        "language": "php"
-      },
-      "path": "php/visitor/visitor_video_custom.md",
-      "language": "php",
-      "target": "php",
-      "session": "php",
-      "requires": [],
-      "side_effect": "safe"
-    },
-    {
-      "key": {
-        "fixture_id": "visitor_video_skip",
-        "language": "php"
-      },
-      "path": "php/visitor/visitor_video_skip.md",
       "language": "php",
       "target": "php",
       "session": "php",
@@ -88601,10 +87899,6 @@
     },
     {
       "fixture_id": "visitor_audio_custom",
-      "language": "php"
-    },
-    {
-      "fixture_id": "visitor_audio_custom",
       "language": "python"
     },
     {
@@ -88661,10 +87955,6 @@
     },
     {
       "fixture_id": "visitor_audio_skip",
-      "language": "php"
-    },
-    {
-      "fixture_id": "visitor_audio_skip",
       "language": "python"
     },
     {
@@ -88721,10 +88011,6 @@
     },
     {
       "fixture_id": "visitor_button_custom",
-      "language": "php"
-    },
-    {
-      "fixture_id": "visitor_button_custom",
       "language": "python"
     },
     {
@@ -88781,10 +88067,6 @@
     },
     {
       "fixture_id": "visitor_button_skip",
-      "language": "php"
-    },
-    {
-      "fixture_id": "visitor_button_skip",
       "language": "python"
     },
     {
@@ -88841,10 +88123,6 @@
     },
     {
       "fixture_id": "visitor_continue_default",
-      "language": "php"
-    },
-    {
-      "fixture_id": "visitor_continue_default",
       "language": "python"
     },
     {
@@ -88901,10 +88179,6 @@
     },
     {
       "fixture_id": "visitor_custom_blockquote",
-      "language": "php"
-    },
-    {
-      "fixture_id": "visitor_custom_blockquote",
       "language": "python"
     },
     {
@@ -88961,10 +88235,6 @@
     },
     {
       "fixture_id": "visitor_custom_element_with_nesting",
-      "language": "php"
-    },
-    {
-      "fixture_id": "visitor_custom_element_with_nesting",
       "language": "python"
     },
     {
@@ -89021,10 +88291,6 @@
     },
     {
       "fixture_id": "visitor_custom_emphasis",
-      "language": "php"
-    },
-    {
-      "fixture_id": "visitor_custom_emphasis",
       "language": "python"
     },
     {
@@ -89081,10 +88347,6 @@
     },
     {
       "fixture_id": "visitor_custom_heading",
-      "language": "php"
-    },
-    {
-      "fixture_id": "visitor_custom_heading",
       "language": "python"
     },
     {
@@ -89141,10 +88403,6 @@
     },
     {
       "fixture_id": "visitor_custom_image",
-      "language": "php"
-    },
-    {
-      "fixture_id": "visitor_custom_image",
       "language": "python"
     },
     {
@@ -89201,10 +88459,6 @@
     },
     {
       "fixture_id": "visitor_custom_link_format",
-      "language": "php"
-    },
-    {
-      "fixture_id": "visitor_custom_link_format",
       "language": "python"
     },
     {
@@ -89261,10 +88515,6 @@
     },
     {
       "fixture_id": "visitor_custom_link_static",
-      "language": "php"
-    },
-    {
-      "fixture_id": "visitor_custom_link_static",
       "language": "python"
     },
     {
@@ -89321,10 +88571,6 @@
     },
     {
       "fixture_id": "visitor_custom_output",
-      "language": "php"
-    },
-    {
-      "fixture_id": "visitor_custom_output",
       "language": "python"
     },
     {
@@ -89381,10 +88627,6 @@
     },
     {
       "fixture_id": "visitor_deeply_nested_skip",
-      "language": "php"
-    },
-    {
-      "fixture_id": "visitor_deeply_nested_skip",
       "language": "python"
     },
     {
@@ -89441,10 +88683,6 @@
     },
     {
       "fixture_id": "visitor_definition_list_custom",
-      "language": "php"
-    },
-    {
-      "fixture_id": "visitor_definition_list_custom",
       "language": "python"
     },
     {
@@ -89501,10 +88739,6 @@
     },
     {
       "fixture_id": "visitor_definition_list_custom_format",
-      "language": "php"
-    },
-    {
-      "fixture_id": "visitor_definition_list_custom_format",
       "language": "python"
     },
     {
@@ -89561,10 +88795,6 @@
     },
     {
       "fixture_id": "visitor_definition_list_skip",
-      "language": "php"
-    },
-    {
-      "fixture_id": "visitor_definition_list_skip",
       "language": "python"
     },
     {
@@ -89621,10 +88851,6 @@
     },
     {
       "fixture_id": "visitor_details_summary_custom",
-      "language": "php"
-    },
-    {
-      "fixture_id": "visitor_details_summary_custom",
       "language": "python"
     },
     {
@@ -89681,10 +88907,6 @@
     },
     {
       "fixture_id": "visitor_details_summary_skip",
-      "language": "php"
-    },
-    {
-      "fixture_id": "visitor_details_summary_skip",
       "language": "python"
     },
     {
@@ -89741,10 +88963,6 @@
     },
     {
       "fixture_id": "visitor_element_end_modification",
-      "language": "php"
-    },
-    {
-      "fixture_id": "visitor_element_end_modification",
       "language": "python"
     },
     {
@@ -89801,10 +89019,6 @@
     },
     {
       "fixture_id": "visitor_element_start_skip_entire_subtree",
-      "language": "php"
-    },
-    {
-      "fixture_id": "visitor_element_start_skip_entire_subtree",
       "language": "python"
     },
     {
@@ -89861,10 +89075,6 @@
     },
     {
       "fixture_id": "visitor_figure_custom",
-      "language": "php"
-    },
-    {
-      "fixture_id": "visitor_figure_custom",
       "language": "python"
     },
     {
@@ -89921,10 +89131,6 @@
     },
     {
       "fixture_id": "visitor_figure_custom_wrap",
-      "language": "php"
-    },
-    {
-      "fixture_id": "visitor_figure_custom_wrap",
       "language": "python"
     },
     {
@@ -89981,10 +89187,6 @@
     },
     {
       "fixture_id": "visitor_figure_skip",
-      "language": "php"
-    },
-    {
-      "fixture_id": "visitor_figure_skip",
       "language": "python"
     },
     {
@@ -90041,10 +89243,6 @@
     },
     {
       "fixture_id": "visitor_form_custom",
-      "language": "php"
-    },
-    {
-      "fixture_id": "visitor_form_custom",
       "language": "python"
     },
     {
@@ -90101,10 +89299,6 @@
     },
     {
       "fixture_id": "visitor_form_skip",
-      "language": "php"
-    },
-    {
-      "fixture_id": "visitor_form_skip",
       "language": "python"
     },
     {
@@ -90161,10 +89355,6 @@
     },
     {
       "fixture_id": "visitor_heading_bare_string_preserves_case",
-      "language": "php"
-    },
-    {
-      "fixture_id": "visitor_heading_bare_string_preserves_case",
       "language": "python"
     },
     {
@@ -90221,10 +89411,6 @@
     },
     {
       "fixture_id": "visitor_horizontal_rule_custom",
-      "language": "php"
-    },
-    {
-      "fixture_id": "visitor_horizontal_rule_custom",
       "language": "python"
     },
     {
@@ -90281,10 +89467,6 @@
     },
     {
       "fixture_id": "visitor_horizontal_rule_skip",
-      "language": "php"
-    },
-    {
-      "fixture_id": "visitor_horizontal_rule_skip",
       "language": "python"
     },
     {
@@ -90341,10 +89523,6 @@
     },
     {
       "fixture_id": "visitor_iframe_custom",
-      "language": "php"
-    },
-    {
-      "fixture_id": "visitor_iframe_custom",
       "language": "python"
     },
     {
@@ -90401,10 +89579,6 @@
     },
     {
       "fixture_id": "visitor_iframe_skip",
-      "language": "php"
-    },
-    {
-      "fixture_id": "visitor_iframe_skip",
       "language": "python"
     },
     {
@@ -90461,10 +89635,6 @@
     },
     {
       "fixture_id": "visitor_image_bare_string_preserves_case",
-      "language": "php"
-    },
-    {
-      "fixture_id": "visitor_image_bare_string_preserves_case",
       "language": "python"
     },
     {
@@ -90521,10 +89691,6 @@
     },
     {
       "fixture_id": "visitor_input_custom",
-      "language": "php"
-    },
-    {
-      "fixture_id": "visitor_input_custom",
       "language": "python"
     },
     {
@@ -90581,10 +89747,6 @@
     },
     {
       "fixture_id": "visitor_input_skip",
-      "language": "php"
-    },
-    {
-      "fixture_id": "visitor_input_skip",
       "language": "python"
     },
     {
@@ -90641,10 +89803,6 @@
     },
     {
       "fixture_id": "visitor_line_break_custom",
-      "language": "php"
-    },
-    {
-      "fixture_id": "visitor_line_break_custom",
       "language": "python"
     },
     {
@@ -90701,10 +89859,6 @@
     },
     {
       "fixture_id": "visitor_line_break_skip",
-      "language": "php"
-    },
-    {
-      "fixture_id": "visitor_line_break_skip",
       "language": "python"
     },
     {
@@ -90761,10 +89915,6 @@
     },
     {
       "fixture_id": "visitor_link_bare_string_preserves_case",
-      "language": "php"
-    },
-    {
-      "fixture_id": "visitor_link_bare_string_preserves_case",
       "language": "python"
     },
     {
@@ -90821,10 +89971,6 @@
     },
     {
       "fixture_id": "visitor_mark_custom",
-      "language": "php"
-    },
-    {
-      "fixture_id": "visitor_mark_custom",
       "language": "python"
     },
     {
@@ -90881,10 +90027,6 @@
     },
     {
       "fixture_id": "visitor_mark_skip",
-      "language": "php"
-    },
-    {
-      "fixture_id": "visitor_mark_skip",
       "language": "python"
     },
     {
@@ -90941,10 +90083,6 @@
     },
     {
       "fixture_id": "visitor_preserve_html",
-      "language": "php"
-    },
-    {
-      "fixture_id": "visitor_preserve_html",
       "language": "python"
     },
     {
@@ -91001,10 +90139,6 @@
     },
     {
       "fixture_id": "visitor_skip_code_blocks",
-      "language": "php"
-    },
-    {
-      "fixture_id": "visitor_skip_code_blocks",
       "language": "python"
     },
     {
@@ -91061,10 +90195,6 @@
     },
     {
       "fixture_id": "visitor_skip_heading",
-      "language": "php"
-    },
-    {
-      "fixture_id": "visitor_skip_heading",
       "language": "python"
     },
     {
@@ -91121,10 +90251,6 @@
     },
     {
       "fixture_id": "visitor_skip_images",
-      "language": "php"
-    },
-    {
-      "fixture_id": "visitor_skip_images",
       "language": "python"
     },
     {
@@ -91181,10 +90307,6 @@
     },
     {
       "fixture_id": "visitor_skip_links",
-      "language": "php"
-    },
-    {
-      "fixture_id": "visitor_skip_links",
       "language": "python"
     },
     {
@@ -91241,10 +90363,6 @@
     },
     {
       "fixture_id": "visitor_skip_strong",
-      "language": "php"
-    },
-    {
-      "fixture_id": "visitor_skip_strong",
       "language": "python"
     },
     {
@@ -91301,10 +90419,6 @@
     },
     {
       "fixture_id": "visitor_subscript_custom",
-      "language": "php"
-    },
-    {
-      "fixture_id": "visitor_subscript_custom",
       "language": "python"
     },
     {
@@ -91361,10 +90475,6 @@
     },
     {
       "fixture_id": "visitor_subscript_skip",
-      "language": "php"
-    },
-    {
-      "fixture_id": "visitor_subscript_skip",
       "language": "python"
     },
     {
@@ -91418,10 +90528,6 @@
     {
       "fixture_id": "visitor_superscript_custom",
       "language": "node"
-    },
-    {
-      "fixture_id": "visitor_superscript_custom",
-      "language": "php"
     },
     {
       "fixture_id": "visitor_superscript_custom",
@@ -91481,10 +90587,6 @@
     },
     {
       "fixture_id": "visitor_superscript_skip",
-      "language": "php"
-    },
-    {
-      "fixture_id": "visitor_superscript_skip",
       "language": "python"
     },
     {
@@ -91538,10 +90640,6 @@
     {
       "fixture_id": "visitor_underline_custom",
       "language": "node"
-    },
-    {
-      "fixture_id": "visitor_underline_custom",
-      "language": "php"
     },
     {
       "fixture_id": "visitor_underline_custom",
@@ -91601,10 +90699,6 @@
     },
     {
       "fixture_id": "visitor_underline_skip",
-      "language": "php"
-    },
-    {
-      "fixture_id": "visitor_underline_skip",
       "language": "python"
     },
     {
@@ -91658,10 +90752,6 @@
     {
       "fixture_id": "visitor_unknown_tag_preservation",
       "language": "node"
-    },
-    {
-      "fixture_id": "visitor_unknown_tag_preservation",
-      "language": "php"
     },
     {
       "fixture_id": "visitor_unknown_tag_preservation",
@@ -91721,10 +90811,6 @@
     },
     {
       "fixture_id": "visitor_video_custom",
-      "language": "php"
-    },
-    {
-      "fixture_id": "visitor_video_custom",
       "language": "python"
     },
     {
@@ -91778,10 +90864,6 @@
     {
       "fixture_id": "visitor_video_skip",
       "language": "node"
-    },
-    {
-      "fixture_id": "visitor_video_skip",
-      "language": "php"
     },
     {
       "fixture_id": "visitor_video_skip",
@@ -110211,10 +109293,6 @@
     },
     {
       "fixture_id": "visitor_audio_custom",
-      "language": "php"
-    },
-    {
-      "fixture_id": "visitor_audio_custom",
       "language": "python"
     },
     {
@@ -110271,10 +109349,6 @@
     },
     {
       "fixture_id": "visitor_audio_skip",
-      "language": "php"
-    },
-    {
-      "fixture_id": "visitor_audio_skip",
       "language": "python"
     },
     {
@@ -110331,10 +109405,6 @@
     },
     {
       "fixture_id": "visitor_button_custom",
-      "language": "php"
-    },
-    {
-      "fixture_id": "visitor_button_custom",
       "language": "python"
     },
     {
@@ -110391,10 +109461,6 @@
     },
     {
       "fixture_id": "visitor_button_skip",
-      "language": "php"
-    },
-    {
-      "fixture_id": "visitor_button_skip",
       "language": "python"
     },
     {
@@ -110451,10 +109517,6 @@
     },
     {
       "fixture_id": "visitor_continue_default",
-      "language": "php"
-    },
-    {
-      "fixture_id": "visitor_continue_default",
       "language": "python"
     },
     {
@@ -110511,10 +109573,6 @@
     },
     {
       "fixture_id": "visitor_custom_blockquote",
-      "language": "php"
-    },
-    {
-      "fixture_id": "visitor_custom_blockquote",
       "language": "python"
     },
     {
@@ -110571,10 +109629,6 @@
     },
     {
       "fixture_id": "visitor_custom_element_with_nesting",
-      "language": "php"
-    },
-    {
-      "fixture_id": "visitor_custom_element_with_nesting",
       "language": "python"
     },
     {
@@ -110631,10 +109685,6 @@
     },
     {
       "fixture_id": "visitor_custom_emphasis",
-      "language": "php"
-    },
-    {
-      "fixture_id": "visitor_custom_emphasis",
       "language": "python"
     },
     {
@@ -110691,10 +109741,6 @@
     },
     {
       "fixture_id": "visitor_custom_heading",
-      "language": "php"
-    },
-    {
-      "fixture_id": "visitor_custom_heading",
       "language": "python"
     },
     {
@@ -110751,10 +109797,6 @@
     },
     {
       "fixture_id": "visitor_custom_image",
-      "language": "php"
-    },
-    {
-      "fixture_id": "visitor_custom_image",
       "language": "python"
     },
     {
@@ -110811,10 +109853,6 @@
     },
     {
       "fixture_id": "visitor_custom_link_format",
-      "language": "php"
-    },
-    {
-      "fixture_id": "visitor_custom_link_format",
       "language": "python"
     },
     {
@@ -110871,10 +109909,6 @@
     },
     {
       "fixture_id": "visitor_custom_link_static",
-      "language": "php"
-    },
-    {
-      "fixture_id": "visitor_custom_link_static",
       "language": "python"
     },
     {
@@ -110931,10 +109965,6 @@
     },
     {
       "fixture_id": "visitor_custom_output",
-      "language": "php"
-    },
-    {
-      "fixture_id": "visitor_custom_output",
       "language": "python"
     },
     {
@@ -110991,10 +110021,6 @@
     },
     {
       "fixture_id": "visitor_deeply_nested_skip",
-      "language": "php"
-    },
-    {
-      "fixture_id": "visitor_deeply_nested_skip",
       "language": "python"
     },
     {
@@ -111051,10 +110077,6 @@
     },
     {
       "fixture_id": "visitor_definition_list_custom",
-      "language": "php"
-    },
-    {
-      "fixture_id": "visitor_definition_list_custom",
       "language": "python"
     },
     {
@@ -111111,10 +110133,6 @@
     },
     {
       "fixture_id": "visitor_definition_list_custom_format",
-      "language": "php"
-    },
-    {
-      "fixture_id": "visitor_definition_list_custom_format",
       "language": "python"
     },
     {
@@ -111171,10 +110189,6 @@
     },
     {
       "fixture_id": "visitor_definition_list_skip",
-      "language": "php"
-    },
-    {
-      "fixture_id": "visitor_definition_list_skip",
       "language": "python"
     },
     {
@@ -111231,10 +110245,6 @@
     },
     {
       "fixture_id": "visitor_details_summary_custom",
-      "language": "php"
-    },
-    {
-      "fixture_id": "visitor_details_summary_custom",
       "language": "python"
     },
     {
@@ -111291,10 +110301,6 @@
     },
     {
       "fixture_id": "visitor_details_summary_skip",
-      "language": "php"
-    },
-    {
-      "fixture_id": "visitor_details_summary_skip",
       "language": "python"
     },
     {
@@ -111351,10 +110357,6 @@
     },
     {
       "fixture_id": "visitor_element_end_modification",
-      "language": "php"
-    },
-    {
-      "fixture_id": "visitor_element_end_modification",
       "language": "python"
     },
     {
@@ -111411,10 +110413,6 @@
     },
     {
       "fixture_id": "visitor_element_start_skip_entire_subtree",
-      "language": "php"
-    },
-    {
-      "fixture_id": "visitor_element_start_skip_entire_subtree",
       "language": "python"
     },
     {
@@ -111471,10 +110469,6 @@
     },
     {
       "fixture_id": "visitor_figure_custom",
-      "language": "php"
-    },
-    {
-      "fixture_id": "visitor_figure_custom",
       "language": "python"
     },
     {
@@ -111531,10 +110525,6 @@
     },
     {
       "fixture_id": "visitor_figure_custom_wrap",
-      "language": "php"
-    },
-    {
-      "fixture_id": "visitor_figure_custom_wrap",
       "language": "python"
     },
     {
@@ -111591,10 +110581,6 @@
     },
     {
       "fixture_id": "visitor_figure_skip",
-      "language": "php"
-    },
-    {
-      "fixture_id": "visitor_figure_skip",
       "language": "python"
     },
     {
@@ -111651,10 +110637,6 @@
     },
     {
       "fixture_id": "visitor_form_custom",
-      "language": "php"
-    },
-    {
-      "fixture_id": "visitor_form_custom",
       "language": "python"
     },
     {
@@ -111711,10 +110693,6 @@
     },
     {
       "fixture_id": "visitor_form_skip",
-      "language": "php"
-    },
-    {
-      "fixture_id": "visitor_form_skip",
       "language": "python"
     },
     {
@@ -111771,10 +110749,6 @@
     },
     {
       "fixture_id": "visitor_heading_bare_string_preserves_case",
-      "language": "php"
-    },
-    {
-      "fixture_id": "visitor_heading_bare_string_preserves_case",
       "language": "python"
     },
     {
@@ -111831,10 +110805,6 @@
     },
     {
       "fixture_id": "visitor_horizontal_rule_custom",
-      "language": "php"
-    },
-    {
-      "fixture_id": "visitor_horizontal_rule_custom",
       "language": "python"
     },
     {
@@ -111891,10 +110861,6 @@
     },
     {
       "fixture_id": "visitor_horizontal_rule_skip",
-      "language": "php"
-    },
-    {
-      "fixture_id": "visitor_horizontal_rule_skip",
       "language": "python"
     },
     {
@@ -111951,10 +110917,6 @@
     },
     {
       "fixture_id": "visitor_iframe_custom",
-      "language": "php"
-    },
-    {
-      "fixture_id": "visitor_iframe_custom",
       "language": "python"
     },
     {
@@ -112011,10 +110973,6 @@
     },
     {
       "fixture_id": "visitor_iframe_skip",
-      "language": "php"
-    },
-    {
-      "fixture_id": "visitor_iframe_skip",
       "language": "python"
     },
     {
@@ -112071,10 +111029,6 @@
     },
     {
       "fixture_id": "visitor_image_bare_string_preserves_case",
-      "language": "php"
-    },
-    {
-      "fixture_id": "visitor_image_bare_string_preserves_case",
       "language": "python"
     },
     {
@@ -112131,10 +111085,6 @@
     },
     {
       "fixture_id": "visitor_input_custom",
-      "language": "php"
-    },
-    {
-      "fixture_id": "visitor_input_custom",
       "language": "python"
     },
     {
@@ -112191,10 +111141,6 @@
     },
     {
       "fixture_id": "visitor_input_skip",
-      "language": "php"
-    },
-    {
-      "fixture_id": "visitor_input_skip",
       "language": "python"
     },
     {
@@ -112251,10 +111197,6 @@
     },
     {
       "fixture_id": "visitor_line_break_custom",
-      "language": "php"
-    },
-    {
-      "fixture_id": "visitor_line_break_custom",
       "language": "python"
     },
     {
@@ -112311,10 +111253,6 @@
     },
     {
       "fixture_id": "visitor_line_break_skip",
-      "language": "php"
-    },
-    {
-      "fixture_id": "visitor_line_break_skip",
       "language": "python"
     },
     {
@@ -112371,10 +111309,6 @@
     },
     {
       "fixture_id": "visitor_link_bare_string_preserves_case",
-      "language": "php"
-    },
-    {
-      "fixture_id": "visitor_link_bare_string_preserves_case",
       "language": "python"
     },
     {
@@ -112431,10 +111365,6 @@
     },
     {
       "fixture_id": "visitor_mark_custom",
-      "language": "php"
-    },
-    {
-      "fixture_id": "visitor_mark_custom",
       "language": "python"
     },
     {
@@ -112491,10 +111421,6 @@
     },
     {
       "fixture_id": "visitor_mark_skip",
-      "language": "php"
-    },
-    {
-      "fixture_id": "visitor_mark_skip",
       "language": "python"
     },
     {
@@ -112551,10 +111477,6 @@
     },
     {
       "fixture_id": "visitor_preserve_html",
-      "language": "php"
-    },
-    {
-      "fixture_id": "visitor_preserve_html",
       "language": "python"
     },
     {
@@ -112611,10 +111533,6 @@
     },
     {
       "fixture_id": "visitor_skip_code_blocks",
-      "language": "php"
-    },
-    {
-      "fixture_id": "visitor_skip_code_blocks",
       "language": "python"
     },
     {
@@ -112671,10 +111589,6 @@
     },
     {
       "fixture_id": "visitor_skip_heading",
-      "language": "php"
-    },
-    {
-      "fixture_id": "visitor_skip_heading",
       "language": "python"
     },
     {
@@ -112731,10 +111645,6 @@
     },
     {
       "fixture_id": "visitor_skip_images",
-      "language": "php"
-    },
-    {
-      "fixture_id": "visitor_skip_images",
       "language": "python"
     },
     {
@@ -112791,10 +111701,6 @@
     },
     {
       "fixture_id": "visitor_skip_links",
-      "language": "php"
-    },
-    {
-      "fixture_id": "visitor_skip_links",
       "language": "python"
     },
     {
@@ -112851,10 +111757,6 @@
     },
     {
       "fixture_id": "visitor_skip_strong",
-      "language": "php"
-    },
-    {
-      "fixture_id": "visitor_skip_strong",
       "language": "python"
     },
     {
@@ -112911,10 +111813,6 @@
     },
     {
       "fixture_id": "visitor_subscript_custom",
-      "language": "php"
-    },
-    {
-      "fixture_id": "visitor_subscript_custom",
       "language": "python"
     },
     {
@@ -112971,10 +111869,6 @@
     },
     {
       "fixture_id": "visitor_subscript_skip",
-      "language": "php"
-    },
-    {
-      "fixture_id": "visitor_subscript_skip",
       "language": "python"
     },
     {
@@ -113028,10 +111922,6 @@
     {
       "fixture_id": "visitor_superscript_custom",
       "language": "node"
-    },
-    {
-      "fixture_id": "visitor_superscript_custom",
-      "language": "php"
     },
     {
       "fixture_id": "visitor_superscript_custom",
@@ -113091,10 +111981,6 @@
     },
     {
       "fixture_id": "visitor_superscript_skip",
-      "language": "php"
-    },
-    {
-      "fixture_id": "visitor_superscript_skip",
       "language": "python"
     },
     {
@@ -113148,10 +112034,6 @@
     {
       "fixture_id": "visitor_underline_custom",
       "language": "node"
-    },
-    {
-      "fixture_id": "visitor_underline_custom",
-      "language": "php"
     },
     {
       "fixture_id": "visitor_underline_custom",
@@ -113211,10 +112093,6 @@
     },
     {
       "fixture_id": "visitor_underline_skip",
-      "language": "php"
-    },
-    {
-      "fixture_id": "visitor_underline_skip",
       "language": "python"
     },
     {
@@ -113268,10 +112146,6 @@
     {
       "fixture_id": "visitor_unknown_tag_preservation",
       "language": "node"
-    },
-    {
-      "fixture_id": "visitor_unknown_tag_preservation",
-      "language": "php"
     },
     {
       "fixture_id": "visitor_unknown_tag_preservation",
@@ -113331,10 +112205,6 @@
     },
     {
       "fixture_id": "visitor_video_custom",
-      "language": "php"
-    },
-    {
-      "fixture_id": "visitor_video_custom",
       "language": "python"
     },
     {
@@ -113388,10 +112258,6 @@
     {
       "fixture_id": "visitor_video_skip",
       "language": "node"
-    },
-    {
-      "fixture_id": "visitor_video_skip",
-      "language": "php"
     },
     {
       "fixture_id": "visitor_video_skip",

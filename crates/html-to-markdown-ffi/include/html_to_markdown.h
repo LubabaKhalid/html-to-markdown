@@ -1344,6 +1344,26 @@ int32_t htm_conversion_options_extract_images(HTMAlefHandle handle);
 uint64_t htm_conversion_options_max_image_size(HTMAlefHandle handle);
 
 /**
+ * Get the `max_input_size` field from a `ConversionOptions`.
+ * # Safety
+ * Pointer must be a valid handle returned by this library.
+ */
+uint64_t htm_conversion_options_max_input_size(HTMAlefHandle handle);
+
+/**
+ * Report whether the `max_input_size` field on a `ConversionOptions` is `Some`.
+ *
+ * `htm_conversion_options_max_input_size` cannot distinguish a `None` field from a
+ * legitimate zero-valued `Some` at the C ABI boundary -- there is no null representation for a
+ * numeric return, so both collapse to the same sentinel. Call this function first: `1` means
+ * the field getter's return value is meaningful, `0` means the field is absent and the getter's
+ * sentinel must be ignored, `-1` reports an invalid handle (see `htm_last_error_code`).
+ * # Safety
+ * Pointer must be a valid handle returned by this library.
+ */
+int32_t htm_conversion_options_has_max_input_size(HTMAlefHandle handle);
+
+/**
  * Get the `capture_svg` field from a `ConversionOptions`.
  * # Safety
  * Pointer must be a valid handle returned by this library.
@@ -1993,6 +2013,26 @@ uint64_t htm_conversion_options_update_max_image_size(HTMAlefHandle handle);
  * Pointer must be a valid handle returned by this library.
  */
 int32_t htm_conversion_options_update_has_max_image_size(HTMAlefHandle handle);
+
+/**
+ * Get the `max_input_size` field from a `ConversionOptionsUpdate`.
+ * # Safety
+ * Pointer must be a valid handle returned by this library.
+ */
+uint64_t htm_conversion_options_update_max_input_size(HTMAlefHandle handle);
+
+/**
+ * Report whether the `max_input_size` field on a `ConversionOptionsUpdate` is `Some`.
+ *
+ * `htm_conversion_options_update_max_input_size` cannot distinguish a `None` field from a
+ * legitimate zero-valued `Some` at the C ABI boundary -- there is no null representation for a
+ * numeric return, so both collapse to the same sentinel. Call this function first: `1` means
+ * the field getter's return value is meaningful, `0` means the field is absent and the getter's
+ * sentinel must be ignored, `-1` reports an invalid handle (see `htm_last_error_code`).
+ * # Safety
+ * Pointer must be a valid handle returned by this library.
+ */
+int32_t htm_conversion_options_update_has_max_input_size(HTMAlefHandle handle);
 
 /**
  * Get the `capture_svg` field from a `ConversionOptionsUpdate`.

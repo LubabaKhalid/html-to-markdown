@@ -14,5 +14,5 @@ The dispatcher is invisible to the caller. Output is byte-identical across tiers
 - **CommonMark-compatible Markdown** with GFM-style tables.
 - **Djot output**: set `output_format = "djot"` (see Djot Output Format section below).
 - **Real-HTML robust**: unclosed tags, CDATA, custom elements, malformed entities, nested tables, mixed encodings handled without losing content.
-- **Metadata extraction**, **visitor API**, **inline images**, **configurable preprocessing presets**.
+- **Metadata extraction**{% if features.visitor_pattern %}, **visitor API**{% endif %}, **inline images**, **configurable preprocessing presets**.
 - **Per-group regression gates in CI**: every PR runs the bench harness against per-group thresholds.

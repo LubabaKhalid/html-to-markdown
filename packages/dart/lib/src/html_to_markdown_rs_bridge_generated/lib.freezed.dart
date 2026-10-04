@@ -550,61 +550,30 @@ as String,
 /// @nodoc
 mixin _$ConversionError {
 
- String get field0;
-/// Create a copy of ConversionError
-/// with the given fields replaced by the non-null parameter values.
-@JsonKey(includeFromJson: false, includeToJson: false)
-@pragma('vm:prefer-inline')
-$ConversionErrorCopyWith<ConversionError> get copyWith => _$ConversionErrorCopyWithImpl<ConversionError>(this as ConversionError, _$identity);
+
 
 
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is ConversionError&&(identical(other.field0, field0) || other.field0 == field0));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is ConversionError);
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,field0);
+int get hashCode => runtimeType.hashCode;
 
 @override
 String toString() {
-  return 'ConversionError(field0: $field0)';
+  return 'ConversionError()';
 }
 
 
 }
 
 /// @nodoc
-abstract mixin class $ConversionErrorCopyWith<$Res>  {
-  factory $ConversionErrorCopyWith(ConversionError value, $Res Function(ConversionError) _then) = _$ConversionErrorCopyWithImpl;
-@useResult
-$Res call({
- String field0
-});
-
-
-
-
-}
-/// @nodoc
-class _$ConversionErrorCopyWithImpl<$Res>
-    implements $ConversionErrorCopyWith<$Res> {
-  _$ConversionErrorCopyWithImpl(this._self, this._then);
-
-  final ConversionError _self;
-  final $Res Function(ConversionError) _then;
-
-/// Create a copy of ConversionError
-/// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? field0 = null,}) {
-  return _then(_self.copyWith(
-field0: null == field0 ? _self.field0 : field0 // ignore: cast_nullable_to_non_nullable
-as String,
-  ));
-}
-
+class $ConversionErrorCopyWith<$Res>  {
+$ConversionErrorCopyWith(ConversionError _, $Res Function(ConversionError) __);
 }
 
 
@@ -622,7 +591,7 @@ extension ConversionErrorPatterns on ConversionError {
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( ConversionError_ParseError value)?  parseError,TResult Function( ConversionError_SanitizationError value)?  sanitizationError,TResult Function( ConversionError_ConfigError value)?  configError,TResult Function( ConversionError_IoError value)?  ioError,TResult Function( ConversionError_Panic value)?  panic,TResult Function( ConversionError_InvalidInput value)?  invalidInput,TResult Function( ConversionError_Other value)?  other,required TResult orElse(),}){
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( ConversionError_ParseError value)?  parseError,TResult Function( ConversionError_SanitizationError value)?  sanitizationError,TResult Function( ConversionError_ConfigError value)?  configError,TResult Function( ConversionError_IoError value)?  ioError,TResult Function( ConversionError_Panic value)?  panic,TResult Function( ConversionError_InvalidInput value)?  invalidInput,TResult Function( ConversionError_InputTooLarge value)?  inputTooLarge,TResult Function( ConversionError_Other value)?  other,required TResult orElse(),}){
 final _that = this;
 switch (_that) {
 case ConversionError_ParseError() when parseError != null:
@@ -631,7 +600,8 @@ return sanitizationError(_that);case ConversionError_ConfigError() when configEr
 return configError(_that);case ConversionError_IoError() when ioError != null:
 return ioError(_that);case ConversionError_Panic() when panic != null:
 return panic(_that);case ConversionError_InvalidInput() when invalidInput != null:
-return invalidInput(_that);case ConversionError_Other() when other != null:
+return invalidInput(_that);case ConversionError_InputTooLarge() when inputTooLarge != null:
+return inputTooLarge(_that);case ConversionError_Other() when other != null:
 return other(_that);case _:
   return orElse();
 
@@ -650,7 +620,7 @@ return other(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( ConversionError_ParseError value)  parseError,required TResult Function( ConversionError_SanitizationError value)  sanitizationError,required TResult Function( ConversionError_ConfigError value)  configError,required TResult Function( ConversionError_IoError value)  ioError,required TResult Function( ConversionError_Panic value)  panic,required TResult Function( ConversionError_InvalidInput value)  invalidInput,required TResult Function( ConversionError_Other value)  other,}){
+@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( ConversionError_ParseError value)  parseError,required TResult Function( ConversionError_SanitizationError value)  sanitizationError,required TResult Function( ConversionError_ConfigError value)  configError,required TResult Function( ConversionError_IoError value)  ioError,required TResult Function( ConversionError_Panic value)  panic,required TResult Function( ConversionError_InvalidInput value)  invalidInput,required TResult Function( ConversionError_InputTooLarge value)  inputTooLarge,required TResult Function( ConversionError_Other value)  other,}){
 final _that = this;
 switch (_that) {
 case ConversionError_ParseError():
@@ -659,7 +629,8 @@ return sanitizationError(_that);case ConversionError_ConfigError():
 return configError(_that);case ConversionError_IoError():
 return ioError(_that);case ConversionError_Panic():
 return panic(_that);case ConversionError_InvalidInput():
-return invalidInput(_that);case ConversionError_Other():
+return invalidInput(_that);case ConversionError_InputTooLarge():
+return inputTooLarge(_that);case ConversionError_Other():
 return other(_that);}
 }
 /// A variant of `map` that fallback to returning `null`.
@@ -674,7 +645,7 @@ return other(_that);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( ConversionError_ParseError value)?  parseError,TResult? Function( ConversionError_SanitizationError value)?  sanitizationError,TResult? Function( ConversionError_ConfigError value)?  configError,TResult? Function( ConversionError_IoError value)?  ioError,TResult? Function( ConversionError_Panic value)?  panic,TResult? Function( ConversionError_InvalidInput value)?  invalidInput,TResult? Function( ConversionError_Other value)?  other,}){
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( ConversionError_ParseError value)?  parseError,TResult? Function( ConversionError_SanitizationError value)?  sanitizationError,TResult? Function( ConversionError_ConfigError value)?  configError,TResult? Function( ConversionError_IoError value)?  ioError,TResult? Function( ConversionError_Panic value)?  panic,TResult? Function( ConversionError_InvalidInput value)?  invalidInput,TResult? Function( ConversionError_InputTooLarge value)?  inputTooLarge,TResult? Function( ConversionError_Other value)?  other,}){
 final _that = this;
 switch (_that) {
 case ConversionError_ParseError() when parseError != null:
@@ -683,7 +654,8 @@ return sanitizationError(_that);case ConversionError_ConfigError() when configEr
 return configError(_that);case ConversionError_IoError() when ioError != null:
 return ioError(_that);case ConversionError_Panic() when panic != null:
 return panic(_that);case ConversionError_InvalidInput() when invalidInput != null:
-return invalidInput(_that);case ConversionError_Other() when other != null:
+return invalidInput(_that);case ConversionError_InputTooLarge() when inputTooLarge != null:
+return inputTooLarge(_that);case ConversionError_Other() when other != null:
 return other(_that);case _:
   return null;
 
@@ -701,7 +673,7 @@ return other(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( String field0)?  parseError,TResult Function( String field0)?  sanitizationError,TResult Function( String field0)?  configError,TResult Function( String field0)?  ioError,TResult Function( String field0)?  panic,TResult Function( String field0)?  invalidInput,TResult Function( String field0)?  other,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( String field0)?  parseError,TResult Function( String field0)?  sanitizationError,TResult Function( String field0)?  configError,TResult Function( String field0)?  ioError,TResult Function( String field0)?  panic,TResult Function( String field0)?  invalidInput,TResult Function( PlatformInt64 observedSize,  PlatformInt64 maxSize)?  inputTooLarge,TResult Function( String field0)?  other,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case ConversionError_ParseError() when parseError != null:
 return parseError(_that.field0);case ConversionError_SanitizationError() when sanitizationError != null:
@@ -709,7 +681,8 @@ return sanitizationError(_that.field0);case ConversionError_ConfigError() when c
 return configError(_that.field0);case ConversionError_IoError() when ioError != null:
 return ioError(_that.field0);case ConversionError_Panic() when panic != null:
 return panic(_that.field0);case ConversionError_InvalidInput() when invalidInput != null:
-return invalidInput(_that.field0);case ConversionError_Other() when other != null:
+return invalidInput(_that.field0);case ConversionError_InputTooLarge() when inputTooLarge != null:
+return inputTooLarge(_that.observedSize,_that.maxSize);case ConversionError_Other() when other != null:
 return other(_that.field0);case _:
   return orElse();
 
@@ -728,7 +701,7 @@ return other(_that.field0);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( String field0)  parseError,required TResult Function( String field0)  sanitizationError,required TResult Function( String field0)  configError,required TResult Function( String field0)  ioError,required TResult Function( String field0)  panic,required TResult Function( String field0)  invalidInput,required TResult Function( String field0)  other,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( String field0)  parseError,required TResult Function( String field0)  sanitizationError,required TResult Function( String field0)  configError,required TResult Function( String field0)  ioError,required TResult Function( String field0)  panic,required TResult Function( String field0)  invalidInput,required TResult Function( PlatformInt64 observedSize,  PlatformInt64 maxSize)  inputTooLarge,required TResult Function( String field0)  other,}) {final _that = this;
 switch (_that) {
 case ConversionError_ParseError():
 return parseError(_that.field0);case ConversionError_SanitizationError():
@@ -736,7 +709,8 @@ return sanitizationError(_that.field0);case ConversionError_ConfigError():
 return configError(_that.field0);case ConversionError_IoError():
 return ioError(_that.field0);case ConversionError_Panic():
 return panic(_that.field0);case ConversionError_InvalidInput():
-return invalidInput(_that.field0);case ConversionError_Other():
+return invalidInput(_that.field0);case ConversionError_InputTooLarge():
+return inputTooLarge(_that.observedSize,_that.maxSize);case ConversionError_Other():
 return other(_that.field0);}
 }
 /// A variant of `when` that fallback to returning `null`
@@ -751,7 +725,7 @@ return other(_that.field0);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( String field0)?  parseError,TResult? Function( String field0)?  sanitizationError,TResult? Function( String field0)?  configError,TResult? Function( String field0)?  ioError,TResult? Function( String field0)?  panic,TResult? Function( String field0)?  invalidInput,TResult? Function( String field0)?  other,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( String field0)?  parseError,TResult? Function( String field0)?  sanitizationError,TResult? Function( String field0)?  configError,TResult? Function( String field0)?  ioError,TResult? Function( String field0)?  panic,TResult? Function( String field0)?  invalidInput,TResult? Function( PlatformInt64 observedSize,  PlatformInt64 maxSize)?  inputTooLarge,TResult? Function( String field0)?  other,}) {final _that = this;
 switch (_that) {
 case ConversionError_ParseError() when parseError != null:
 return parseError(_that.field0);case ConversionError_SanitizationError() when sanitizationError != null:
@@ -759,7 +733,8 @@ return sanitizationError(_that.field0);case ConversionError_ConfigError() when c
 return configError(_that.field0);case ConversionError_IoError() when ioError != null:
 return ioError(_that.field0);case ConversionError_Panic() when panic != null:
 return panic(_that.field0);case ConversionError_InvalidInput() when invalidInput != null:
-return invalidInput(_that.field0);case ConversionError_Other() when other != null:
+return invalidInput(_that.field0);case ConversionError_InputTooLarge() when inputTooLarge != null:
+return inputTooLarge(_that.observedSize,_that.maxSize);case ConversionError_Other() when other != null:
 return other(_that.field0);case _:
   return null;
 
@@ -775,11 +750,11 @@ class ConversionError_ParseError extends ConversionError {
   const ConversionError_ParseError({required this.field0}): super._();
 
 
-@override final  String field0;
+ final  String field0;
 
 /// Create a copy of ConversionError
 /// with the given fields replaced by the non-null parameter values.
-@override @JsonKey(includeFromJson: false, includeToJson: false)
+@JsonKey(includeFromJson: false, includeToJson: false)
 @pragma('vm:prefer-inline')
 $ConversionError_ParseErrorCopyWith<ConversionError_ParseError> get copyWith => _$ConversionError_ParseErrorCopyWithImpl<ConversionError_ParseError>(this, _$identity);
 
@@ -805,7 +780,7 @@ String toString() {
 /// @nodoc
 abstract mixin class $ConversionError_ParseErrorCopyWith<$Res> implements $ConversionErrorCopyWith<$Res> {
   factory $ConversionError_ParseErrorCopyWith(ConversionError_ParseError value, $Res Function(ConversionError_ParseError) _then) = _$ConversionError_ParseErrorCopyWithImpl;
-@override @useResult
+@useResult
 $Res call({
  String field0
 });
@@ -824,7 +799,7 @@ class _$ConversionError_ParseErrorCopyWithImpl<$Res>
 
 /// Create a copy of ConversionError
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? field0 = null,}) {
+@pragma('vm:prefer-inline') $Res call({Object? field0 = null,}) {
   return _then(ConversionError_ParseError(
 field0: null == field0 ? _self.field0 : field0 // ignore: cast_nullable_to_non_nullable
 as String,
@@ -841,11 +816,11 @@ class ConversionError_SanitizationError extends ConversionError {
   const ConversionError_SanitizationError({required this.field0}): super._();
 
 
-@override final  String field0;
+ final  String field0;
 
 /// Create a copy of ConversionError
 /// with the given fields replaced by the non-null parameter values.
-@override @JsonKey(includeFromJson: false, includeToJson: false)
+@JsonKey(includeFromJson: false, includeToJson: false)
 @pragma('vm:prefer-inline')
 $ConversionError_SanitizationErrorCopyWith<ConversionError_SanitizationError> get copyWith => _$ConversionError_SanitizationErrorCopyWithImpl<ConversionError_SanitizationError>(this, _$identity);
 
@@ -871,7 +846,7 @@ String toString() {
 /// @nodoc
 abstract mixin class $ConversionError_SanitizationErrorCopyWith<$Res> implements $ConversionErrorCopyWith<$Res> {
   factory $ConversionError_SanitizationErrorCopyWith(ConversionError_SanitizationError value, $Res Function(ConversionError_SanitizationError) _then) = _$ConversionError_SanitizationErrorCopyWithImpl;
-@override @useResult
+@useResult
 $Res call({
  String field0
 });
@@ -890,7 +865,7 @@ class _$ConversionError_SanitizationErrorCopyWithImpl<$Res>
 
 /// Create a copy of ConversionError
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? field0 = null,}) {
+@pragma('vm:prefer-inline') $Res call({Object? field0 = null,}) {
   return _then(ConversionError_SanitizationError(
 field0: null == field0 ? _self.field0 : field0 // ignore: cast_nullable_to_non_nullable
 as String,
@@ -907,11 +882,11 @@ class ConversionError_ConfigError extends ConversionError {
   const ConversionError_ConfigError({required this.field0}): super._();
 
 
-@override final  String field0;
+ final  String field0;
 
 /// Create a copy of ConversionError
 /// with the given fields replaced by the non-null parameter values.
-@override @JsonKey(includeFromJson: false, includeToJson: false)
+@JsonKey(includeFromJson: false, includeToJson: false)
 @pragma('vm:prefer-inline')
 $ConversionError_ConfigErrorCopyWith<ConversionError_ConfigError> get copyWith => _$ConversionError_ConfigErrorCopyWithImpl<ConversionError_ConfigError>(this, _$identity);
 
@@ -937,7 +912,7 @@ String toString() {
 /// @nodoc
 abstract mixin class $ConversionError_ConfigErrorCopyWith<$Res> implements $ConversionErrorCopyWith<$Res> {
   factory $ConversionError_ConfigErrorCopyWith(ConversionError_ConfigError value, $Res Function(ConversionError_ConfigError) _then) = _$ConversionError_ConfigErrorCopyWithImpl;
-@override @useResult
+@useResult
 $Res call({
  String field0
 });
@@ -956,7 +931,7 @@ class _$ConversionError_ConfigErrorCopyWithImpl<$Res>
 
 /// Create a copy of ConversionError
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? field0 = null,}) {
+@pragma('vm:prefer-inline') $Res call({Object? field0 = null,}) {
   return _then(ConversionError_ConfigError(
 field0: null == field0 ? _self.field0 : field0 // ignore: cast_nullable_to_non_nullable
 as String,
@@ -973,11 +948,11 @@ class ConversionError_IoError extends ConversionError {
   const ConversionError_IoError({required this.field0}): super._();
 
 
-@override final  String field0;
+ final  String field0;
 
 /// Create a copy of ConversionError
 /// with the given fields replaced by the non-null parameter values.
-@override @JsonKey(includeFromJson: false, includeToJson: false)
+@JsonKey(includeFromJson: false, includeToJson: false)
 @pragma('vm:prefer-inline')
 $ConversionError_IoErrorCopyWith<ConversionError_IoError> get copyWith => _$ConversionError_IoErrorCopyWithImpl<ConversionError_IoError>(this, _$identity);
 
@@ -1003,7 +978,7 @@ String toString() {
 /// @nodoc
 abstract mixin class $ConversionError_IoErrorCopyWith<$Res> implements $ConversionErrorCopyWith<$Res> {
   factory $ConversionError_IoErrorCopyWith(ConversionError_IoError value, $Res Function(ConversionError_IoError) _then) = _$ConversionError_IoErrorCopyWithImpl;
-@override @useResult
+@useResult
 $Res call({
  String field0
 });
@@ -1022,7 +997,7 @@ class _$ConversionError_IoErrorCopyWithImpl<$Res>
 
 /// Create a copy of ConversionError
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? field0 = null,}) {
+@pragma('vm:prefer-inline') $Res call({Object? field0 = null,}) {
   return _then(ConversionError_IoError(
 field0: null == field0 ? _self.field0 : field0 // ignore: cast_nullable_to_non_nullable
 as String,
@@ -1039,11 +1014,11 @@ class ConversionError_Panic extends ConversionError {
   const ConversionError_Panic({required this.field0}): super._();
 
 
-@override final  String field0;
+ final  String field0;
 
 /// Create a copy of ConversionError
 /// with the given fields replaced by the non-null parameter values.
-@override @JsonKey(includeFromJson: false, includeToJson: false)
+@JsonKey(includeFromJson: false, includeToJson: false)
 @pragma('vm:prefer-inline')
 $ConversionError_PanicCopyWith<ConversionError_Panic> get copyWith => _$ConversionError_PanicCopyWithImpl<ConversionError_Panic>(this, _$identity);
 
@@ -1069,7 +1044,7 @@ String toString() {
 /// @nodoc
 abstract mixin class $ConversionError_PanicCopyWith<$Res> implements $ConversionErrorCopyWith<$Res> {
   factory $ConversionError_PanicCopyWith(ConversionError_Panic value, $Res Function(ConversionError_Panic) _then) = _$ConversionError_PanicCopyWithImpl;
-@override @useResult
+@useResult
 $Res call({
  String field0
 });
@@ -1088,7 +1063,7 @@ class _$ConversionError_PanicCopyWithImpl<$Res>
 
 /// Create a copy of ConversionError
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? field0 = null,}) {
+@pragma('vm:prefer-inline') $Res call({Object? field0 = null,}) {
   return _then(ConversionError_Panic(
 field0: null == field0 ? _self.field0 : field0 // ignore: cast_nullable_to_non_nullable
 as String,
@@ -1105,11 +1080,11 @@ class ConversionError_InvalidInput extends ConversionError {
   const ConversionError_InvalidInput({required this.field0}): super._();
 
 
-@override final  String field0;
+ final  String field0;
 
 /// Create a copy of ConversionError
 /// with the given fields replaced by the non-null parameter values.
-@override @JsonKey(includeFromJson: false, includeToJson: false)
+@JsonKey(includeFromJson: false, includeToJson: false)
 @pragma('vm:prefer-inline')
 $ConversionError_InvalidInputCopyWith<ConversionError_InvalidInput> get copyWith => _$ConversionError_InvalidInputCopyWithImpl<ConversionError_InvalidInput>(this, _$identity);
 
@@ -1135,7 +1110,7 @@ String toString() {
 /// @nodoc
 abstract mixin class $ConversionError_InvalidInputCopyWith<$Res> implements $ConversionErrorCopyWith<$Res> {
   factory $ConversionError_InvalidInputCopyWith(ConversionError_InvalidInput value, $Res Function(ConversionError_InvalidInput) _then) = _$ConversionError_InvalidInputCopyWithImpl;
-@override @useResult
+@useResult
 $Res call({
  String field0
 });
@@ -1154,10 +1129,78 @@ class _$ConversionError_InvalidInputCopyWithImpl<$Res>
 
 /// Create a copy of ConversionError
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? field0 = null,}) {
+@pragma('vm:prefer-inline') $Res call({Object? field0 = null,}) {
   return _then(ConversionError_InvalidInput(
 field0: null == field0 ? _self.field0 : field0 // ignore: cast_nullable_to_non_nullable
 as String,
+  ));
+}
+
+
+}
+
+/// @nodoc
+
+
+class ConversionError_InputTooLarge extends ConversionError {
+  const ConversionError_InputTooLarge({required this.observedSize, required this.maxSize}): super._();
+
+
+ final  PlatformInt64 observedSize;
+ final  PlatformInt64 maxSize;
+
+/// Create a copy of ConversionError
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$ConversionError_InputTooLargeCopyWith<ConversionError_InputTooLarge> get copyWith => _$ConversionError_InputTooLargeCopyWithImpl<ConversionError_InputTooLarge>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is ConversionError_InputTooLarge&&(identical(other.observedSize, observedSize) || other.observedSize == observedSize)&&(identical(other.maxSize, maxSize) || other.maxSize == maxSize));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,observedSize,maxSize);
+
+@override
+String toString() {
+  return 'ConversionError.inputTooLarge(observedSize: $observedSize, maxSize: $maxSize)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $ConversionError_InputTooLargeCopyWith<$Res> implements $ConversionErrorCopyWith<$Res> {
+  factory $ConversionError_InputTooLargeCopyWith(ConversionError_InputTooLarge value, $Res Function(ConversionError_InputTooLarge) _then) = _$ConversionError_InputTooLargeCopyWithImpl;
+@useResult
+$Res call({
+ PlatformInt64 observedSize, PlatformInt64 maxSize
+});
+
+
+
+
+}
+/// @nodoc
+class _$ConversionError_InputTooLargeCopyWithImpl<$Res>
+    implements $ConversionError_InputTooLargeCopyWith<$Res> {
+  _$ConversionError_InputTooLargeCopyWithImpl(this._self, this._then);
+
+  final ConversionError_InputTooLarge _self;
+  final $Res Function(ConversionError_InputTooLarge) _then;
+
+/// Create a copy of ConversionError
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? observedSize = null,Object? maxSize = null,}) {
+  return _then(ConversionError_InputTooLarge(
+observedSize: null == observedSize ? _self.observedSize : observedSize // ignore: cast_nullable_to_non_nullable
+as PlatformInt64,maxSize: null == maxSize ? _self.maxSize : maxSize // ignore: cast_nullable_to_non_nullable
+as PlatformInt64,
   ));
 }
 
@@ -1171,11 +1214,11 @@ class ConversionError_Other extends ConversionError {
   const ConversionError_Other({required this.field0}): super._();
 
 
-@override final  String field0;
+ final  String field0;
 
 /// Create a copy of ConversionError
 /// with the given fields replaced by the non-null parameter values.
-@override @JsonKey(includeFromJson: false, includeToJson: false)
+@JsonKey(includeFromJson: false, includeToJson: false)
 @pragma('vm:prefer-inline')
 $ConversionError_OtherCopyWith<ConversionError_Other> get copyWith => _$ConversionError_OtherCopyWithImpl<ConversionError_Other>(this, _$identity);
 
@@ -1201,7 +1244,7 @@ String toString() {
 /// @nodoc
 abstract mixin class $ConversionError_OtherCopyWith<$Res> implements $ConversionErrorCopyWith<$Res> {
   factory $ConversionError_OtherCopyWith(ConversionError_Other value, $Res Function(ConversionError_Other) _then) = _$ConversionError_OtherCopyWithImpl;
-@override @useResult
+@useResult
 $Res call({
  String field0
 });
@@ -1220,7 +1263,7 @@ class _$ConversionError_OtherCopyWithImpl<$Res>
 
 /// Create a copy of ConversionError
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? field0 = null,}) {
+@pragma('vm:prefer-inline') $Res call({Object? field0 = null,}) {
   return _then(ConversionError_Other(
 field0: null == field0 ? _self.field0 : field0 // ignore: cast_nullable_to_non_nullable
 as String,
