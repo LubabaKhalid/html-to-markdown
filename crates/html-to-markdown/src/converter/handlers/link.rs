@@ -106,7 +106,12 @@ impl<'a> LinkData<'a> {
             .get("href")
             .flatten()
             .map(|value| text::decode_attribute_value_cow(&value.as_utf8_str()).into_owned())
-            .map(|href| handler.context.resolve_url(&href).unwrap_or(href))?;
+            .map(|href| {
+                handler
+                    .context
+                    .resolve_url(&href, handler.node_handle, handler.parser, handler.dom_context)
+                    .unwrap_or(href)
+            })?;
         // ~keep Empty titles are absent because Markdown serializers drop `""` on reparse.
         let title =
             crate::converter::utility::attributes::decoded_attribute(tag, "title").filter(|value| !value.is_empty());

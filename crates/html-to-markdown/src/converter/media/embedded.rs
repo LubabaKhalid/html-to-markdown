@@ -137,7 +137,7 @@ pub fn handle_audio(
         dom_ctx,
     } = context;
     let raw_src = media_element_src(tag, parser, options.inline_data_media);
-    let base_resolved_src = ctx.resolve_url(&raw_src);
+    let base_resolved_src = ctx.resolve_url(&raw_src, node_handle, parser, dom_ctx);
     let src = sanitize_markdown_url(base_resolved_src.as_deref().unwrap_or(&raw_src)).into_owned();
     let src_opt: Option<&str> = if src.is_empty() { None } else { Some(src.as_str()) };
 
@@ -218,7 +218,7 @@ pub fn handle_video(
         dom_ctx,
     } = context;
     let raw_src = media_element_src(tag, parser, options.inline_data_media);
-    let base_resolved_src = ctx.resolve_url(&raw_src);
+    let base_resolved_src = ctx.resolve_url(&raw_src, node_handle, parser, dom_ctx);
     let src = sanitize_markdown_url(base_resolved_src.as_deref().unwrap_or(&raw_src)).into_owned();
     let src_opt: Option<&str> = if src.is_empty() { None } else { Some(src.as_str()) };
 
@@ -332,7 +332,7 @@ pub fn handle_iframe(
         dom_ctx,
     } = context;
     let raw_src = crate::converter::utility::attributes::decoded_attribute(tag, "src").unwrap_or(Cow::Borrowed(""));
-    let base_resolved_src = ctx.resolve_url(&raw_src);
+    let base_resolved_src = ctx.resolve_url(&raw_src, node_handle, parser, dom_ctx);
     let src = sanitize_markdown_url(base_resolved_src.as_deref().unwrap_or(&raw_src)).into_owned();
     let src_opt: Option<&str> = if src.is_empty() { None } else { Some(src.as_str()) };
 

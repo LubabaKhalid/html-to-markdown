@@ -74,7 +74,10 @@ fn image_data<'a>(tag: &'a tl::HTMLTag<'a>, handler: &HandlerContext<'_>) -> Ima
                 effective_src = Cow::Owned(source_src);
             }
         }
-        let base_resolved = handler.context.resolve_url(&effective_src);
+        let base_resolved =
+            handler
+                .context
+                .resolve_url(&effective_src, handler.node_handle, handler.parser, handler.dom_context);
         Cow::Owned(sanitize_markdown_url(base_resolved.as_deref().unwrap_or(&effective_src)).into_owned())
     };
 

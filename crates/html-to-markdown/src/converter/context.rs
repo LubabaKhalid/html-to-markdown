@@ -496,7 +496,16 @@ impl Context {
     /// Returns `None` (meaning: use the original text unchanged) whenever `base_url`
     /// is unset, `value` is empty, already absolute, or fails to resolve. See
     /// `converter::url_resolve::resolve_attribute_url` for the full contract.
-    pub(crate) fn resolve_url(&self, value: &str) -> Option<String> {
+    pub(crate) fn resolve_url(
+        &self,
+        value: &str,
+        node_handle: &tl::NodeHandle,
+        parser: &tl::Parser,
+        dom_ctx: &crate::converter::DomContext,
+    ) -> Option<String> {
+        if dom_ctx.has_raw_text_ancestor(node_handle.get_inner(), parser) {
+            return None;
+        }
         crate::converter::url_resolve::resolve_attribute_url(self.base_url.as_deref()?, value)
     }
 }

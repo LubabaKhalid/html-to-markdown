@@ -37,7 +37,12 @@ pub fn handle_blockquote(tag: &tl::HTMLTag, mut handler: HandlerContext<'_>) {
     // ~keep Relative citations must remain meaningful after the Markdown leaves its source page.
     let cite = crate::converter::utility::attributes::decoded_attribute(tag, "cite")
         .map(std::borrow::Cow::into_owned)
-        .map(|value| handler.context.resolve_url(&value).unwrap_or(value));
+        .map(|value| {
+            handler
+                .context
+                .resolve_url(&value, handler.node_handle, handler.parser, handler.dom_context)
+                .unwrap_or(value)
+        });
     let content = collect_quote_content(tag, &handler);
     let trimmed = content.trim();
 

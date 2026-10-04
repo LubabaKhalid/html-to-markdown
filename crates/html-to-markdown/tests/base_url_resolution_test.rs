@@ -217,3 +217,47 @@ fn should_render_a_cited_blockquote_identically_on_both_tiers_without_a_base_url
         "a blockquote citation must reach the markdown, got {tier1:?}"
     );
 }
+
+#[test]
+fn should_not_resolve_link_like_text_inside_textarea() {
+    let html = r#"<textarea>see <a href="x.html">here</a> <img src="pic.png" alt="pic"></textarea><p><a href="real.html">real</a></p>"#;
+    let out = convert_with(html, Some("https://example.com/dir/page.html"), TierStrategy::Tier2);
+
+    assert_eq!(
+        out,
+        "see [here](x.html) ![pic](pic.png)\n\n[real](https://example.com/dir/real.html)\n"
+    );
+}
+
+#[test]
+fn should_not_resolve_link_like_text_inside_other_raw_text_elements() {
+    for (element, expected) in [
+        ("xmp", "see [here](x.html)\n\nafter\n"),
+        ("iframe", "after\n"),
+        ("noscript", "after\n"),
+        ("noembed", "see [here](x.html)\n\nafter\n"),
+        ("noframes", "see [here](x.html)\n\nafter\n"),
+    ] {
+        let html = format!(r#"<{element}>see <a href="x.html">here</a></{element}><p>after</p>"#);
+        let out = convert_with(&html, Some("https://example.com/dir/page.html"), TierStrategy::Tier2);
+
+        assert_eq!(out, expected, "element: {element}");
+    }
+}
+
+#[test]
+fn should_keep_title_script_and_style_contents_outside_url_resolution() {
+    let html = r#"
+        <html>
+          <head>
+            <title>see <a href="title.html">title</a></title>
+            <script>const link = '<a href="script.html">script</a>';</script>
+            <style>.x { background: url("style.html"); }</style>
+          </head>
+          <body><p><a href="real.html">real</a></p></body>
+        </html>
+    "#;
+    let out = convert_with(html, Some("https://example.com/dir/page.html"), TierStrategy::Tier2);
+
+    assert_eq!(out, "[real](https://example.com/dir/real.html)\n");
+}

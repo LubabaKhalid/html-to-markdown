@@ -10,13 +10,14 @@ use std::borrow::Cow;
 #[cfg(feature = "metadata")]
 use std::collections::BTreeMap;
 
+#[cfg(feature = "metadata")]
 use crate::converter::Context;
 use crate::converter::inline::HandlerContext;
 use crate::converter::inline::link::{append_url_destination, escape_markdown_title};
 use crate::converter::media::first_address;
 use crate::converter::utility::escaping::escape_image_alt;
 use crate::converter::utility::preprocessing::sanitize_markdown_url;
-use crate::options::{ConversionOptions, InlineDataMedia};
+use crate::options::InlineDataMedia;
 
 #[cfg(feature = "visitor")]
 use crate::converter::utility::serialization::serialize_node;
@@ -39,7 +40,7 @@ struct GraphicData<'a> {
 /// - Invoking visitor callbacks when the visitor feature is enabled
 /// - Generating appropriate markdown output
 pub fn handle_graphic(tag: &tl::HTMLTag, handler: HandlerContext<'_>) {
-    let data = graphic_data(tag, handler.options, handler.context);
+    let data = graphic_data(tag, &handler);
     #[cfg(feature = "metadata")]
     let metadata = handler.context.metadata_wants_images.then(|| graphic_metadata(tag));
     let rendered = render_graphic(tag, &data, &handler);
@@ -52,12 +53,14 @@ pub fn handle_graphic(tag: &tl::HTMLTag, handler: HandlerContext<'_>) {
     record_graphic_metadata(&data, metadata, handler.context);
 }
 
-fn graphic_data<'a>(tag: &'a tl::HTMLTag<'a>, options: &ConversionOptions, context: &Context) -> GraphicData<'a> {
+fn graphic_data<'a>(tag: &'a tl::HTMLTag<'a>, handler: &HandlerContext<'_>) -> GraphicData<'a> {
     let addresses = ["url", "href", "xlink:href", "src"]
         .into_iter()
         .filter_map(|name| crate::converter::utility::attributes::decoded_attribute(tag, name));
-    let src = first_address(options.inline_data_media, addresses).map_or(Cow::Borrowed(""), |s| {
-        let resolved = context.resolve_url(&s);
+    let src = first_address(handler.options.inline_data_media, addresses).map_or(Cow::Borrowed(""), |s| {
+        let resolved = handler
+            .context
+            .resolve_url(&s, handler.node_handle, handler.parser, handler.dom_context);
         Cow::Owned(sanitize_markdown_url(resolved.as_deref().unwrap_or(&s)).into_owned())
     });
 
