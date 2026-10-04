@@ -57,9 +57,8 @@ pub fn handle_ol(node_handle: &tl::NodeHandle, parser: &tl::Parser, output: &mut
     let nested_depth = calculate_list_nesting_depth(ctx);
     let is_loose = is_loose_list(*node_handle, parser, dom_ctx);
 
-    let tag = match node_handle.get(parser) {
-        Some(tl::Node::Tag(t)) => t,
-        _ => return,
+    let Some(tl::Node::Tag(tag)) = node_handle.get(parser) else {
+        return;
     };
 
     let start = ordered_start(tag);
