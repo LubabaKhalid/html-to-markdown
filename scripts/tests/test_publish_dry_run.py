@@ -50,3 +50,16 @@ def test_swift_release_finalizer_refreshes_an_existing_checksum() -> None:
     assert tooling["with"]["ref"] == "${{ github.workflow_sha }}"
     assert tooling["with"]["path"] == ".release-tooling"
     assert 'python3 .release-tooling/scripts/ci/swift/finalize_release_manifest.py "${CHECKSUM}" "${VERSION}"' in script
+
+
+def test_release_report_accepts_already_finalized_release_and_scoop_manifest() -> None:
+    """Recovery reporting must recognize external state created by an earlier run."""
+    workflow = yaml.safe_load((ROOT / ".github/workflows/publish.yaml").read_text())
+    steps = workflow["jobs"]["release-report"]["steps"]
+    report = next(step for step in steps if step.get("name") == "Verify every enabled publish target succeeded")
+    script = report["run"]
+
+    assert 'release_is_draft="$(gh release view' in script
+    assert 'if [[ "${RESULT_FINALIZE}" != "success" && "${release_is_draft}" != "false" ]]' in script
+    assert "repos/xberg-io/scoop-bucket/contents/bucket/html-to-markdown.json" in script
+    assert '"${scoop_version}" == "${VERSION}"' in script

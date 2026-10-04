@@ -3565,6 +3565,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           TAG: ${{ needs.prepare.outputs.tag }}
+          VERSION: ${{ needs.prepare.outputs.version }}
           PROMOTED: ${{ needs.promote-release.outputs.promoted }}
         run: |
           set -euo pipefail
@@ -3723,7 +3724,6 @@ jobs:
 
           require_success "prepare" "${RESULT_PREPARE}"
           require_success "validate-versions" "${RESULT_VALIDATE}"
-          require_success "release-finalize" "${RESULT_FINALIZE}"
 
           if [[ "${RESULT_CRATES_GATE}" != "true" ]]; then
             echo "::error title=Incomplete release::crates-gate refused to release: the crates.io prerequisite for ${TAG} was never satisfied."
@@ -3740,6 +3740,12 @@ jobs:
             echo "::error title=Incomplete release::${TAG} is not a published release (isDraft=${release_is_draft}; promote-release reported '${RESULT_PROMOTE:-<skipped>}')."
             failed=1
           fi
+          if [[ "${RESULT_FINALIZE}" != "success" && "${release_is_draft}" != "false" ]]; then
+            echo "::error title=Incomplete release::Required release job 'release-finalize' finished with '${RESULT_FINALIZE}' and ${TAG} is not public."
+            failed=1
+          else
+            echo "  - release-finalize: release is public"
+          fi
 
           require_publish "crates.io" "${RESULT_PUBLISH_CRATES}" "${RELEASE_CRATES}" "${EXISTS_CRATES}"
           require_publish "pypi" "${RESULT_PUBLISH_PYPI}" "${RELEASE_PYTHON}" "${EXISTS_PYPI}"
@@ -3754,7 +3760,14 @@ jobs:
           require_publish "pub.dev" "${RESULT_TRIGGER_PUBDEV}" "${RELEASE_DART}" "${EXISTS_PUB}"
           require_publish "zig" "${RESULT_PUBLISH_ZIG}" "${RELEASE_ZIG}" "${EXISTS_ZIG}"
           require_publish "homebrew" "${RESULT_PUBLISH_HOMEBREW}" "${RELEASE_HOMEBREW}" "${EXISTS_HOMEBREW}"
-          require_publish "scoop" "${RESULT_PUBLISH_SCOOP}" "${RELEASE_SCOOP}"
+          scoop_already=false
+          if [[ "${RELEASE_SCOOP}" == "true" && "${RESULT_PUBLISH_SCOOP}" != "success" && "${FORCE_REPUBLISH}" != "true" ]]; then
+            scoop_version="$(gh api 'repos/xberg-io/scoop-bucket/contents/bucket/html-to-markdown.json?ref=main' --jq '.content' 2>/dev/null | base64 --decode | jq -r '.version' 2>/dev/null || true)"
+            if [[ "${scoop_version}" == "${VERSION}" ]]; then
+              scoop_already=true
+            fi
+          fi
+          require_publish "scoop" "${RESULT_PUBLISH_SCOOP}" "${RELEASE_SCOOP}" "${scoop_already}"
 
           # Release assets consumers resolve at install time.
           require_publish "cli-binaries" "${RESULT_UPLOAD_CLI}" "${RELEASE_CLI}" "${EXISTS_CLI}"
