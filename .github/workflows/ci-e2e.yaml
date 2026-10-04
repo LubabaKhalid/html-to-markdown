@@ -338,6 +338,9 @@ jobs:
       - {
           "name": "Build native module",
           "uses": "xberg-io/actions/build-node-napi@v1",
+          # ~keep The action recreates npm/ after deleting it. pnpm 12 otherwise rejects the
+          # temporarily missing workspace importers before napi can recreate them.
+          "env": { "PNPM_CONFIG_FROZEN_LOCKFILE": "false" },
           "with": {
             "crate-dir": "crates/html-to-markdown-node",
             "target": "${{ matrix.target }}",
