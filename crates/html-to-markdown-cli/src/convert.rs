@@ -10,6 +10,20 @@ fn base64_encode(data: &[u8]) -> String {
     BASE64.encode(data)
 }
 
+fn convert_with_warnings(
+    html: &str,
+    options: ConversionOptions,
+    show_warnings: bool,
+) -> Result<html_to_markdown_rs::ConversionResult, Box<dyn std::error::Error>> {
+    let result = convert(html, Some(options)).map_err(|error| format!("Error converting HTML: {error}"))?;
+    if show_warnings {
+        for warning in &result.warnings {
+            tracing::warn!(kind = ?warning.kind, detail = %warning.message, "conversion warning");
+        }
+    }
+    Ok(result)
+}
+
 pub fn build_conversion_options(cli: &Cli) -> ConversionOptions {
     let defaults = ConversionOptions::default();
 
@@ -79,15 +93,8 @@ pub fn perform_conversion(
     options: ConversionOptions,
     cli: &Cli,
 ) -> Result<String, Box<dyn std::error::Error>> {
+    let result = convert_with_warnings(html, options, cli.show_warnings)?;
     let output_content = if cli.json {
-        let result = convert(html, Some(options)).map_err(|e| format!("Error converting HTML: {e}"))?;
-
-        if cli.show_warnings {
-            for warning in &result.warnings {
-                tracing::warn!(kind = ?warning.kind, detail = %warning.message, "conversion warning");
-            }
-        }
-
         tracing::debug!(
             bytes = result.content.as_deref().unwrap_or("").len(),
             "generated markdown output (JSON mode)"
@@ -142,14 +149,6 @@ pub fn perform_conversion(
         serde_json::to_string_pretty(&serde_json::Value::Object(json_output))
             .map_err(|e| format!("Error serializing JSON output: {e}"))?
     } else {
-        let result = convert(html, Some(options)).map_err(|e| format!("Error converting HTML: {e}"))?;
-
-        if cli.show_warnings {
-            for warning in &result.warnings {
-                tracing::warn!(kind = ?warning.kind, detail = %warning.message, "conversion warning");
-            }
-        }
-
         let markdown = result.content.unwrap_or_default();
         tracing::debug!(bytes = markdown.len(), "generated markdown output");
         markdown

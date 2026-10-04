@@ -12,6 +12,7 @@ use crate::validators::{
 #[cfg(feature = "mcp")]
 use clap::Subcommand;
 use clap::{Parser, ValueEnum};
+use std::ops::Deref;
 use std::path::PathBuf;
 
 /// Optional top-level subcommands.
@@ -105,6 +106,20 @@ pub struct Cli {
     #[arg(long = "generate-man")]
     pub generate_man: bool,
 
+    #[command(flatten)]
+    pub conversion: ConversionArgs,
+}
+
+impl Deref for Cli {
+    type Target = ConversionArgs;
+
+    fn deref(&self) -> &Self::Target {
+        &self.conversion
+    }
+}
+
+#[derive(clap::Args)]
+pub struct ConversionArgs {
     /// Heading style
     ///
     /// Controls how headings are formatted in the output:
@@ -311,6 +326,20 @@ pub struct Cli {
     #[arg(help_heading = "Metadata")]
     pub extract_metadata: bool,
 
+    #[command(flatten)]
+    pub extended: ExtendedConversionArgs,
+}
+
+impl Deref for ConversionArgs {
+    type Target = ExtendedConversionArgs;
+
+    fn deref(&self) -> &Self::Target {
+        &self.extended
+    }
+}
+
+#[derive(clap::Args)]
+pub struct ExtendedConversionArgs {
     /// Output full `ConversionResult` as JSON instead of markdown text
     ///
     /// Serializes all result fields (content, metadata, tables, document tree, warnings)
