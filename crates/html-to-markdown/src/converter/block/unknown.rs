@@ -62,7 +62,12 @@ pub fn handle(node_handle: &NodeHandle, parser: &Parser, output: &mut String, ha
     let children = tag.children();
     {
         for child_handle in children.top().iter() {
-            walk_node(child_handle, parser, output, options, ctx, depth + 1, dom_ctx);
+            walk_node(
+                child_handle,
+                parser,
+                output,
+                crate::converter::block::container::HandlerContext::new(options, ctx, depth + 1, dom_ctx),
+            );
         }
     }
 

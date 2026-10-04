@@ -108,10 +108,12 @@ fn walk_paragraph_children(
             child_handle,
             parser,
             output,
-            handler.options,
-            handler.ctx,
-            handler.depth + 1,
-            handler.dom_ctx,
+            crate::converter::block::container::HandlerContext::new(
+                handler.options,
+                handler.ctx,
+                handler.depth + 1,
+                handler.dom_ctx,
+            ),
         );
     }
 }

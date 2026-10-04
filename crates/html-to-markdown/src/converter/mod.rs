@@ -100,6 +100,7 @@ pub mod head_metadata;
 pub mod inline;
 pub mod list;
 pub mod main;
+mod main_dispatch;
 mod main_helpers;
 pub mod media;
 mod metadata;

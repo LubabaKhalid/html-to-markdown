@@ -41,7 +41,12 @@ pub fn handle_blockquote(
     if ctx.in_heading && !ctx.in_table_cell {
         let mut content = String::new();
         for child_handle in tag.children().top().iter() {
-            walk_node(child_handle, parser, &mut content, options, ctx, depth + 1, dom_ctx);
+            walk_node(
+                child_handle,
+                parser,
+                &mut content,
+                crate::converter::block::container::HandlerContext::new(options, ctx, depth + 1, dom_ctx),
+            );
         }
         let trimmed = content.trim();
         if !trimmed.is_empty() {
@@ -59,7 +64,12 @@ pub fn handle_blockquote(
         let children = tag.children();
         {
             for child_handle in children.top().iter() {
-                walk_node(child_handle, parser, output, options, ctx, depth + 1, dom_ctx);
+                walk_node(
+                    child_handle,
+                    parser,
+                    output,
+                    crate::converter::block::container::HandlerContext::new(options, ctx, depth + 1, dom_ctx),
+                );
             }
         }
         return;
@@ -108,10 +118,7 @@ pub fn handle_blockquote(
                 child_handle,
                 parser,
                 &mut content,
-                options,
-                &blockquote_ctx,
-                depth + 1,
-                dom_ctx,
+                crate::converter::block::container::HandlerContext::new(options, &blockquote_ctx, depth + 1, dom_ctx),
             );
         }
     }

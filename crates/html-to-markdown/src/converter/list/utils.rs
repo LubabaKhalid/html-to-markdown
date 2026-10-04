@@ -1207,7 +1207,12 @@ pub fn process_list_children(
                 }
 
                 use crate::converter::walk_node;
-                walk_node(child_handle, parser, output, options, &list_ctx, depth + 1, dom_ctx);
+                walk_node(
+                    child_handle,
+                    parser,
+                    output,
+                    crate::converter::block::container::HandlerContext::new(options, &list_ctx, depth + 1, dom_ctx),
+                );
 
                 if let Some(line_start) = marker_line_start {
                     let line = written_marker_line(output, line_start);

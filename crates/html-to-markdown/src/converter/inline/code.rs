@@ -79,7 +79,12 @@ fn handle_kbd_samp(
         // ~keep (`handlers::code_block::handle_code`); `<kbd>`/`<samp>` wrapped their own
         // ~keep backticks anyway, so the outer span grew a second, nested pair.
         for child_handle in children.top().iter() {
-            walk_node(child_handle, parser, output, options, ctx, depth + 1, dom_ctx);
+            walk_node(
+                child_handle,
+                parser,
+                output,
+                crate::converter::block::container::HandlerContext::new(options, ctx, depth + 1, dom_ctx),
+            );
         }
         return;
     }
@@ -94,10 +99,7 @@ fn handle_kbd_samp(
             child_handle,
             parser,
             &mut content,
-            options,
-            &code_ctx,
-            depth + 1,
-            dom_ctx,
+            crate::converter::block::container::HandlerContext::new(options, &code_ctx, depth + 1, dom_ctx),
         );
     }
 

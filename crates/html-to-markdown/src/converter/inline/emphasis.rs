@@ -253,7 +253,12 @@ fn handle_strong(
     if ctx.in_code {
         let children = tag.children();
         for child_handle in children.top().iter() {
-            walk_node(child_handle, parser, output, options, ctx, depth + 1, dom_ctx);
+            walk_node(
+                child_handle,
+                parser,
+                output,
+                crate::converter::block::container::HandlerContext::new(options, ctx, depth + 1, dom_ctx),
+            );
         }
     } else {
         let mut content = String::with_capacity(64);
@@ -271,10 +276,7 @@ fn handle_strong(
                     child_handle,
                     parser,
                     &mut content,
-                    options,
-                    &strong_ctx,
-                    depth + 1,
-                    dom_ctx,
+                    crate::converter::block::container::HandlerContext::new(options, &strong_ctx, depth + 1, dom_ctx),
                 );
             }
         }
@@ -356,7 +358,12 @@ fn handle_emphasis(
     if ctx.in_code {
         let children = tag.children();
         for child_handle in children.top().iter() {
-            walk_node(child_handle, parser, output, options, ctx, depth + 1, dom_ctx);
+            walk_node(
+                child_handle,
+                parser,
+                output,
+                crate::converter::block::container::HandlerContext::new(options, ctx, depth + 1, dom_ctx),
+            );
         }
     } else {
         let mut content = String::with_capacity(64);
@@ -369,7 +376,12 @@ fn handle_emphasis(
                 ..ctx.clone()
             };
             for child_handle in children.top().iter() {
-                walk_node(child_handle, parser, &mut content, options, &em_ctx, depth + 1, dom_ctx);
+                walk_node(
+                    child_handle,
+                    parser,
+                    &mut content,
+                    crate::converter::block::container::HandlerContext::new(options, &em_ctx, depth + 1, dom_ctx),
+                );
             }
         }
 

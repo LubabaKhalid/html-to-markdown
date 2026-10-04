@@ -296,9 +296,6 @@ fn convert_inner(html: &str, options: ConversionOptions) -> Result<ConversionRes
             None
         };
 
-    #[cfg(not(feature = "visitor"))]
-    let visitor: Option<()> = None;
-
     // ~keep Pass structure_collector by value — convert_html_impl will consume it via Rc::try_unwrap
     // ~keep to return the finished DocumentStructure. We must not hold a second Rc reference.
     //
@@ -316,58 +313,23 @@ fn convert_inner(html: &str, options: ConversionOptions) -> Result<ConversionRes
         Option<crate::types::ProcessingWarning>,
     );
     let convert_outcome = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| -> Result<ConvertOutput> {
-        #[cfg(all(feature = "metadata", feature = "inline-images"))]
-        {
-            crate::converter::convert_html_impl(
-                normalized_html.as_ref(),
-                &options,
-                image_collector.as_ref().map(Rc::clone),
-                metadata_collector.as_ref().map(Rc::clone),
+        crate::converter::convert_html_impl(
+            normalized_html.as_ref(),
+            &options,
+            crate::converter::main::ConversionParameters {
+                #[cfg(feature = "inline-images")]
+                inline_collector: image_collector.as_ref().map(Rc::clone),
+                #[cfg(not(feature = "inline-images"))]
+                inline_collector: None,
+                #[cfg(feature = "metadata")]
+                metadata_collector: metadata_collector.as_ref().map(Rc::clone),
+                #[cfg(feature = "visitor")]
                 visitor,
                 structure_collector,
-                effective_base,
-                metadata_base_href.as_deref(),
-            )
-        }
-        #[cfg(all(feature = "metadata", not(feature = "inline-images")))]
-        {
-            crate::converter::convert_html_impl(
-                normalized_html.as_ref(),
-                &options,
-                None,
-                metadata_collector.as_ref().map(Rc::clone),
-                visitor,
-                structure_collector,
-                effective_base,
-                metadata_base_href.as_deref(),
-            )
-        }
-        #[cfg(all(not(feature = "metadata"), feature = "inline-images"))]
-        {
-            crate::converter::convert_html_impl(
-                normalized_html.as_ref(),
-                &options,
-                image_collector.as_ref().map(Rc::clone),
-                None,
-                visitor,
-                structure_collector,
-                effective_base,
-                metadata_base_href.as_deref(),
-            )
-        }
-        #[cfg(all(not(feature = "metadata"), not(feature = "inline-images")))]
-        {
-            crate::converter::convert_html_impl(
-                normalized_html.as_ref(),
-                &options,
-                None,
-                None,
-                visitor,
-                structure_collector,
-                effective_base,
-                metadata_base_href.as_deref(),
-            )
-        }
+                base_url: effective_base,
+                document_base_href: metadata_base_href.as_deref(),
+            },
+        )
     }));
 
     let (markdown, document, tables, depth_warning) = match convert_outcome {

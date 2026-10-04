@@ -104,10 +104,12 @@ pub fn handle(
                                             child_handle,
                                             parser,
                                             &mut annotation,
-                                            options,
-                                            &ruby_ctx,
-                                            depth + 1,
-                                            dom_ctx,
+                                            crate::converter::block::container::HandlerContext::new(
+                                                options,
+                                                &ruby_ctx,
+                                                depth + 1,
+                                                dom_ctx,
+                                            ),
                                         );
                                         if !current_base.is_empty() {
                                             output.push_str(current_base.trim());
@@ -123,20 +125,24 @@ pub fn handle(
                                             child_handle,
                                             parser,
                                             &mut current_base,
-                                            options,
-                                            &ruby_ctx,
-                                            depth + 1,
-                                            dom_ctx,
+                                            crate::converter::block::container::HandlerContext::new(
+                                                options,
+                                                &ruby_ctx,
+                                                depth + 1,
+                                                dom_ctx,
+                                            ),
                                         );
                                     } else if tag_name != "rp" {
                                         walk_node(
                                             child_handle,
                                             parser,
                                             &mut current_base,
-                                            options,
-                                            &ruby_ctx,
-                                            depth + 1,
-                                            dom_ctx,
+                                            crate::converter::block::container::HandlerContext::new(
+                                                options,
+                                                &ruby_ctx,
+                                                depth + 1,
+                                                dom_ctx,
+                                            ),
                                         );
                                     }
                                 }
@@ -145,10 +151,12 @@ pub fn handle(
                                         child_handle,
                                         parser,
                                         &mut current_base,
-                                        options,
-                                        &ruby_ctx,
-                                        depth + 1,
-                                        dom_ctx,
+                                        crate::converter::block::container::HandlerContext::new(
+                                            options,
+                                            &ruby_ctx,
+                                            depth + 1,
+                                            dom_ctx,
+                                        ),
                                     );
                                 }
                                 _ => {}
@@ -177,10 +185,12 @@ pub fn handle(
                                             child_handle,
                                             parser,
                                             &mut annotation,
-                                            options,
-                                            &ruby_ctx,
-                                            depth + 1,
-                                            dom_ctx,
+                                            crate::converter::block::container::HandlerContext::new(
+                                                options,
+                                                &ruby_ctx,
+                                                depth + 1,
+                                                dom_ctx,
+                                            ),
                                         );
                                         rt_annotations.push(annotation);
                                     } else if tag_name == "rtc" {
@@ -188,20 +198,24 @@ pub fn handle(
                                             child_handle,
                                             parser,
                                             &mut rtc_content,
-                                            options,
-                                            &ruby_ctx,
-                                            depth + 1,
-                                            dom_ctx,
+                                            crate::converter::block::container::HandlerContext::new(
+                                                options,
+                                                &ruby_ctx,
+                                                depth + 1,
+                                                dom_ctx,
+                                            ),
                                         );
                                     } else if tag_name != "rp" {
                                         walk_node(
                                             child_handle,
                                             parser,
                                             &mut base_text,
-                                            options,
-                                            &ruby_ctx,
-                                            depth + 1,
-                                            dom_ctx,
+                                            crate::converter::block::container::HandlerContext::new(
+                                                options,
+                                                &ruby_ctx,
+                                                depth + 1,
+                                                dom_ctx,
+                                            ),
                                         );
                                     }
                                 }
@@ -210,10 +224,12 @@ pub fn handle(
                                         child_handle,
                                         parser,
                                         &mut base_text,
-                                        options,
-                                        &ruby_ctx,
-                                        depth + 1,
-                                        dom_ctx,
+                                        crate::converter::block::container::HandlerContext::new(
+                                            options,
+                                            &ruby_ctx,
+                                            depth + 1,
+                                            dom_ctx,
+                                        ),
                                     );
                                 }
                                 _ => {}
@@ -250,7 +266,12 @@ pub fn handle(
             let text_ctx = ctx.inline_buffer(output, false);
             {
                 for child_handle in children.top().iter() {
-                    walk_node(child_handle, parser, &mut text, options, &text_ctx, depth + 1, dom_ctx);
+                    walk_node(
+                        child_handle,
+                        parser,
+                        &mut text,
+                        crate::converter::block::container::HandlerContext::new(options, &text_ctx, depth + 1, dom_ctx),
+                    );
                 }
             }
             output.push_str(text.trim());
@@ -262,7 +283,12 @@ pub fn handle(
             let text_ctx = ctx.inline_buffer(output, true);
             {
                 for child_handle in children.top().iter() {
-                    walk_node(child_handle, parser, &mut text, options, &text_ctx, depth + 1, dom_ctx);
+                    walk_node(
+                        child_handle,
+                        parser,
+                        &mut text,
+                        crate::converter::block::container::HandlerContext::new(options, &text_ctx, depth + 1, dom_ctx),
+                    );
                 }
             }
             let trimmed = text.trim();
@@ -288,10 +314,12 @@ pub fn handle(
                         child_handle,
                         parser,
                         &mut content,
-                        options,
-                        &content_ctx,
-                        depth + 1,
-                        dom_ctx,
+                        crate::converter::block::container::HandlerContext::new(
+                            options,
+                            &content_ctx,
+                            depth + 1,
+                            dom_ctx,
+                        ),
                     );
                 }
             }
@@ -305,7 +333,12 @@ pub fn handle(
             let children = tag.children();
             {
                 for child_handle in children.top().iter() {
-                    walk_node(child_handle, parser, output, options, ctx, depth + 1, dom_ctx);
+                    walk_node(
+                        child_handle,
+                        parser,
+                        output,
+                        crate::converter::block::container::HandlerContext::new(options, ctx, depth + 1, dom_ctx),
+                    );
                 }
             }
         }
@@ -315,7 +348,12 @@ pub fn handle(
             let children = tag.children();
             {
                 for child_handle in children.top().iter() {
-                    walk_node(child_handle, parser, output, options, ctx, depth + 1, dom_ctx);
+                    walk_node(
+                        child_handle,
+                        parser,
+                        output,
+                        crate::converter::block::container::HandlerContext::new(options, ctx, depth + 1, dom_ctx),
+                    );
                 }
             }
         }

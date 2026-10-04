@@ -35,7 +35,12 @@ pub fn handle_dl(
         {
             for child_handle in children.top().iter() {
                 use crate::converter::walk_node;
-                walk_node(child_handle, parser, output, options, ctx, depth + 1, dom_ctx);
+                walk_node(
+                    child_handle,
+                    parser,
+                    output,
+                    crate::converter::block::container::HandlerContext::new(options, ctx, depth + 1, dom_ctx),
+                );
             }
         }
         return;
@@ -46,7 +51,12 @@ pub fn handle_dl(
     {
         let dl_ctx = crate::converter::list::utils::nested_block_context(output, ctx, options);
         for child_handle in children.top().iter() {
-            crate::converter::walk_node(child_handle, parser, &mut content, options, &dl_ctx, depth + 1, dom_ctx);
+            crate::converter::walk_node(
+                child_handle,
+                parser,
+                &mut content,
+                crate::converter::block::container::HandlerContext::new(options, &dl_ctx, depth + 1, dom_ctx),
+            );
         }
     }
 
@@ -86,7 +96,12 @@ pub fn handle_dt(
     let children = tag.children();
     {
         for child_handle in children.top().iter() {
-            crate::converter::walk_node(child_handle, parser, &mut content, options, ctx, depth + 1, dom_ctx);
+            crate::converter::walk_node(
+                child_handle,
+                parser,
+                &mut content,
+                crate::converter::block::container::HandlerContext::new(options, ctx, depth + 1, dom_ctx),
+            );
         }
     }
     let trimmed = content.trim().to_owned();
@@ -169,7 +184,12 @@ pub fn handle_dd(
     let children = tag.children();
     {
         for child_handle in children.top().iter() {
-            crate::converter::walk_node(child_handle, parser, &mut content, options, ctx, depth + 1, dom_ctx);
+            crate::converter::walk_node(
+                child_handle,
+                parser,
+                &mut content,
+                crate::converter::block::container::HandlerContext::new(options, ctx, depth + 1, dom_ctx),
+            );
         }
     }
 

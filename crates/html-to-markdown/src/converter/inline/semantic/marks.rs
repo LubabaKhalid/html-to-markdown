@@ -91,7 +91,12 @@ pub fn handle_mark(
     if ctx.convert_as_inline {
         let children = tag.children();
         for child_handle in children.top().iter() {
-            walk_node(child_handle, parser, output, options, ctx, depth + 1, dom_ctx);
+            walk_node(
+                child_handle,
+                parser,
+                output,
+                crate::converter::block::container::HandlerContext::new(options, ctx, depth + 1, dom_ctx),
+            );
         }
         return;
     }
@@ -111,10 +116,7 @@ pub fn handle_mark(
             child_handle,
             parser,
             &mut content,
-            options,
-            &child_ctx,
-            depth + 1,
-            dom_ctx,
+            crate::converter::block::container::HandlerContext::new(options, &child_ctx, depth + 1, dom_ctx),
         );
     }
 
@@ -292,7 +294,12 @@ pub fn handle_strikethrough(
     if ctx.in_code {
         let children = tag.children();
         for child_handle in children.top().iter() {
-            walk_node(child_handle, parser, output, options, ctx, depth + 1, dom_ctx);
+            walk_node(
+                child_handle,
+                parser,
+                output,
+                crate::converter::block::container::HandlerContext::new(options, ctx, depth + 1, dom_ctx),
+            );
         }
     } else {
         let mut content = String::with_capacity(32);
@@ -303,10 +310,7 @@ pub fn handle_strikethrough(
                 child_handle,
                 parser,
                 &mut content,
-                options,
-                &marker_ctx,
-                depth + 1,
-                dom_ctx,
+                crate::converter::block::container::HandlerContext::new(options, &marker_ctx, depth + 1, dom_ctx),
             );
         }
 
@@ -393,7 +397,12 @@ pub fn handle_inserted(
         // ~keep did not, so it emitted literal `==` INTO code content, where it is text.
         let children = tag.children();
         for child_handle in children.top().iter() {
-            walk_node(child_handle, parser, output, options, ctx, depth + 1, dom_ctx);
+            walk_node(
+                child_handle,
+                parser,
+                output,
+                crate::converter::block::container::HandlerContext::new(options, ctx, depth + 1, dom_ctx),
+            );
         }
         return;
     }
@@ -406,10 +415,7 @@ pub fn handle_inserted(
             child_handle,
             parser,
             &mut content,
-            options,
-            &marker_ctx,
-            depth + 1,
-            dom_ctx,
+            crate::converter::block::container::HandlerContext::new(options, &marker_ctx, depth + 1, dom_ctx),
         );
     }
 
@@ -521,7 +527,12 @@ pub fn handle_underline(
             VisitResult::Continue => {
                 let children = tag.children();
                 for child_handle in children.top().iter() {
-                    walk_node(child_handle, parser, output, options, ctx, depth + 1, dom_ctx);
+                    walk_node(
+                        child_handle,
+                        parser,
+                        output,
+                        crate::converter::block::container::HandlerContext::new(options, ctx, depth + 1, dom_ctx),
+                    );
                 }
             }
             VisitResult::Custom(custom) => {
@@ -538,14 +549,24 @@ pub fn handle_underline(
                 }
                 let children = tag.children();
                 for child_handle in children.top().iter() {
-                    walk_node(child_handle, parser, output, options, ctx, depth + 1, dom_ctx);
+                    walk_node(
+                        child_handle,
+                        parser,
+                        output,
+                        crate::converter::block::container::HandlerContext::new(options, ctx, depth + 1, dom_ctx),
+                    );
                 }
             }
         }
     } else {
         let children = tag.children();
         for child_handle in children.top().iter() {
-            walk_node(child_handle, parser, output, options, ctx, depth + 1, dom_ctx);
+            walk_node(
+                child_handle,
+                parser,
+                output,
+                crate::converter::block::container::HandlerContext::new(options, ctx, depth + 1, dom_ctx),
+            );
         }
     }
 
@@ -553,7 +574,12 @@ pub fn handle_underline(
     {
         let children = tag.children();
         for child_handle in children.top().iter() {
-            walk_node(child_handle, parser, output, options, ctx, depth + 1, dom_ctx);
+            walk_node(
+                child_handle,
+                parser,
+                output,
+                crate::converter::block::container::HandlerContext::new(options, ctx, depth + 1, dom_ctx),
+            );
         }
     }
 }

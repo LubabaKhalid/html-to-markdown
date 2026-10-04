@@ -121,7 +121,12 @@ pub fn handle_form(
             let children = tag.children();
             {
                 for child_handle in children.top().iter() {
-                    super::walk_node(child_handle, parser, output, options, ctx, depth + 1, dom_ctx);
+                    super::walk_node(
+                        child_handle,
+                        parser,
+                        output,
+                        crate::converter::block::container::HandlerContext::new(options, ctx, depth + 1, dom_ctx),
+                    );
                 }
             }
             return;
@@ -141,10 +146,7 @@ pub fn handle_form(
                     child_handle,
                     parser,
                     &mut content,
-                    options,
-                    &block_ctx,
-                    depth + 1,
-                    dom_ctx,
+                    crate::converter::block::container::HandlerContext::new(options, &block_ctx, depth + 1, dom_ctx),
                 );
             }
         }
@@ -181,7 +183,12 @@ pub fn handle_fieldset(
     depth: usize,
     dom_ctx: &super::DomContext,
 ) {
-    crate::converter::block::div::handle(node_handle, parser, output, options, ctx, depth, dom_ctx);
+    crate::converter::block::div::handle(
+        node_handle,
+        parser,
+        output,
+        crate::converter::block::container::HandlerContext::new(options, ctx, depth, dom_ctx),
+    );
 }
 
 /// Handles the `<legend>` element.
@@ -219,10 +226,7 @@ pub fn handle_legend(
                     child_handle,
                     parser,
                     &mut content,
-                    options,
-                    &legend_ctx,
-                    depth + 1,
-                    dom_ctx,
+                    crate::converter::block::container::HandlerContext::new(options, &legend_ctx, depth + 1, dom_ctx),
                 );
             }
         }
@@ -277,10 +281,7 @@ pub fn handle_label(
                     child_handle,
                     parser,
                     &mut content,
-                    options,
-                    &label_ctx,
-                    depth + 1,
-                    dom_ctx,
+                    crate::converter::block::container::HandlerContext::new(options, &label_ctx, depth + 1, dom_ctx),
                 );
             }
         }
@@ -411,7 +412,12 @@ pub fn handle_textarea(
         let children = tag.children();
         {
             for child_handle in children.top().iter() {
-                walk_node(child_handle, parser, output, options, ctx, depth + 1, dom_ctx);
+                walk_node(
+                    child_handle,
+                    parser,
+                    output,
+                    crate::converter::block::container::HandlerContext::new(options, ctx, depth + 1, dom_ctx),
+                );
             }
         }
 
@@ -444,7 +450,12 @@ pub fn handle_select(
         let children = tag.children();
         {
             for child_handle in children.top().iter() {
-                walk_node(child_handle, parser, output, options, ctx, depth + 1, dom_ctx);
+                walk_node(
+                    child_handle,
+                    parser,
+                    output,
+                    crate::converter::block::container::HandlerContext::new(options, ctx, depth + 1, dom_ctx),
+                );
             }
         }
     }
@@ -475,7 +486,12 @@ pub fn handle_option(
         let children = tag.children();
         {
             for child_handle in children.top().iter() {
-                super::walk_node(child_handle, parser, &mut text, options, ctx, depth + 1, dom_ctx);
+                super::walk_node(
+                    child_handle,
+                    parser,
+                    &mut text,
+                    crate::converter::block::container::HandlerContext::new(options, ctx, depth + 1, dom_ctx),
+                );
             }
         }
 
@@ -525,7 +541,12 @@ pub fn handle_optgroup(
         let children = tag.children();
         {
             for child_handle in children.top().iter() {
-                walk_node(child_handle, parser, output, options, ctx, depth + 1, dom_ctx);
+                walk_node(
+                    child_handle,
+                    parser,
+                    output,
+                    crate::converter::block::container::HandlerContext::new(options, ctx, depth + 1, dom_ctx),
+                );
             }
         }
     }
@@ -602,7 +623,12 @@ pub fn handle_button(
         let children = tag.children();
         {
             for child_handle in children.top().iter() {
-                walk_node(child_handle, parser, output, options, ctx, depth + 1, dom_ctx);
+                walk_node(
+                    child_handle,
+                    parser,
+                    output,
+                    crate::converter::block::container::HandlerContext::new(options, ctx, depth + 1, dom_ctx),
+                );
             }
         }
 
@@ -636,7 +662,12 @@ pub fn handle_progress(
         let children = tag.children();
         {
             for child_handle in children.top().iter() {
-                walk_node(child_handle, parser, output, options, ctx, depth + 1, dom_ctx);
+                walk_node(
+                    child_handle,
+                    parser,
+                    output,
+                    crate::converter::block::container::HandlerContext::new(options, ctx, depth + 1, dom_ctx),
+                );
             }
         }
 
@@ -670,7 +701,12 @@ pub fn handle_meter(
         let children = tag.children();
         {
             for child_handle in children.top().iter() {
-                walk_node(child_handle, parser, output, options, ctx, depth + 1, dom_ctx);
+                walk_node(
+                    child_handle,
+                    parser,
+                    output,
+                    crate::converter::block::container::HandlerContext::new(options, ctx, depth + 1, dom_ctx),
+                );
             }
         }
 
@@ -704,7 +740,12 @@ pub fn handle_output(
         let children = tag.children();
         {
             for child_handle in children.top().iter() {
-                walk_node(child_handle, parser, output, options, ctx, depth + 1, dom_ctx);
+                walk_node(
+                    child_handle,
+                    parser,
+                    output,
+                    crate::converter::block::container::HandlerContext::new(options, ctx, depth + 1, dom_ctx),
+                );
             }
         }
 
@@ -738,7 +779,12 @@ pub fn handle_datalist(
         let children = tag.children();
         {
             for child_handle in children.top().iter() {
-                walk_node(child_handle, parser, output, options, ctx, depth + 1, dom_ctx);
+                walk_node(
+                    child_handle,
+                    parser,
+                    output,
+                    crate::converter::block::container::HandlerContext::new(options, ctx, depth + 1, dom_ctx),
+                );
             }
         }
 

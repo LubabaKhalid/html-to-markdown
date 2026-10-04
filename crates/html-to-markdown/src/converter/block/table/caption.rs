@@ -33,10 +33,12 @@ pub fn handle_caption(
                     child_handle,
                     parser,
                     &mut text,
-                    handler.options,
-                    handler.ctx,
-                    handler.depth + 1,
-                    handler.dom_ctx,
+                    crate::converter::block::container::HandlerContext::new(
+                        handler.options,
+                        handler.ctx,
+                        handler.depth + 1,
+                        handler.dom_ctx,
+                    ),
                 );
             }
         }

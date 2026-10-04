@@ -347,7 +347,12 @@ fn write_li(
                     }
                 }
             } else {
-                walk_node(node_handle, parser, output, options, ctx, depth, dom_ctx);
+                walk_node(
+                    node_handle,
+                    parser,
+                    output,
+                    crate::converter::block::container::HandlerContext::new(options, ctx, depth, dom_ctx),
+                );
             }
         }
 
@@ -449,7 +454,12 @@ fn write_li(
                 } else {
                     false
                 };
-                walk_node(child_handle, parser, output, options, &li_ctx, depth + 1, dom_ctx);
+                walk_node(
+                    child_handle,
+                    parser,
+                    output,
+                    crate::converter::block::container::HandlerContext::new(options, &li_ctx, depth + 1, dom_ctx),
+                );
                 if !is_nested_list {
                     text_end_pos = output.len();
                 }

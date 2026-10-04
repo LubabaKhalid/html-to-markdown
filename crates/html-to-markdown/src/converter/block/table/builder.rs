@@ -194,10 +194,12 @@ fn render_layout_child(
             child_handle,
             parser,
             output,
-            handler.options,
-            handler.ctx,
-            handler.depth + 1,
-            handler.dom_ctx,
+            crate::converter::block::container::HandlerContext::new(
+                handler.options,
+                handler.ctx,
+                handler.depth + 1,
+                handler.dom_ctx,
+            ),
         ),
     }
 }
@@ -217,10 +219,12 @@ fn render_wrapper_cell(
             child,
             parser,
             output,
-            handler.options,
-            handler.ctx,
-            handler.depth + cell_depth + 1,
-            handler.dom_ctx,
+            crate::converter::block::container::HandlerContext::new(
+                handler.options,
+                handler.ctx,
+                handler.depth + cell_depth + 1,
+                handler.dom_ctx,
+            ),
         );
     }
 }
@@ -377,10 +381,12 @@ fn render_data_child(child_handle: &tl::NodeHandle, output: &mut String, env: Da
             child_handle,
             env.parser,
             output,
-            env.handler.options,
-            env.handler.ctx,
-            env.handler.depth + 1,
-            env.handler.dom_ctx,
+            crate::converter::block::container::HandlerContext::new(
+                env.handler.options,
+                env.handler.ctx,
+                env.handler.depth + 1,
+                env.handler.dom_ctx,
+            ),
         ),
     }
 }
@@ -397,10 +403,12 @@ fn render_caption(tag: &tl::HTMLTag<'_>, output: &mut String, env: DataEnv<'_>) 
             child_handle,
             env.parser,
             &mut text,
-            env.handler.options,
-            &caption_ctx,
-            env.handler.depth + 1,
-            env.handler.dom_ctx,
+            crate::converter::block::container::HandlerContext::new(
+                env.handler.options,
+                &caption_ctx,
+                env.handler.depth + 1,
+                env.handler.dom_ctx,
+            ),
         );
     }
     let text = text.trim();

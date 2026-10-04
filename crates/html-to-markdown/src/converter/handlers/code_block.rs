@@ -98,7 +98,12 @@ pub fn handle_code(
         let children = tag.children();
         {
             for child_handle in children.top().iter() {
-                walk_node(child_handle, parser, output, options, &code_ctx, depth + 1, dom_ctx);
+                walk_node(
+                    child_handle,
+                    parser,
+                    output,
+                    crate::converter::block::container::HandlerContext::new(options, &code_ctx, depth + 1, dom_ctx),
+                );
             }
         }
     } else {
@@ -110,10 +115,7 @@ pub fn handle_code(
                     child_handle,
                     parser,
                     &mut content,
-                    options,
-                    &code_ctx,
-                    depth + 1,
-                    dom_ctx,
+                    crate::converter::block::container::HandlerContext::new(options, &code_ctx, depth + 1, dom_ctx),
                 );
             }
         }
@@ -306,10 +308,7 @@ pub fn handle_pre(
                 child_handle,
                 parser,
                 &mut content,
-                options,
-                &code_ctx,
-                depth + 1,
-                dom_ctx,
+                crate::converter::block::container::HandlerContext::new(options, &code_ctx, depth + 1, dom_ctx),
             );
         }
     }

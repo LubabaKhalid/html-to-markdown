@@ -181,10 +181,12 @@ pub fn handle_link(
                             &heading_handle,
                             parser,
                             &mut heading_text,
-                            options,
-                            &heading_ctx,
-                            depth + 1,
-                            dom_ctx,
+                            crate::converter::block::container::HandlerContext::new(
+                                options,
+                                &heading_ctx,
+                                depth + 1,
+                                dom_ctx,
+                            ),
                         );
                         let trimmed_heading = heading_text.trim();
                         if !trimmed_heading.is_empty() {
@@ -229,10 +231,7 @@ pub fn handle_link(
                     child_handle,
                     parser,
                     &mut content,
-                    options,
-                    &link_ctx,
-                    depth + 1,
-                    dom_ctx,
+                    crate::converter::block::container::HandlerContext::new(options, &link_ctx, depth + 1, dom_ctx),
                 );
             }
             normalize_link_label(&content)
@@ -251,10 +250,7 @@ pub fn handle_link(
                     child_handle,
                     parser,
                     &mut child_buf,
-                    options,
-                    &link_ctx,
-                    depth + 1,
-                    dom_ctx,
+                    crate::converter::block::container::HandlerContext::new(options, &link_ctx, depth + 1, dom_ctx),
                 );
                 if !child_buf.trim().is_empty()
                     && !content.is_empty()
@@ -283,10 +279,7 @@ pub fn handle_link(
                     child_handle,
                     parser,
                     &mut content,
-                    options,
-                    &link_ctx,
-                    depth + 1,
-                    dom_ctx,
+                    crate::converter::block::container::HandlerContext::new(options, &link_ctx, depth + 1, dom_ctx),
                 );
             }
             normalize_link_label(&content)
@@ -449,14 +442,24 @@ pub fn handle_link(
         // ~keep `should_emit_deferred_blocks`'s doc comment above).
         if emit_blocks_separately && should_emit_deferred_blocks {
             for child_handle in &deferred {
-                walk_node(child_handle, parser, output, options, ctx, depth + 1, dom_ctx);
+                walk_node(
+                    child_handle,
+                    parser,
+                    output,
+                    crate::converter::block::container::HandlerContext::new(options, ctx, depth + 1, dom_ctx),
+                );
             }
         }
     } else {
         let children = tag.children();
         {
             for child_handle in children.top().iter() {
-                walk_node(child_handle, parser, output, options, ctx, depth + 1, dom_ctx);
+                walk_node(
+                    child_handle,
+                    parser,
+                    output,
+                    crate::converter::block::container::HandlerContext::new(options, ctx, depth + 1, dom_ctx),
+                );
             }
         }
     }

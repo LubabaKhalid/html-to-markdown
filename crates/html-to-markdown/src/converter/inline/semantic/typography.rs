@@ -39,7 +39,12 @@ pub fn handle_small(
 
     let children = tag.children();
     for child_handle in children.top().iter() {
-        walk_node(child_handle, parser, output, options, ctx, depth + 1, dom_ctx);
+        walk_node(
+            child_handle,
+            parser,
+            output,
+            crate::converter::block::container::HandlerContext::new(options, ctx, depth + 1, dom_ctx),
+        );
     }
 }
 
@@ -91,10 +96,7 @@ pub fn handle_subscript(
             child_handle,
             parser,
             &mut content,
-            options,
-            &marker_ctx,
-            depth + 1,
-            dom_ctx,
+            crate::converter::block::container::HandlerContext::new(options, &marker_ctx, depth + 1, dom_ctx),
         );
     }
 
@@ -201,10 +203,7 @@ pub fn handle_superscript(
             child_handle,
             parser,
             &mut content,
-            options,
-            &marker_ctx,
-            depth + 1,
-            dom_ctx,
+            crate::converter::block::container::HandlerContext::new(options, &marker_ctx, depth + 1, dom_ctx),
         );
     }
 
@@ -305,7 +304,12 @@ pub fn handle_variable(
         // ~keep INTO code content, where it is text rather than emphasis.
         let children = tag.children();
         for child_handle in children.top().iter() {
-            walk_node(child_handle, parser, output, options, ctx, depth + 1, dom_ctx);
+            walk_node(
+                child_handle,
+                parser,
+                output,
+                crate::converter::block::container::HandlerContext::new(options, ctx, depth + 1, dom_ctx),
+            );
         }
         return;
     }
@@ -318,10 +322,7 @@ pub fn handle_variable(
             child_handle,
             parser,
             &mut content,
-            options,
-            &marker_ctx,
-            depth + 1,
-            dom_ctx,
+            crate::converter::block::container::HandlerContext::new(options, &marker_ctx, depth + 1, dom_ctx),
         );
     }
 
@@ -372,7 +373,12 @@ pub fn handle_definition(
         // ~keep INTO code content, where it is text rather than emphasis.
         let children = tag.children();
         for child_handle in children.top().iter() {
-            walk_node(child_handle, parser, output, options, ctx, depth + 1, dom_ctx);
+            walk_node(
+                child_handle,
+                parser,
+                output,
+                crate::converter::block::container::HandlerContext::new(options, ctx, depth + 1, dom_ctx),
+            );
         }
         return;
     }
@@ -385,10 +391,7 @@ pub fn handle_definition(
             child_handle,
             parser,
             &mut content,
-            options,
-            &marker_ctx,
-            depth + 1,
-            dom_ctx,
+            crate::converter::block::container::HandlerContext::new(options, &marker_ctx, depth + 1, dom_ctx),
         );
     }
 
@@ -441,10 +444,7 @@ pub fn handle_abbreviation(
             child_handle,
             parser,
             &mut content,
-            options,
-            &abbr_ctx,
-            depth + 1,
-            dom_ctx,
+            crate::converter::block::container::HandlerContext::new(options, &abbr_ctx, depth + 1, dom_ctx),
         );
     }
 
@@ -512,7 +512,12 @@ pub fn handle_span(
     let children = tag.children();
     {
         for child_handle in children.top().iter() {
-            walk_node(child_handle, parser, output, options, ctx, depth + 1, dom_ctx);
+            walk_node(
+                child_handle,
+                parser,
+                output,
+                crate::converter::block::container::HandlerContext::new(options, ctx, depth + 1, dom_ctx),
+            );
         }
     }
 }

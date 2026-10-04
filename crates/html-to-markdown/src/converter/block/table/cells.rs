@@ -101,10 +101,7 @@ fn append_layout_cell_text(cell_handle: &tl::NodeHandle, row_text: &mut String, 
             cell_child,
             env.parser,
             &mut cell_text,
-            env.options,
-            &cell_ctx,
-            depth + 1,
-            env.dom_ctx,
+            crate::converter::block::container::HandlerContext::new(env.options, &cell_ctx, depth + 1, env.dom_ctx),
         );
     }
     let cell_content = crate::text::normalize_whitespace_cow(&cell_text);
@@ -472,10 +469,12 @@ fn visitor_cell_text(
                 child_handle,
                 env.parser,
                 &mut text,
-                env.options,
-                collect_ctx,
-                depth + 1,
-                env.dom_ctx,
+                crate::converter::block::container::HandlerContext::new(
+                    env.options,
+                    collect_ctx,
+                    depth + 1,
+                    env.dom_ctx,
+                ),
             );
         }
     }
@@ -653,7 +652,7 @@ fn emit_header_separator(
     output.push('|');
     if !is_djot {
         output.push(' ');
-    };
+    }
     for index in 0..total_cols {
         if index > 0 {
             output.push_str(if is_djot { "|" } else { " | " });

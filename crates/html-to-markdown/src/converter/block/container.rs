@@ -15,20 +15,15 @@ type Context = crate::converter::Context;
 type DomContext = crate::converter::DomContext;
 
 #[derive(Clone, Copy)]
-pub(crate) struct HandlerContext<'a> {
-    pub(crate) options: &'a ConversionOptions,
-    pub(crate) ctx: &'a Context,
-    pub(crate) depth: usize,
-    pub(crate) dom_ctx: &'a DomContext,
+pub struct HandlerContext<'a> {
+    pub options: &'a ConversionOptions,
+    pub ctx: &'a Context,
+    pub depth: usize,
+    pub dom_ctx: &'a DomContext,
 }
 
 impl<'a> HandlerContext<'a> {
-    pub(crate) const fn new(
-        options: &'a ConversionOptions,
-        ctx: &'a Context,
-        depth: usize,
-        dom_ctx: &'a DomContext,
-    ) -> Self {
+    pub const fn new(options: &'a ConversionOptions, ctx: &'a Context, depth: usize, dom_ctx: &'a DomContext) -> Self {
         Self {
             options,
             ctx,
@@ -71,10 +66,12 @@ pub fn handle_structural_container(
             child_handle,
             parser,
             output,
-            handler.options,
-            handler.ctx,
-            handler.depth + 1,
-            handler.dom_ctx,
+            crate::converter::block::container::HandlerContext::new(
+                handler.options,
+                handler.ctx,
+                handler.depth + 1,
+                handler.dom_ctx,
+            ),
         );
     }
 }
@@ -107,10 +104,12 @@ pub fn handle_passthrough(node_handle: &NodeHandle, parser: &Parser, output: &mu
             child_handle,
             parser,
             output,
-            handler.options,
-            handler.ctx,
-            handler.depth + 1,
-            handler.dom_ctx,
+            crate::converter::block::container::HandlerContext::new(
+                handler.options,
+                handler.ctx,
+                handler.depth + 1,
+                handler.dom_ctx,
+            ),
         );
     }
 }

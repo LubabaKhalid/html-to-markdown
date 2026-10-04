@@ -94,10 +94,12 @@ fn heading_text(
             child_handle,
             parser,
             &mut text,
-            handler.options,
-            &heading_ctx,
-            handler.depth + 1,
-            handler.dom_ctx,
+            crate::converter::block::container::HandlerContext::new(
+                handler.options,
+                &heading_ctx,
+                handler.depth + 1,
+                handler.dom_ctx,
+            ),
         );
     }
     let trimmed = text.trim();

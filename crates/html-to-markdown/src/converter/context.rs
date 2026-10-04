@@ -28,6 +28,47 @@ pub type InlineCollectorHandle = ();
 #[cfg(feature = "metadata")]
 pub type ImageMetadataPayload = (BTreeMap<String, String>, Option<u32>, Option<u32>);
 
+pub struct ContextParameters {
+    pub inline_collector: Option<InlineCollectorHandle>,
+    #[cfg(feature = "metadata")]
+    pub metadata_collector: Option<crate::metadata::MetadataCollectorHandle>,
+    #[cfg(feature = "visitor")]
+    pub visitor: Option<crate::visitor::VisitorHandle>,
+    pub structure_collector: Option<StructureCollectorHandle>,
+    pub reference_collector: Option<ReferenceCollectorHandle>,
+    pub base_url: Option<Rc<url::Url>>,
+}
+
+#[cfg(feature = "metadata")]
+struct MetadataPreferences {
+    document: bool,
+    headers: bool,
+    links: bool,
+    images: bool,
+    structured_data: bool,
+}
+
+#[cfg(feature = "metadata")]
+fn metadata_preferences(collector: Option<&crate::metadata::MetadataCollectorHandle>) -> MetadataPreferences {
+    let Some(collector) = collector else {
+        return MetadataPreferences {
+            document: false,
+            headers: false,
+            links: false,
+            images: false,
+            structured_data: false,
+        };
+    };
+    let guard = collector.borrow();
+    MetadataPreferences {
+        document: guard.wants_document(),
+        headers: guard.wants_headers(),
+        links: guard.wants_links(),
+        images: guard.wants_images(),
+        structured_data: guard.wants_structured_data(),
+    }
+}
+
 #[derive(Clone)]
 pub(super) struct DjotRuleLikeText {
     lines: Rc<[bool]>,
@@ -322,41 +363,9 @@ impl Context {
     }
 
     /// Create a new conversion context from options and optional collectors.
-    #[allow(clippy::too_many_arguments)]
-    #[cfg_attr(
-        any(not(feature = "inline-images"), not(feature = "metadata"), not(feature = "visitor")),
-        allow(unused_variables)
-    )]
-    pub fn new(
-        options: &crate::options::ConversionOptions,
-        inline_collector: Option<InlineCollectorHandle>,
-        #[cfg(feature = "metadata")] metadata_collector: Option<crate::metadata::MetadataCollectorHandle>,
-        #[cfg(not(feature = "metadata"))] _metadata_collector: Option<()>,
-        #[cfg(feature = "visitor")] visitor: Option<crate::visitor::VisitorHandle>,
-        #[cfg(not(feature = "visitor"))] _visitor: Option<()>,
-        structure_collector: Option<StructureCollectorHandle>,
-        reference_collector: Option<ReferenceCollectorHandle>,
-        base_url: Option<Rc<url::Url>>,
-    ) -> Self {
+    pub(crate) fn new(options: &crate::options::ConversionOptions, parameters: ContextParameters) -> Self {
         #[cfg(feature = "metadata")]
-        let (
-            metadata_wants_document,
-            metadata_wants_headers,
-            metadata_wants_links,
-            metadata_wants_images,
-            metadata_wants_structured_data,
-        ) = if let Some(ref collector) = metadata_collector {
-            let guard = collector.borrow();
-            (
-                guard.wants_document(),
-                guard.wants_headers(),
-                guard.wants_links(),
-                guard.wants_images(),
-                guard.wants_structured_data(),
-            )
-        } else {
-            (false, false, false, false, false)
-        };
+        let metadata = metadata_preferences(parameters.metadata_collector.as_ref());
 
         Self {
             in_code: false,
@@ -409,28 +418,28 @@ impl Context {
             depth_limit_reached: Rc::new(Cell::new(false)),
             inline_data_replaced: Rc::new(Cell::new(false)),
             #[cfg(feature = "inline-images")]
-            inline_collector,
+            inline_collector: parameters.inline_collector,
             #[cfg(feature = "metadata")]
-            metadata_collector,
+            metadata_collector: parameters.metadata_collector,
             #[cfg(feature = "metadata")]
-            metadata_wants_document,
+            metadata_wants_document: metadata.document,
             #[cfg(feature = "metadata")]
-            metadata_wants_headers,
+            metadata_wants_headers: metadata.headers,
             #[cfg(feature = "metadata")]
-            metadata_wants_links,
+            metadata_wants_links: metadata.links,
             #[cfg(feature = "metadata")]
-            metadata_wants_images,
+            metadata_wants_images: metadata.images,
             #[cfg(feature = "metadata")]
-            metadata_wants_structured_data,
+            metadata_wants_structured_data: metadata.structured_data,
             #[cfg(feature = "visitor")]
-            visitor: visitor.clone(),
+            visitor: parameters.visitor,
             #[cfg(feature = "visitor")]
             visitor_error: Rc::new(RefCell::new(None)),
-            structure_collector,
-            reference_collector,
+            structure_collector: parameters.structure_collector,
+            reference_collector: parameters.reference_collector,
             skip_visitor_hooks: false,
             measure_width_only: false,
-            base_url,
+            base_url: parameters.base_url,
         }
     }
 

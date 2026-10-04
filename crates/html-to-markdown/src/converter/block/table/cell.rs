@@ -211,10 +211,12 @@ fn render_cell_child(
             child_handle,
             parser,
             text,
-            handler.options,
-            handler.ctx,
-            handler.depth + 1,
-            handler.dom_ctx,
+            crate::converter::block::container::HandlerContext::new(
+                handler.options,
+                handler.ctx,
+                handler.depth + 1,
+                handler.dom_ctx,
+            ),
         );
         return;
     }
@@ -223,10 +225,12 @@ fn render_cell_child(
         child_handle,
         parser,
         &mut nested,
-        handler.options,
-        handler.ctx,
-        handler.depth + 1,
-        handler.dom_ctx,
+        crate::converter::block::container::HandlerContext::new(
+            handler.options,
+            handler.ctx,
+            handler.depth + 1,
+            handler.dom_ctx,
+        ),
     );
     if let Some(buf) = deferred_tables.as_deref_mut() {
         let trimmed = nested.trim();

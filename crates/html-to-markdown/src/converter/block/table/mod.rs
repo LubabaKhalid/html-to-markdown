@@ -250,10 +250,12 @@ fn collect_grid_row(
                     child_handle,
                     parser,
                     &mut text,
-                    handler.options,
-                    &cell_ctx,
-                    handler.depth + 2,
-                    handler.dom_ctx,
+                    crate::converter::block::container::HandlerContext::new(
+                        handler.options,
+                        &cell_ctx,
+                        handler.depth + 2,
+                        handler.dom_ctx,
+                    ),
                 );
             }
         }

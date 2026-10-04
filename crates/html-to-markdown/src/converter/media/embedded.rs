@@ -174,7 +174,12 @@ pub fn handle_audio(
         };
 
         if !is_source {
-            walk_node(child_handle, parser, &mut fallback, options, ctx, depth + 1, dom_ctx);
+            walk_node(
+                child_handle,
+                parser,
+                &mut fallback,
+                crate::converter::block::container::HandlerContext::new(options, ctx, depth + 1, dom_ctx),
+            );
         }
     }
     if !fallback.is_empty() {
@@ -271,7 +276,12 @@ pub fn handle_video(
         };
 
         if !is_source {
-            walk_node(child_handle, parser, &mut fallback, options, ctx, depth + 1, dom_ctx);
+            walk_node(
+                child_handle,
+                parser,
+                &mut fallback,
+                crate::converter::block::container::HandlerContext::new(options, ctx, depth + 1, dom_ctx),
+            );
         }
     }
     if !fallback.is_empty() {
@@ -300,7 +310,12 @@ pub fn handle_picture(
     for child_handle in tag.children().top().iter() {
         if let Some(tl::Node::Tag(child_tag)) = child_handle.get(parser) {
             if tag_name_eq(child_tag.name().as_utf8_str(), "img") {
-                walk_node(child_handle, parser, output, options, ctx, depth + 1, dom_ctx);
+                walk_node(
+                    child_handle,
+                    parser,
+                    output,
+                    crate::converter::block::container::HandlerContext::new(options, ctx, depth + 1, dom_ctx),
+                );
                 break;
             }
         }
