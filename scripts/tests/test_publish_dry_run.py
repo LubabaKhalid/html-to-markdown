@@ -37,3 +37,14 @@ def test_node_release_builds_allow_napi_platform_regeneration() -> None:
     workflow = yaml.safe_load((ROOT / ".github/workflows/publish.yaml").read_text())
 
     assert workflow["jobs"]["node-bindings"]["env"] == {"PNPM_CONFIG_FROZEN_LOCKFILE": "false"}
+
+
+def test_swift_release_finalizer_refreshes_an_existing_checksum() -> None:
+    """Recovery runs must replace the checksum written by an earlier build."""
+    workflow = yaml.safe_load((ROOT / ".github/workflows/publish.yaml").read_text())
+    steps = workflow["jobs"]["update-swift-package-manifest"]["steps"]
+    update = next(step for step in steps if step.get("name") == "Update Package.swift with version and checksum")
+    script = update["run"]
+
+    assert "(__ALEF_SWIFT_CHECKSUM__|[0-9a-f]{64})" in script
+    assert "if ! git diff --quiet -- Package.swift; then" in script
