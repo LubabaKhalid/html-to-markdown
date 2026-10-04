@@ -40,8 +40,10 @@ fn benchmark_fixture(
     let mut mdream_output = String::new();
     for _ in 0..ITERS {
         let start = Instant::now();
-        h2m_output = convert(&html, Some(h2m_options.clone()))?.content.unwrap_or_default();
-        h2m_best = h2m_best.min(start.elapsed().as_secs_f64() * 1000.0);
+        let result = convert(&html, Some(h2m_options.clone()))?;
+        let elapsed_ms = start.elapsed().as_secs_f64() * 1000.0;
+        h2m_best = h2m_best.min(elapsed_ms);
+        h2m_output = result.content.unwrap_or_default();
 
         let start = Instant::now();
         mdream_output = mdream_convert(&html, mdream_options.clone());
