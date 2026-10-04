@@ -7,7 +7,7 @@
 //! - `oracle`  — verify (or bless) Markdown snapshot tests
 //! - `survey`  — print a fixture corpus feature-coverage table
 
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 use anyhow::{Context, Result};
 use clap::{Parser, Subcommand};
@@ -16,7 +16,8 @@ use html_to_markdown_bench::{
     oracle::{self, Permutation},
     policy, provenance,
     schema::{
-        BenchRecord, CalibratedBaseline, Guardrails, LegacyGuardrails, LegacyRunResults, RunResults, SCHEMA_VERSION,
+        BenchRecord, CalibratedBaseline, Guardrails, LegacyGuardrails, LegacyRunResults, Provenance, RunResults,
+        SCHEMA_VERSION,
     },
     survey,
 };
@@ -85,116 +86,12 @@ struct RunArgs {
 
 #[expect(clippy::print_stdout, reason = "CLI result output, not diagnostics")]
 fn cmd_run(args: RunArgs) -> Result<()> {
-    tracing::info!("loading fixtures from {}", args.fixtures.display());
-    let loader = fixture::Loader::new(args.fixtures.clone());
-    let fixtures = loader.load(args.filter.as_deref())?;
-
-    if fixtures.is_empty() {
-        anyhow::bail!("no fixtures found (check --filter and groups.toml)");
-    }
-
+    let fixtures = load_run_fixtures(&args)?;
     let sha = git_sha();
     let hostname = hostname();
-    let tier_strategy = if args.force_tier1 {
-        "tier1"
-    } else if args.force_tier2 {
-        "tier2"
-    } else {
-        "auto"
-    };
-    let visitor_mode = if args.with_visitor { "noop" } else { "disabled" };
-    let provenance = provenance::collect(&provenance::CaptureSettings {
-        tier_strategy,
-        visitor_mode,
-        iteration_override: args.iters,
-    })?;
     let created_at = humantime::format_rfc3339(std::time::SystemTime::now()).to_string();
-
-    let mut runs: Vec<BenchRecord> = Vec::with_capacity(fixtures.len());
-    for fix in &fixtures {
-        let html = std::fs::read_to_string(&fix.path).with_context(|| format!("reading {}", fix.path.display()))?;
-
-        let opts: Option<ConversionOptions> = if args.force_tier1 {
-            #[cfg(feature = "testkit")]
-            {
-                Some(ConversionOptions {
-                    tier_strategy: TierStrategy::Tier1,
-                    ..ConversionOptions::default()
-                })
-            }
-            #[cfg(not(feature = "testkit"))]
-            {
-                anyhow::bail!(
-                    "--force-tier1 requires building with the testkit feature: cargo run --features testkit -- run --force-tier1"
-                );
-            }
-        } else if args.force_tier2 {
-            Some(ConversionOptions {
-                tier_strategy: TierStrategy::Tier2,
-                ..ConversionOptions::default()
-            })
-        } else {
-            None
-        };
-
-        #[cfg(feature = "visitor")]
-        let opts = if args.with_visitor {
-            {
-                let handle = html_to_markdown_bench::bench::new_noop_visitor_handle();
-                Some(ConversionOptions {
-                    visitor: Some(handle),
-                    ..opts.unwrap_or_default()
-                })
-            }
-        } else {
-            opts
-        };
-        #[cfg(not(feature = "visitor"))]
-        let opts = {
-            if args.with_visitor {
-                anyhow::bail!("--with-visitor requires building with the visitor feature");
-            }
-            opts
-        };
-        let measurement = bench::run_one(&html, opts, args.iters);
-        if measurement.median_ms == 0.0 {
-            tracing::warn!(
-                "NOTE: {} panicked during bench (known core bug) — recording 0 ms",
-                fix.rel_path
-            );
-        }
-        let mb_per_s = if measurement.median_ms > 0.0 {
-            (fix.bytes as f64 / 1_048_576.0) / (measurement.median_ms / 1_000.0)
-        } else {
-            0.0
-        };
-
-        if args.mdream {
-            tracing::warn!("--mdream flag has no effect (compare-mdream feature removed)");
-        }
-
-        let record = BenchRecord {
-            fixture: fix.rel_path.clone(),
-            group: fix.group.clone(),
-            bytes: fix.bytes,
-            samples_ms: measurement.samples_ms,
-            median_ms: measurement.median_ms,
-            mad_ms: measurement.mad_ms,
-            legacy_ms_best: measurement.legacy_ms_best,
-            mb_per_s,
-            output_bytes: measurement.output_bytes as u64,
-        };
-
-        tracing::info!(
-            "{:<55}  median={:.4} ms  MAD={:.4} ms  {:.1} MB/s",
-            fix.rel_path,
-            record.median_ms,
-            record.mad_ms,
-            mb_per_s,
-        );
-        runs.push(record);
-    }
-
+    let provenance = capture_run_provenance(&args)?;
+    let runs = benchmark_fixtures(&fixtures, &args)?;
     let results = RunResults {
         schema: SCHEMA_VERSION,
         sha,
@@ -203,13 +100,143 @@ fn cmd_run(args: RunArgs) -> Result<()> {
         provenance,
         runs,
     };
+    write_run_results(&args.output, &results)?;
+    println!("Results written to {}", args.output.display());
+    Ok(())
+}
 
-    if let Some(parent) = args.output.parent() {
+fn load_run_fixtures(args: &RunArgs) -> Result<Vec<fixture::Fixture>> {
+    tracing::info!("loading fixtures from {}", args.fixtures.display());
+    let loader = fixture::Loader::new(args.fixtures.clone());
+    let fixtures = loader.load(args.filter.as_deref())?;
+    if fixtures.is_empty() {
+        anyhow::bail!("no fixtures found (check --filter and groups.toml)");
+    }
+    Ok(fixtures)
+}
+
+fn capture_run_provenance(args: &RunArgs) -> Result<Provenance> {
+    let tier_strategy = if args.force_tier1 {
+        "tier1"
+    } else if args.force_tier2 {
+        "tier2"
+    } else {
+        "auto"
+    };
+    let visitor_mode = if args.with_visitor { "noop" } else { "disabled" };
+    provenance::collect(&provenance::CaptureSettings {
+        tier_strategy,
+        visitor_mode,
+        iteration_override: args.iters,
+    })
+}
+
+fn benchmark_fixtures(fixtures: &[fixture::Fixture], args: &RunArgs) -> Result<Vec<BenchRecord>> {
+    let mut runs: Vec<BenchRecord> = Vec::with_capacity(fixtures.len());
+    for fix in fixtures {
+        runs.push(benchmark_fixture(fix, args)?);
+    }
+    Ok(runs)
+}
+
+fn benchmark_fixture(fix: &fixture::Fixture, args: &RunArgs) -> Result<BenchRecord> {
+    let html = std::fs::read_to_string(&fix.path).with_context(|| format!("reading {}", fix.path.display()))?;
+    let options = conversion_options(args)?;
+    let measurement = bench::run_one(&html, options, args.iters);
+    if measurement.median_ms == 0.0 {
+        tracing::warn!(
+            "NOTE: {} panicked during bench (known core bug) — recording 0 ms",
+            fix.rel_path
+        );
+    }
+    if args.mdream {
+        tracing::warn!("--mdream flag has no effect (compare-mdream feature removed)");
+    }
+    let mb_per_s = throughput(fix.bytes, measurement.median_ms);
+    let record = BenchRecord {
+        fixture: fix.rel_path.clone(),
+        group: fix.group.clone(),
+        bytes: fix.bytes,
+        samples_ms: measurement.samples_ms,
+        median_ms: measurement.median_ms,
+        mad_ms: measurement.mad_ms,
+        legacy_ms_best: measurement.legacy_ms_best,
+        mb_per_s,
+        output_bytes: measurement.output_bytes as u64,
+    };
+    tracing::info!(
+        "{:<55}  median={:.4} ms  MAD={:.4} ms  {:.1} MB/s",
+        fix.rel_path,
+        record.median_ms,
+        record.mad_ms,
+        mb_per_s,
+    );
+    Ok(record)
+}
+
+fn conversion_options(args: &RunArgs) -> Result<Option<ConversionOptions>> {
+    let options = tier_options(args)?;
+    if args.with_visitor {
+        return with_noop_visitor(options);
+    }
+    Ok(options)
+}
+
+fn tier_options(args: &RunArgs) -> Result<Option<ConversionOptions>> {
+    if args.force_tier1 {
+        return tier_one_options();
+    }
+    if args.force_tier2 {
+        return Ok(Some(ConversionOptions {
+            tier_strategy: TierStrategy::Tier2,
+            ..ConversionOptions::default()
+        }));
+    }
+    Ok(None)
+}
+
+#[cfg(feature = "testkit")]
+fn tier_one_options() -> Result<Option<ConversionOptions>> {
+    Ok(Some(ConversionOptions {
+        tier_strategy: TierStrategy::Tier1,
+        ..ConversionOptions::default()
+    }))
+}
+
+#[cfg(not(feature = "testkit"))]
+fn tier_one_options() -> Result<Option<ConversionOptions>> {
+    anyhow::bail!(
+        "--force-tier1 requires building with the testkit feature: cargo run --features testkit -- run --force-tier1"
+    )
+}
+
+#[cfg(feature = "visitor")]
+fn with_noop_visitor(options: Option<ConversionOptions>) -> Result<Option<ConversionOptions>> {
+    Ok(Some(ConversionOptions {
+        visitor: Some(bench::new_noop_visitor_handle()),
+        ..options.unwrap_or_default()
+    }))
+}
+
+#[cfg(not(feature = "visitor"))]
+fn with_noop_visitor(_options: Option<ConversionOptions>) -> Result<Option<ConversionOptions>> {
+    anyhow::bail!("--with-visitor requires building with the visitor feature")
+}
+
+fn throughput(bytes: u64, median_ms: f64) -> f64 {
+    if median_ms > 0.0 {
+        (bytes as f64 / 1_048_576.0) / (median_ms / 1_000.0)
+    } else {
+        0.0
+    }
+}
+
+fn write_run_results(output: &Path, results: &RunResults) -> Result<()> {
+    if let Some(parent) = output.parent() {
         std::fs::create_dir_all(parent).with_context(|| format!("creating output dir {}", parent.display()))?;
     }
     let json = serde_json::to_string_pretty(&results)?;
-    std::fs::write(&args.output, &json).with_context(|| format!("writing {}", args.output.display()))?;
-    println!("Results written to {}", args.output.display());
+    std::fs::write(output, &json).with_context(|| format!("writing {}", output.display()))?;
     Ok(())
 }
 
