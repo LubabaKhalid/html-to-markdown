@@ -4,7 +4,7 @@ set -euo pipefail
 
 ROOT="CHANGELOG.md"
 MIRROR="docs-site/src/content/docs/changelog.md"
-ARCHIVE_COUNT=5
+ARCHIVE_COUNT=6
 
 # ~keep Nothing syncs these two files, so they diverged unnoticed: the mirror's 3.15.0 section
 # carried the wrong release date, was missing the alef re-pin and the R-binding entries, and
