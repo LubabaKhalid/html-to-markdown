@@ -30,63 +30,21 @@ pub fn handle(node_handle: &NodeHandle, parser: &Parser, output: &mut String, ha
         dom_ctx,
     } = handler;
     #[cfg(feature = "visitor")]
-    if let Some(ref visitor_handle) = ctx.visitor {
-        use crate::visitor::EMPTY_ATTRS;
-        use crate::visitor::{NodeContext, NodeType, VisitResult};
-
-        let node_id = node_handle.get_inner();
-        let parent_tag = dom_ctx.parent_tag_name(node_id, parser);
-        let index_in_parent = dom_ctx.get_sibling_index(node_id).unwrap_or(0);
-        let node_ctx = if let Some(tl::Node::Tag(t)) = node_handle.get(parser) {
-            NodeContext::with_lazy_attributes(
-                NodeType::Br,
-                Cow::Borrowed("br"),
-                t,
-                depth,
-                index_in_parent,
-                parent_tag.map(Cow::Borrowed),
-                true,
-            )
-        } else {
-            NodeContext::with_borrowed_attributes(
-                NodeType::Br,
-                Cow::Borrowed("br"),
-                &EMPTY_ATTRS,
-                depth,
-                index_in_parent,
-                parent_tag.map(Cow::Borrowed),
-                true,
-            )
-        };
-        let visit_result = {
-            let mut visitor = visitor_handle.lock().expect("visitor mutex poisoned");
-            visitor.visit_line_break(&node_ctx)
-        };
-        match visit_result {
-            VisitResult::Continue => {}
-            VisitResult::Skip => return,
-            VisitResult::Custom(custom) => {
-                output.push_str(&custom);
-                return;
-            }
-            VisitResult::PreserveHtml => {
-                use crate::converter::utility::serialization::serialize_node;
-                output.push_str(&serialize_node(node_handle, parser));
-                return;
-            }
-            VisitResult::Error(err) => {
-                if ctx.visitor_error.borrow().is_none() {
-                    *ctx.visitor_error.borrow_mut() = Some(err);
-                }
-                return;
-            }
-        }
+    if visit_line_break(node_handle, parser, output, handler) {
+        return;
     }
 
     if let Some(rule_like_text) = &ctx.djot_rule_like_text {
         rule_like_text.advance();
     }
 
+    if write_special_break(output, options, ctx) {
+        return;
+    }
+    write_flow_break(output, options, ctx);
+}
+
+fn write_special_break(output: &mut String, options: &ConversionOptions, ctx: &Context) -> bool {
     if ctx.in_heading {
         // ~keep A single-line ATX heading cannot carry a hard break at all, so any marker
         // ~keep here is inherently lossy. A single space is the only choice that is
@@ -100,6 +58,7 @@ pub fn handle(node_handle: &NodeHandle, parser: &Parser, output: &mut String, ha
         // ~keep heading body down to one space.
         trim_trailing_whitespace(output);
         output.push(' ');
+        true
     } else if ctx.in_table_cell && ctx.in_code && !ctx.in_code_block {
         // ~keep Neither a code SPAN nor a table cell can carry a hard break on its own
         // ~keep (see the two ~keep blocks this combines, immediately below and at the
@@ -113,6 +72,7 @@ pub fn handle(node_handle: &NodeHandle, parser: &Parser, output: &mut String, ha
         // ~keep option is never consulted here either.
         trim_trailing_whitespace(output);
         output.push(' ');
+        true
     } else if ctx.in_code_block {
         // ~keep A `<pre>` code BLOCK reproduces its content literally, line structure
         // ~keep included: a `<br>` here is real content, so the byte pushed is a genuine
@@ -121,6 +81,7 @@ pub fn handle(node_handle: &NodeHandle, parser: &Parser, output: &mut String, ha
             offsets.borrow_mut().push(output.len());
         }
         output.push('\n');
+        true
     } else if ctx.in_code {
         // ~keep A code SPAN's content is otherwise reproduced literally too, but unlike a
         // ~keep block it has no interior line structure of its own to preserve: `<br>` is
@@ -135,7 +96,14 @@ pub fn handle(node_handle: &NodeHandle, parser: &Parser, output: &mut String, ha
         // ~keep branch), so nothing else can leave a bare '\n' here for this split to
         // ~keep misfire on.
         output.push('\n');
-    } else if ctx.in_table_cell || ctx.in_layout_cell {
+        true
+    } else {
+        false
+    }
+}
+
+fn write_flow_break(output: &mut String, options: &ConversionOptions, ctx: &Context) {
+    if ctx.in_table_cell || ctx.in_layout_cell {
         // ~keep Shared with div/p continuations inside a cell (issue #453, #454): a cell
         // ~keep cannot contain a hard line break, so newline_style is never consulted and
         // ~keep source whitespace before the <br> is trimmed rather than leaked. A layout
@@ -178,5 +146,67 @@ pub fn handle(node_handle: &NodeHandle, parser: &Parser, output: &mut String, ha
         // ~keep content column like text there, or a backslash line leaves the item (issue #681).
         crate::converter::list::utils::indent_list_item_line_start(output, ctx, options);
         output.push_str(hard_break_marker(options));
+    }
+}
+
+#[cfg(feature = "visitor")]
+fn visit_line_break(
+    node_handle: &NodeHandle,
+    parser: &Parser,
+    output: &mut String,
+    handler: HandlerContext<'_>,
+) -> bool {
+    use crate::visitor::EMPTY_ATTRS;
+    use crate::visitor::{NodeContext, NodeType, VisitResult};
+
+    let Some(ref visitor_handle) = handler.ctx.visitor else {
+        return false;
+    };
+    let node_id = node_handle.get_inner();
+    let parent_tag = handler.dom_ctx.parent_tag_name(node_id, parser);
+    let index_in_parent = handler.dom_ctx.get_sibling_index(node_id).unwrap_or(0);
+    let node_ctx = if let Some(tl::Node::Tag(t)) = node_handle.get(parser) {
+        NodeContext::with_lazy_attributes(
+            NodeType::Br,
+            Cow::Borrowed("br"),
+            t,
+            handler.depth,
+            index_in_parent,
+            parent_tag.map(Cow::Borrowed),
+            true,
+        )
+    } else {
+        NodeContext::with_borrowed_attributes(
+            NodeType::Br,
+            Cow::Borrowed("br"),
+            &EMPTY_ATTRS,
+            handler.depth,
+            index_in_parent,
+            parent_tag.map(Cow::Borrowed),
+            true,
+        )
+    };
+    let visit_result = {
+        let mut visitor = visitor_handle.lock().expect("visitor mutex poisoned");
+        visitor.visit_line_break(&node_ctx)
+    };
+    match visit_result {
+        VisitResult::Continue => false,
+        VisitResult::Skip => true,
+        VisitResult::Custom(custom) => {
+            output.push_str(&custom);
+            true
+        }
+        VisitResult::PreserveHtml => {
+            use crate::converter::utility::serialization::serialize_node;
+            output.push_str(&serialize_node(node_handle, parser));
+            true
+        }
+        VisitResult::Error(err) => {
+            if handler.ctx.visitor_error.borrow().is_none() {
+                *handler.ctx.visitor_error.borrow_mut() = Some(err);
+            }
+            true
+        }
     }
 }

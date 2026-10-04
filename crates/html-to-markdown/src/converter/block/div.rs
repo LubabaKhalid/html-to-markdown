@@ -52,28 +52,7 @@ pub fn handle(node_handle: &NodeHandle, parser: &Parser, output: &mut String, ha
         && !output.ends_with('\n');
 
     if ctx.convert_as_inline {
-        // ~keep A layout-table cell converts as inline but is still a cell, so its sibling
-        // ~keep boundary follows the settled cell rule (issues #453/#454) instead of
-        // ~keep disappearing, which is what glued adjacent <div>s together (issue #470).
-        // ~keep `in_table_cell` never reaches this branch: a real cell does not set
-        // ~keep `convert_as_inline`, so only `in_layout_cell` can make this fire.
-        if is_table_continuation {
-            crate::converter::main_helpers::emit_table_cell_break_in_context(output, options.br_in_tables, ctx);
-        }
-        // ~keep A heading is one line, so a block in it is set off by spaces, as Tier 1 does.
-        let in_heading_line = ctx.in_heading && !is_table_continuation;
-        if in_heading_line && !output.is_empty() && !output.ends_with(char::is_whitespace) {
-            output.push(' ');
-        }
-        let children = tag.children();
-        {
-            for child_handle in children.top().iter() {
-                walk_node(child_handle, parser, output, options, ctx, depth + 1, dom_ctx);
-            }
-        }
-        if in_heading_line && !output.ends_with(char::is_whitespace) {
-            output.push(' ');
-        }
+        handle_inline(tag, parser, output, handler, is_table_continuation);
         return;
     }
 
@@ -117,6 +96,40 @@ pub fn handle(node_handle: &NodeHandle, parser: &Parser, output: &mut String, ha
         output.push_str(&kept_tail);
     }
     close_block(output, ctx, content_start_pos, is_list_continuation);
+}
+
+fn handle_inline(
+    tag: &tl::HTMLTag<'_>,
+    parser: &Parser,
+    output: &mut String,
+    handler: HandlerContext<'_>,
+    is_table_continuation: bool,
+) {
+    if is_table_continuation {
+        crate::converter::main_helpers::emit_table_cell_break_in_context(
+            output,
+            handler.options.br_in_tables,
+            handler.ctx,
+        );
+    }
+    let in_heading_line = handler.ctx.in_heading && !is_table_continuation;
+    if in_heading_line && !output.is_empty() && !output.ends_with(char::is_whitespace) {
+        output.push(' ');
+    }
+    for child_handle in tag.children().top().iter() {
+        crate::converter::walk_node(
+            child_handle,
+            parser,
+            output,
+            handler.options,
+            handler.ctx,
+            handler.depth + 1,
+            handler.dom_ctx,
+        );
+    }
+    if in_heading_line && !output.ends_with(char::is_whitespace) {
+        output.push(' ');
+    }
 }
 
 /// Writes `text` as its own block, with the separators a div writes around its content.
