@@ -164,7 +164,12 @@ fn should_keep_the_output_where_a_checkbox_is_text() {
     let cases = [
         same(false, format!("<code>{empty}</code>"), "`- [ ] `\n"),
         same(false, format!("<code><b>{empty}</b></code>"), "`- [ ] `\n"),
-        same(false, format!("<code>{quote}</code>"), "`- [ ]`  \n`  > q`\n"),
+        (
+            false,
+            format!("<code>{quote}</code>"),
+            "`- [ ]`  \n`  > q`\n",
+            "`- [ ]`\\\n`  > q`\n",
+        ),
         same(false, format!("<pre>{empty}</pre>"), "```\n- [ ]\n```\n"),
         same(false, format!("<pre>{quote}</pre>"), "```\n- [ ]\n  > q\n```\n"),
         (false, format!("<b>{empty}</b>"), "**- [ ]**\n", "*- [ ]*\n"),
