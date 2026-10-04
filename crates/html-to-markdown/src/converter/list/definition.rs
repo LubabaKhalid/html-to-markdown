@@ -86,15 +86,11 @@ pub fn handle_dt(node_handle: &tl::NodeHandle, parser: &tl::Parser, output: &mut
     };
 
     let mut rendered = String::with_capacity(64);
+    let child_context = crate::converter::block::container::HandlerContext::new(options, ctx, depth + 1, dom_ctx);
     let children = tag.children();
     {
         for child_handle in children.top().iter() {
-            crate::converter::walk_node(
-                child_handle,
-                parser,
-                &mut rendered,
-                crate::converter::block::container::HandlerContext::new(options, ctx, depth + 1, dom_ctx),
-            );
+            crate::converter::walk_node(child_handle, parser, &mut rendered, child_context);
         }
     }
     let trimmed = rendered.trim().to_owned();
