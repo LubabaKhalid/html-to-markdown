@@ -17,7 +17,7 @@ title: Python (programming language) - Wikipedia
 
 # Python (programming language) #
 
-116 languages
+[ ] 116 languages
 
 - [Afrikaans](https://af.wikipedia.org/wiki/Python_(programmeertaal) "Python (programmeertaal) – Afrikaans")
 - [Alemannisch](https://als.wikipedia.org/wiki/Python_(Programmiersprache) "Python (Programmiersprache) – Alemannic")
@@ -497,7 +497,7 @@ annotations for optimization.[[103]](#cite_note-106)
 | `types.NotImplementedType` | immutable                                               | A placeholder that can be returned from [overloaded operators](/wiki/Operator_overloading "Operator overloading") to indicate unsupported operand types.                                                 | `NotImplemented`                                                                                                                                                                        |
 | `range`                    | immutable                                               | An *immutable sequence* of numbers, commonly used for iterating a specific number of times in `for` loops[[106]](#cite_note-109)                                                                         | `range(−1, 10)` `range(10,`   `                            −5, −2)`                                                                                                                     |
 | `set`                      | mutable                                                 | Unordered [set](/wiki/Set_(computer_science) "Set (computer science)"), contains no duplicates; can contain mixed types, if hashable                                                                     | `{4.0, 'string', True}` `set()`                                                                                                                                                         |
-| `str`                      | immutable                                               | A [character string](/wiki/Character_string "Character string"): sequence of Unicode codepoints                                                                                                          | `'Wikipedia'` `"Wikipedia"` """Spanning multiple lines"""                                                                                                                               |
+| `str`                      | immutable                                               | A [character string](/wiki/Character_string "Character string"): sequence of Unicode codepoints                                                                                                          | `'Wikipedia'` `"Wikipedia"` `"""Spanning multiple lines"""`                                                                                                                             |
 | `tuple`                    | immutable                                               | [Tuple](/wiki/Tuple "Tuple"), can contain mixed types                                                                                                                                                    | `(4.0, 'string', True)` `('single element',)` `()`                                                                                                                                      |
 
 ### Arithmetic operations ###
