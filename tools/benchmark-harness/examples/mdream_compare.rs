@@ -17,11 +17,54 @@
 use std::path::PathBuf;
 use std::time::Instant;
 
-use html_to_markdown_bench::fixture::Loader;
+use html_to_markdown_bench::fixture::{Fixture, Loader};
 use html_to_markdown_rs::{ConversionOptions, TierStrategy, convert};
 use mdream::{HTMLToMarkdownOptions, html_to_markdown as mdream_convert};
 
 const ITERS: u32 = 5;
+type FixtureResult = (String, f64, f64, f64, f64);
+
+fn benchmark_fixture(
+    fixture: &Fixture,
+    h2m_options: &ConversionOptions,
+    mdream_options: &HTMLToMarkdownOptions,
+) -> anyhow::Result<FixtureResult> {
+    let html = std::fs::read_to_string(&fixture.path)?;
+    let bytes = html.len() as f64;
+    let _ = convert(&html, Some(h2m_options.clone()))?;
+    let _ = mdream_convert(&html, mdream_options.clone());
+
+    let mut h2m_best = f64::INFINITY;
+    let mut mdream_best = f64::INFINITY;
+    let mut h2m_output = String::new();
+    let mut mdream_output = String::new();
+    for _ in 0..ITERS {
+        let start = Instant::now();
+        h2m_output = convert(&html, Some(h2m_options.clone()))?.content.unwrap_or_default();
+        h2m_best = h2m_best.min(start.elapsed().as_secs_f64() * 1000.0);
+
+        let start = Instant::now();
+        mdream_output = mdream_convert(&html, mdream_options.clone());
+        mdream_best = mdream_best.min(start.elapsed().as_secs_f64() * 1000.0);
+    }
+
+    let h2m_mbps = bytes / 1.0e6 / (h2m_best / 1000.0);
+    let mdream_mbps = bytes / 1.0e6 / (mdream_best / 1000.0);
+    let speed_ratio = mdream_mbps / h2m_mbps;
+    let size_ratio = mdream_output.len() as f64 / h2m_output.len().max(1) as f64;
+    println!(
+        "{:<48} {:>10} {:>10.1} {:>10.1} {:>8.2}× {:>10} {:>10} {:>7.0}%",
+        fixture.rel_path,
+        fixture.bytes,
+        h2m_mbps,
+        mdream_mbps,
+        speed_ratio,
+        h2m_output.len(),
+        mdream_output.len(),
+        size_ratio * 100.0
+    );
+    Ok((fixture.rel_path.clone(), h2m_mbps, mdream_mbps, speed_ratio, size_ratio))
+}
 
 fn main() -> anyhow::Result<()> {
     let fixtures_dir = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("fixtures");
@@ -40,53 +83,10 @@ fn main() -> anyhow::Result<()> {
         ..ConversionOptions::default()
     };
     let md_opts = HTMLToMarkdownOptions::default();
-
-    let mut totals = Vec::new();
-
-    for fix in &fixtures {
-        let html = std::fs::read_to_string(&fix.path)?;
-        let bytes = html.len() as f64;
-
-        let _ = convert(&html, Some(h2m_opts.clone()))?;
-        let _ = mdream_convert(&html, md_opts.clone());
-
-        let mut h2m_best = f64::INFINITY;
-        let mut md_best = f64::INFINITY;
-        let mut h2m_out = String::new();
-        let mut md_out = String::new();
-
-        for _ in 0..ITERS {
-            let t0 = Instant::now();
-            let r = convert(&html, Some(h2m_opts.clone()))?;
-            let dt = t0.elapsed().as_secs_f64() * 1000.0;
-            h2m_best = h2m_best.min(dt);
-            h2m_out = r.content.unwrap_or_default();
-
-            let t0 = Instant::now();
-            md_out = mdream_convert(&html, md_opts.clone());
-            let dt = t0.elapsed().as_secs_f64() * 1000.0;
-            md_best = md_best.min(dt);
-        }
-
-        let h2m_mbps = bytes / 1.0e6 / (h2m_best / 1000.0);
-        let md_mbps = bytes / 1.0e6 / (md_best / 1000.0);
-        let ratio = md_mbps / h2m_mbps;
-        let size_ratio = md_out.len() as f64 / h2m_out.len().max(1) as f64;
-
-        println!(
-            "{:<48} {:>10} {:>10.1} {:>10.1} {:>8.2}× {:>10} {:>10} {:>7.0}%",
-            fix.rel_path,
-            fix.bytes,
-            h2m_mbps,
-            md_mbps,
-            ratio,
-            h2m_out.len(),
-            md_out.len(),
-            size_ratio * 100.0
-        );
-
-        totals.push((fix.rel_path.clone(), h2m_mbps, md_mbps, ratio, size_ratio));
-    }
+    let totals = fixtures
+        .iter()
+        .map(|fixture| benchmark_fixture(fixture, &h2m_opts, &md_opts))
+        .collect::<anyhow::Result<Vec<_>>>()?;
 
     println!();
     println!("=== Aggregate ===");
