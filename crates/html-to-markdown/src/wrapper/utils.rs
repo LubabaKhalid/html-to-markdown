@@ -285,6 +285,18 @@ fn words(text: &str) -> Vec<&str> {
 /// ~keep line, so the loop ends. A line that takes words can run past `width`.
 fn wrap_words(text: &str, width: usize, result: &mut String, first_line_may_open: bool) {
     let words = words(text);
+    let greedy_ends = greedy_line_ends(&words, width);
+    let (starts, end) = block_safe_line_starts(&words, greedy_ends, first_line_may_open);
+
+    for (index, &start) in starts.iter().enumerate() {
+        if index > 0 {
+            result.push('\n');
+        }
+        result.push_str(&words[start..starts.get(index + 1).copied().unwrap_or(end)].join(" "));
+    }
+}
+
+fn greedy_line_ends(words: &[&str], width: usize) -> Vec<usize> {
     let mut greedy_ends = Vec::new();
     let mut line_len = 0;
     for (index, word) in words.iter().enumerate() {
@@ -295,8 +307,14 @@ fn wrap_words(text: &str, width: usize, result: &mut String, first_line_may_open
         line_len += usize::from(line_len > 0) + word.len();
     }
     greedy_ends.push(words.len());
+    greedy_ends
+}
 
-    let opens = |start: usize, end: usize| opens_block(&words[start..end].join(" "));
+fn block_safe_line_starts(
+    words: &[&str],
+    greedy_ends: Vec<usize>,
+    first_line_may_open: bool,
+) -> (Vec<usize>, usize) {
     // ~keep Line `k` is `words[starts[k]..starts[k + 1]]`, the last one ends at `end`.
     let mut starts: Vec<usize> = Vec::new();
     let mut end = 0;
@@ -306,63 +324,85 @@ fn wrap_words(text: &str, width: usize, result: &mut String, first_line_may_open
         }
         starts.push(end);
         end = greedy_end;
-        let mut index = starts.len() - 1;
-        while index < starts.len() {
-            let line_end = starts.get(index + 1).copied().unwrap_or(end);
-            if !opens(starts[index], line_end) || (index == 0 && first_line_may_open) {
-                index += 1;
-            } else if index == 0 {
-                let mut step = 1;
-                let mut first_end = line_end;
-                while first_end < words.len() && opens(0, first_end) {
-                    first_end = (first_end + step).min(words.len());
-                    step *= 2;
-                    while starts.len() > 1 && starts.get(2).copied().unwrap_or(end) <= first_end {
-                        starts.remove(1);
-                    }
-                    if starts.len() > 1 {
-                        starts[1] = starts[1].max(first_end);
-                    } else {
-                        end = end.max(first_end);
-                    }
-                }
-                index = 1;
-            } else {
-                let receiver = index - 1;
-                let receiver_may_open = words_are_bare_marker(&words[starts[receiver]..starts[index]]);
-                starts[index] += 1;
-                if starts[index] == line_end {
-                    starts.remove(index);
-                }
-                if receiver_may_open && receiver == 0 {
-                    index = 0;
-                } else if receiver_may_open && opens(starts[receiver], starts.get(index).copied().unwrap_or(end)) {
-                    // ~keep Merged into the line before it, with every bare marker line right
-                    // ~keep before it, a line cannot open a block unless it is the first line.
-                    let mut merged = receiver;
-                    while merged > 0 {
-                        let previous_bare = words_are_bare_marker(&words[starts[merged - 1]..starts[merged]]);
-                        starts.remove(merged);
-                        index -= 1;
-                        merged -= 1;
-                        if !previous_bare {
-                            break;
-                        }
-                        if merged == 0 {
-                            index = 0;
-                        }
-                    }
-                }
-            }
-        }
+        repair_line_starts(words, &mut starts, &mut end, first_line_may_open);
     }
+    (starts, end)
+}
 
-    for (index, &start) in starts.iter().enumerate() {
-        if index > 0 {
-            result.push('\n');
+fn repair_line_starts(words: &[&str], starts: &mut Vec<usize>, end: &mut usize, first_line_may_open: bool) {
+    let mut index = starts.len() - 1;
+    while index < starts.len() {
+        let line_end = starts.get(index + 1).copied().unwrap_or(*end);
+        if !words_open_block(words, starts[index], line_end) || (index == 0 && first_line_may_open) {
+            index += 1;
+            continue;
         }
-        result.push_str(&words[start..starts.get(index + 1).copied().unwrap_or(end)].join(" "));
+        if index == 0 {
+            extend_first_line(words, starts, end, line_end);
+            index = 1;
+        } else {
+            index = move_opening_word(words, starts, *end, index, line_end);
+        }
     }
+}
+
+fn words_open_block(words: &[&str], start: usize, end: usize) -> bool {
+    opens_block(&words[start..end].join(" "))
+}
+
+fn extend_first_line(words: &[&str], starts: &mut Vec<usize>, end: &mut usize, line_end: usize) {
+    let mut step = 1;
+    let mut first_end = line_end;
+    while first_end < words.len() && words_open_block(words, 0, first_end) {
+        first_end = (first_end + step).min(words.len());
+        step *= 2;
+        while starts.len() > 1 && starts.get(2).copied().unwrap_or(*end) <= first_end {
+            starts.remove(1);
+        }
+        if starts.len() > 1 {
+            starts[1] = starts[1].max(first_end);
+        } else {
+            *end = (*end).max(first_end);
+        }
+    }
+}
+
+fn move_opening_word(words: &[&str], starts: &mut Vec<usize>, end: usize, index: usize, line_end: usize) -> usize {
+    let receiver = index - 1;
+    let receiver_may_open = words_are_bare_marker(&words[starts[receiver]..starts[index]]);
+    starts[index] += 1;
+    if starts[index] == line_end {
+        starts.remove(index);
+    }
+    if !receiver_may_open {
+        return index;
+    }
+    if receiver == 0 {
+        return 0;
+    }
+    let receiver_end = starts.get(index).copied().unwrap_or(end);
+    if !words_open_block(words, starts[receiver], receiver_end) {
+        return index;
+    }
+    merge_bare_predecessors(words, starts, index, receiver)
+}
+
+fn merge_bare_predecessors(words: &[&str], starts: &mut Vec<usize>, mut index: usize, mut merged: usize) -> usize {
+    // ~keep Merged into the line before it, with every bare marker line right before it, a line
+    // ~keep cannot open a block unless it is the first line.
+    while merged > 0 {
+        let previous_bare = words_are_bare_marker(&words[starts[merged - 1]..starts[merged]]);
+        starts.remove(merged);
+        index -= 1;
+        merged -= 1;
+        if !previous_bare {
+            break;
+        }
+        if merged == 0 {
+            index = 0;
+        }
+    }
+    index
 }
 
 /// Wrap a paragraph whose first line starts with `indent`, and start every wrapped line with it.
