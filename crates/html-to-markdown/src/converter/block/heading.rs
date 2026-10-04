@@ -51,6 +51,7 @@ pub fn handle(
     if let Some(heading_output) = heading_output {
         append_heading(output, &heading_output, options, ctx, level);
     }
+    #[cfg(feature = "metadata")]
     record_heading(node_handle, parser, &normalized, level, handler);
 }
 
@@ -133,7 +134,7 @@ fn append_heading(output: &mut String, heading_text: &str, options: &ConversionO
     output.push_str(heading_text);
 }
 
-#[cfg_attr(not(feature = "metadata"), allow(unused_variables))]
+#[cfg(feature = "metadata")]
 fn record_heading(
     node_handle: &NodeHandle,
     parser: &Parser,
@@ -141,7 +142,6 @@ fn record_heading(
     level: usize,
     handler: HandlerContext<'_>,
 ) {
-    #[cfg(feature = "metadata")]
     let id = node_handle
         .get(parser)
         .and_then(|node| match node {
@@ -150,7 +150,6 @@ fn record_heading(
         })
         .map(|value| value.as_utf8_str().to_string());
 
-    #[cfg(feature = "metadata")]
     if handler.ctx.metadata_wants_headers {
         if let Some(ref collector) = handler.ctx.metadata_collector {
             collector
