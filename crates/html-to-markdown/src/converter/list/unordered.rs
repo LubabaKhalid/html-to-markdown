@@ -8,8 +8,8 @@
 
 use super::ListContext;
 use super::utils::{
-    add_list_leading_separator, add_nested_list_trailing_separator, calculate_list_nesting_depth, is_loose_list,
-    preceding_same_type_list_separator_comment, process_list_children,
+    ListChildrenContext, add_list_leading_separator, add_nested_list_trailing_separator, calculate_list_nesting_depth,
+    is_loose_list, preceding_same_type_list_separator_comment, process_list_children,
 };
 use tl;
 
@@ -22,7 +22,7 @@ pub fn handle_ul(node_handle: &tl::NodeHandle, parser: &tl::Parser, output: &mut
     let ListContext {
         options,
         ctx,
-        depth,
+        depth: _,
         dom_ctx,
     } = context;
     if !super::utils::has_list_item_child(*node_handle, parser, dom_ctx) {
@@ -70,15 +70,14 @@ pub fn handle_ul(node_handle: &tl::NodeHandle, parser: &tl::Parser, output: &mut
         *node_handle,
         parser,
         output,
-        options,
-        ctx,
-        depth,
-        false,
-        is_loose,
-        nested_depth,
-        1,
-        None,
-        dom_ctx,
+        ListChildrenContext {
+            list: context,
+            ordered: false,
+            loose: is_loose,
+            nested_depth,
+            start_counter: 1,
+            delimiter: None,
+        },
     );
 
     if !ctx.in_table_cell {
