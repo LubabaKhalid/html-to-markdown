@@ -155,17 +155,9 @@ fn close_paragraph(
     if has_content && !ctx.convert_as_inline && !ctx.in_table_cell {
         output.push_str("\n\n");
     }
-
-    if has_content && !ctx.in_table_cell && !ctx.in_list_item && !ctx.convert_as_inline {
-        if let Some(ref sc) = ctx.structure_collector {
-            let text = structure_text(output, content_start_pos);
-            if !text.is_empty() {
-                sc.borrow_mut().push_paragraph(text);
-            }
-        }
-    }
 }
 
+#[cfg(test)]
 fn structure_text(output: &str, content_start_pos: usize) -> &str {
     let safe_start = crate::converter::utility::content::floor_char_boundary(output, content_start_pos);
     output[safe_start..].trim()

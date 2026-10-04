@@ -53,6 +53,20 @@ struct WhitespaceFacts {
     was_fresh_block_start: bool,
 }
 
+struct ProcessedText {
+    output: String,
+    semantic: Option<String>,
+}
+
+impl ProcessedText {
+    fn same(text: String, capture_semantic: bool) -> Self {
+        Self {
+            semantic: capture_semantic.then(|| text.clone()),
+            output: text,
+        }
+    }
+}
+
 struct TextProcessor<'dom, 'output, 'handler> {
     node_handle: &'dom tl::NodeHandle,
     parser: &'dom tl::Parser<'dom>,
@@ -75,19 +89,27 @@ impl TextProcessor<'_, '_, '_> {
             decoded = Cow::Owned(decoded.replace(['\r', '\n'], " "));
         }
         if decoded.trim().is_empty() {
+            let output_start = self.output.len();
             self.emit_whitespace(decoded.as_ref(), &facts);
+            if crate::converter::structure_capture::is_text_capture_active(self.handler.ctx) {
+                self.append_semantic_output(output_start);
+            }
             return;
         }
         self.handler.ctx.at_fresh_block_start.set(false);
         let escape_asterisks = self.escape_asterisks();
-        let processed = self.process_content(decoded, escape_asterisks, facts.was_fresh_block_start);
+        let capture_semantic = crate::converter::structure_capture::is_text_capture_active(self.handler.ctx);
+        let processed = self.process_content(decoded, escape_asterisks, facts.was_fresh_block_start, capture_semantic);
         #[cfg(feature = "visitor")]
         let Some(final_text) = self.apply_visitor(processed) else {
             return;
         };
         #[cfg(not(feature = "visitor"))]
         let final_text = processed;
-        self.emit_processed(&final_text);
+        self.emit_processed(&final_text.output);
+        if let Some(semantic) = final_text.semantic.as_deref() {
+            crate::converter::structure_capture::append_text(self.handler.ctx, semantic);
+        }
     }
 
     fn escape_asterisks(&self) -> bool {
@@ -208,27 +230,39 @@ impl TextProcessor<'_, '_, '_> {
         }
     }
 
-    fn process_content(&self, value: Cow<'_, str>, escape_asterisks: bool, was_fresh: bool) -> String {
+    fn process_content(
+        &self,
+        value: Cow<'_, str>,
+        escape_asterisks: bool,
+        was_fresh: bool,
+        capture_semantic: bool,
+    ) -> ProcessedText {
         let ctx = self.handler.ctx;
         if ((ctx.in_code && !ctx.in_code_block) || ctx.in_ruby) && ctx.in_table_cell {
-            return text::fold_cell_line_breaks_verbatim_cow(value.as_ref()).into_owned();
+            return ProcessedText::same(
+                text::fold_cell_line_breaks_verbatim_cow(value.as_ref()).into_owned(),
+                capture_semantic,
+            );
         }
         if ctx.in_code && !ctx.in_code_block {
-            return text::fold_cell_line_breaks_verbatim_cow(value.as_ref()).into_owned();
+            return ProcessedText::same(
+                text::fold_cell_line_breaks_verbatim_cow(value.as_ref()).into_owned(),
+                capture_semantic,
+            );
         }
         if ctx.in_code || ctx.in_ruby {
-            return value.into_owned();
+            return ProcessedText::same(value.into_owned(), capture_semantic);
         }
         if ctx.in_table_cell {
-            return self.process_table_cell(value.as_ref(), escape_asterisks);
+            return self.process_table_cell(value.as_ref(), escape_asterisks, capture_semantic);
         }
         if self.handler.options.whitespace_mode == crate::options::WhitespaceMode::Strict {
-            return self.process_strict(value.as_ref(), escape_asterisks);
+            return self.process_strict(value.as_ref(), escape_asterisks, capture_semantic);
         }
-        self.process_normalized(value.as_ref(), escape_asterisks, was_fresh)
+        self.process_normalized(value.as_ref(), escape_asterisks, was_fresh, capture_semantic)
     }
 
-    fn process_table_cell(&self, value: &str, escape_asterisks: bool) -> String {
+    fn process_table_cell(&self, value: &str, escape_asterisks: bool, capture_semantic: bool) -> ProcessedText {
         let options = self.handler.options;
         let normalized = if options.whitespace_mode == crate::options::WhitespaceMode::Normalized {
             text::normalize_cell_whitespace_cow(value)
@@ -247,15 +281,19 @@ impl TextProcessor<'_, '_, '_> {
         if !options.escape_misc && !options.escape_ascii && output.contains('|') {
             output = output.replace('|', r"\|");
         }
-        crate::converter::utility::escaping::escape_djot_table_cell_literal(
+        let output = crate::converter::utility::escaping::escape_djot_table_cell_literal(
             &output,
             options.output_format,
             self.handler.ctx.in_table_cell,
         )
-        .into_owned()
+        .into_owned();
+        ProcessedText {
+            output,
+            semantic: capture_semantic.then(|| normalized.into_owned()),
+        }
     }
 
-    fn process_strict(&self, value: &str, escape_asterisks: bool) -> String {
+    fn process_strict(&self, value: &str, escape_asterisks: bool, capture_semantic: bool) -> ProcessedText {
         let follows_break = get_next_sibling_tag(self.node_handle, self.parser, self.handler.dom_ctx) == Some("br")
             || br_follows_enclosing_elements(self.node_handle.get_inner(), self.parser, self.handler.dom_ctx);
         let trimmed_end = follows_break
@@ -270,25 +308,39 @@ impl TextProcessor<'_, '_, '_> {
             .flatten()
             .unwrap_or(trimmed_end);
         let options = self.handler.options;
-        text::escape(
+        let output = text::escape(
             strict,
             options.escape_misc,
             escape_asterisks,
             options.escape_underscores,
             options.escape_ascii,
         )
-        .into_owned()
+        .into_owned();
+        ProcessedText {
+            output,
+            semantic: capture_semantic.then(|| strict.to_string()),
+        }
     }
 
-    fn process_normalized(&self, value: &str, escape_asterisks: bool, was_fresh: bool) -> String {
+    fn process_normalized(
+        &self,
+        value: &str,
+        escape_asterisks: bool,
+        was_fresh: bool,
+        capture_semantic: bool,
+    ) -> ProcessedText {
         let has_double_newline = value.contains("\n\n") || value.contains("\r\n\r\n");
         let trailing_single_newline = value.ends_with('\n') && !value.ends_with("\n\n") && !value.ends_with("\r\n\r\n");
         let normalized = text::normalize_whitespace_cow(value);
         let (prefix, suffix, _) = text::chomp(normalized.as_ref());
         let core = text::normalize_block_whitespace_cow(value.trim());
         let mut output = String::with_capacity(prefix.len() + core.len() + suffix.len() + 2);
+        let mut semantic = capture_semantic.then(|| String::with_capacity(output.capacity()));
         if !self.skip_prefix(prefix, was_fresh) && !prefix.is_empty() {
             output.push_str(prefix);
+            if let Some(semantic) = semantic.as_mut() {
+                semantic.push_str(prefix);
+            }
         }
         let options = self.handler.options;
         output.push_str(&text::escape(
@@ -298,12 +350,22 @@ impl TextProcessor<'_, '_, '_> {
             options.escape_underscores,
             options.escape_ascii,
         ));
+        if let Some(semantic) = semantic.as_mut() {
+            semantic.push_str(core.as_ref());
+        }
         if !suffix.is_empty() {
             output.push_str(suffix);
+            if let Some(semantic) = semantic.as_mut() {
+                semantic.push_str(suffix);
+            }
         } else if trailing_single_newline {
+            let output_end = output.len();
             self.append_trailing_line_ending(&mut output, has_double_newline);
+            if let Some(semantic) = semantic.as_mut() {
+                semantic.push_str(&output[output_end..]);
+            }
         }
-        output
+        ProcessedText { output, semantic }
     }
 
     fn skip_prefix(&self, prefix: &str, was_fresh: bool) -> bool {
@@ -360,7 +422,7 @@ impl TextProcessor<'_, '_, '_> {
     }
 
     #[cfg(feature = "visitor")]
-    fn apply_visitor(&self, processed: String) -> Option<String> {
+    fn apply_visitor(&self, processed: ProcessedText) -> Option<ProcessedText> {
         use crate::visitor::{NodeContext, NodeType, VisitResult};
 
         let Some(visitor_handle) = self.handler.ctx.visitor.as_ref() else {
@@ -380,11 +442,14 @@ impl TextProcessor<'_, '_, '_> {
         let result = visitor_handle
             .lock()
             .expect("visitor mutex poisoned")
-            .visit_text(&node_ctx, &processed);
+            .visit_text(&node_ctx, &processed.output);
         match result {
             VisitResult::Continue | VisitResult::PreserveHtml => Some(processed),
             VisitResult::Custom(custom) if self.handler.ctx.inline_depth == 0 && !self.handler.ctx.in_heading => {
-                Some(custom)
+                Some(ProcessedText {
+                    semantic: processed.semantic.as_ref().map(|_| custom.clone()),
+                    output: custom,
+                })
             }
             VisitResult::Custom(_) => Some(processed),
             VisitResult::Skip => None,
@@ -394,6 +459,12 @@ impl TextProcessor<'_, '_, '_> {
                 }
                 None
             }
+        }
+    }
+
+    fn append_semantic_output(&self, output_start: usize) {
+        if let Some(text) = self.output.get(output_start..) {
+            crate::converter::structure_capture::append_text(self.handler.ctx, text);
         }
     }
 

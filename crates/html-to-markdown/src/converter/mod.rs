@@ -109,6 +109,7 @@ pub mod preprocessing_helpers;
 pub mod prescan;
 pub mod reference_collector;
 pub mod semantic;
+mod structure_capture;
 pub mod text;
 mod text_node;
 pub mod tier1;

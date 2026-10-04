@@ -340,10 +340,21 @@ fn visitor_output(result: crate::visitor::VisitResult, handler: &HandlerContext<
 
     match result {
         VisitResult::Continue => None,
-        VisitResult::Custom(custom) => Some(custom),
-        VisitResult::Skip => Some(String::new()),
-        VisitResult::PreserveHtml => Some(serialize_node(handler.node_handle, handler.parser)),
+        VisitResult::Custom(custom) => {
+            crate::converter::structure_capture::replace_element(handler.context, Some(&custom));
+            Some(custom)
+        }
+        VisitResult::Skip => {
+            crate::converter::structure_capture::replace_element(handler.context, None);
+            Some(String::new())
+        }
+        VisitResult::PreserveHtml => {
+            let html = serialize_node(handler.node_handle, handler.parser);
+            crate::converter::structure_capture::replace_element(handler.context, Some(&html));
+            Some(html)
+        }
         VisitResult::Error(error) => {
+            crate::converter::structure_capture::replace_element(handler.context, None);
             if handler.context.visitor_error.borrow().is_none() {
                 *handler.context.visitor_error.borrow_mut() = Some(error);
             }

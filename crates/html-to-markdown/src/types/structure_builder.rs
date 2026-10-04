@@ -95,31 +95,7 @@ fn collect_annotations(tag: &tl::HTMLTag, parser: &tl::Parser, text: &str, annot
                     continue;
                 }
 
-                let kind = match name.as_str() {
-                    "strong" | "b" => Some(AnnotationKind::Bold),
-                    "em" | "i" => Some(AnnotationKind::Italic),
-                    "u" | "ins" => Some(AnnotationKind::Underline),
-                    "s" | "del" | "strike" => Some(AnnotationKind::Strikethrough),
-                    "code" | "kbd" | "samp" => Some(AnnotationKind::Code),
-                    "sub" => Some(AnnotationKind::Subscript),
-                    "sup" => Some(AnnotationKind::Superscript),
-                    "mark" => Some(AnnotationKind::Highlight),
-                    "a" => {
-                        let url = child_tag
-                            .attributes()
-                            .get("href")
-                            .flatten()
-                            .map(|v| v.as_utf8_str().to_string())
-                            .unwrap_or_default();
-                        let title = child_tag
-                            .attributes()
-                            .get("title")
-                            .flatten()
-                            .map(|v| v.as_utf8_str().to_string());
-                        Some(AnnotationKind::Link { url, title })
-                    }
-                    _ => None,
-                };
+                let kind = annotation_kind_for_tag(name.as_str(), child_tag);
 
                 stack.push(Frame::Finish { start: offset, kind });
                 for child_handle in reversed_child_handles(child_tag) {
@@ -129,6 +105,53 @@ fn collect_annotations(tag: &tl::HTMLTag, parser: &tl::Parser, text: &str, annot
             tl::Node::Comment(_) => {}
         }
     }
+}
+
+pub(crate) fn annotation_kind_for_tag(name: &str, tag: &tl::HTMLTag) -> Option<AnnotationKind> {
+    match name {
+        "strong" | "b" => Some(AnnotationKind::Bold),
+        "em" | "i" => Some(AnnotationKind::Italic),
+        "u" | "ins" => Some(AnnotationKind::Underline),
+        "s" | "del" | "strike" => Some(AnnotationKind::Strikethrough),
+        "code" | "kbd" | "samp" => Some(AnnotationKind::Code),
+        "sub" => Some(AnnotationKind::Subscript),
+        "sup" => Some(AnnotationKind::Superscript),
+        "mark" => Some(AnnotationKind::Highlight),
+        "a" => {
+            let url = tag
+                .attributes()
+                .get("href")
+                .flatten()
+                .map(|value| value.as_utf8_str().to_string())
+                .unwrap_or_default();
+            let title = tag
+                .attributes()
+                .get("title")
+                .flatten()
+                .map(|value| value.as_utf8_str().to_string());
+            Some(AnnotationKind::Link { url, title })
+        }
+        _ => None,
+    }
+}
+
+fn collect_annotated_text(tag: &tl::HTMLTag, parser: &tl::Parser) -> (String, Vec<TextAnnotation>) {
+    let raw_text = extract_text(tag, parser);
+    let text_start = raw_text.len() - raw_text.trim_start().len();
+    let text_end = raw_text.trim_end().len();
+    let mut annotations = Vec::new();
+    collect_annotations(tag, parser, &raw_text, &mut annotations);
+    annotations.retain_mut(|annotation| {
+        let start = (annotation.start as usize).max(text_start);
+        let end = (annotation.end as usize).min(text_end);
+        if start >= end {
+            return false;
+        }
+        annotation.start = (start - text_start) as u32;
+        annotation.end = (end - text_start) as u32;
+        true
+    });
+    (raw_text[text_start..text_end].to_string(), annotations)
 }
 
 /// Build a [`TableGrid`] from a `<table>` element.
@@ -653,12 +676,10 @@ fn process_definition_list(state: &mut BuilderState, tag: &tl::HTMLTag, parser: 
 }
 
 fn process_paragraph(state: &mut BuilderState, tag: &tl::HTMLTag, parser: &tl::Parser, parent_idx: Option<u32>) {
-    let text = extract_text(tag, parser).trim().to_string();
+    let (text, annotations) = collect_annotated_text(tag, parser);
     if text.is_empty() {
         return;
     }
-    let mut annotations = Vec::new();
-    collect_annotations(tag, parser, &text, &mut annotations);
     state.push_attached(DocumentNode {
         id: make_node_id("paragraph", &text, state.nodes.len()),
         content: NodeContent::Paragraph { text },
@@ -690,9 +711,7 @@ fn process_list(
 }
 
 fn process_list_item(state: &mut BuilderState, tag: &tl::HTMLTag, parser: &tl::Parser, parent_idx: Option<u32>) {
-    let text = extract_text(tag, parser).trim().to_string();
-    let mut annotations = Vec::new();
-    collect_annotations(tag, parser, &text, &mut annotations);
+    let (text, annotations) = collect_annotated_text(tag, parser);
     state.push_attached(DocumentNode {
         id: make_node_id("list_item", &text, state.nodes.len()),
         content: NodeContent::ListItem { text },
@@ -749,7 +768,7 @@ fn process_heading(
     parent_idx: Option<u32>,
 ) {
     let level = tag_name[1..].parse::<u8>().unwrap_or(1);
-    let text = extract_text(tag, parser).trim().to_string();
+    let (text, annotations) = collect_annotated_text(tag, parser);
     while state
         .group_stack
         .last()
@@ -772,8 +791,6 @@ fn process_heading(
     });
     state.group_stack.push((level, group_idx));
 
-    let mut annotations = Vec::new();
-    collect_annotations(tag, parser, &text, &mut annotations);
     state.push_attached(DocumentNode {
         id: make_node_id("heading", &text, state.nodes.len()),
         content: NodeContent::Heading { level, text },

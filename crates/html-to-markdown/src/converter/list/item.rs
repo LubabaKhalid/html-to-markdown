@@ -493,23 +493,6 @@ fn write_regular_children(
     (item_start, text_end)
 }
 
-fn collect_list_item_structure(output: &str, item_start: usize, text_end: usize, ctx: &Context) {
-    if ctx.in_table_cell {
-        return;
-    }
-    let Some(collector) = ctx.structure_collector.as_ref() else {
-        return;
-    };
-    let safe_end = text_end.min(output.len());
-    if item_start > safe_end || !output.is_char_boundary(item_start) || !output.is_char_boundary(safe_end) {
-        return;
-    }
-    let item_content = output[item_start..safe_end].trim();
-    if !item_content.is_empty() {
-        collector.borrow_mut().push_list_item(item_content);
-    }
-}
-
 #[cfg(feature = "visitor")]
 fn visit_regular_item(
     node_handle: &tl::NodeHandle,
@@ -562,31 +545,37 @@ fn visit_regular_item(
     match visit_result {
         VisitResult::Continue => false,
         VisitResult::Custom(custom) => {
-            output.truncate(line_start);
-            output.push_str(&custom);
-            if !render.list.ctx.in_table_cell && !output.ends_with('\n') {
-                output.push('\n');
-            }
+            crate::converter::structure_capture::replace_element(render.list.ctx, Some(&custom));
+            replace_regular_item_output(output, line_start, &custom, render.list.ctx.in_table_cell);
             true
         }
         VisitResult::Skip => {
+            crate::converter::structure_capture::replace_element(render.list.ctx, None);
             output.truncate(line_start);
             true
         }
         VisitResult::PreserveHtml => {
-            output.truncate(line_start);
-            crate::converter::serialize_node_to_html(node_handle, parser, output);
-            if !render.list.ctx.in_table_cell && !output.ends_with('\n') {
-                output.push('\n');
-            }
+            let html = crate::converter::serialize_node(node_handle, parser);
+            crate::converter::structure_capture::replace_element(render.list.ctx, Some(&html));
+            replace_regular_item_output(output, line_start, &html, render.list.ctx.in_table_cell);
             true
         }
         VisitResult::Error(error) => {
+            crate::converter::structure_capture::replace_element(render.list.ctx, None);
             if render.list.ctx.visitor_error.borrow().is_none() {
                 *render.list.ctx.visitor_error.borrow_mut() = Some(error);
             }
             true
         }
+    }
+}
+
+#[cfg(feature = "visitor")]
+fn replace_regular_item_output(output: &mut String, line_start: usize, replacement: &str, in_table_cell: bool) {
+    output.truncate(line_start);
+    output.push_str(replacement);
+    if !in_table_cell && !output.ends_with('\n') {
+        output.push('\n');
     }
 }
 
@@ -604,12 +593,11 @@ fn render_regular_item(
     } else {
         output.push_str(&render.marker.list_marker());
     }
-    let (item_start, text_end) = write_regular_children(tag, parser, output, render);
+    let (item_start, _) = write_regular_children(tag, parser, output, render);
     trim_trailing_whitespace(output);
     if render.list.options.newline_style == NewlineStyle::Backslash {
         strip_trailing_backslash_breaks(output, item_start);
     }
-    collect_list_item_structure(output, item_start, text_end, render.list.ctx);
     #[cfg(feature = "visitor")]
     if visit_regular_item(node_handle, tag, parser, output, render) {
         return true;

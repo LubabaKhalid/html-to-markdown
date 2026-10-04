@@ -434,10 +434,21 @@ fn visit_semantic(
     };
     Some(match result {
         VisitResult::Continue => VisitorOutcome::Continue,
-        VisitResult::Custom(custom) => VisitorOutcome::Output(custom),
-        VisitResult::Skip => VisitorOutcome::Skip,
-        VisitResult::PreserveHtml => VisitorOutcome::Output(serialize_node(site.node_handle, site.parser)),
+        VisitResult::Custom(custom) => {
+            crate::converter::structure_capture::replace_element(site.ctx, Some(&custom));
+            VisitorOutcome::Output(custom)
+        }
+        VisitResult::Skip => {
+            crate::converter::structure_capture::replace_element(site.ctx, None);
+            VisitorOutcome::Skip
+        }
+        VisitResult::PreserveHtml => {
+            let html = serialize_node(site.node_handle, site.parser);
+            crate::converter::structure_capture::replace_element(site.ctx, Some(&html));
+            VisitorOutcome::Output(html)
+        }
         VisitResult::Error(error) => {
+            crate::converter::structure_capture::replace_element(site.ctx, None);
             if site.ctx.visitor_error.borrow().is_none() {
                 *site.ctx.visitor_error.borrow_mut() = Some(error);
             }

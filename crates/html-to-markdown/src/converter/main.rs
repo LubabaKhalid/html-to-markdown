@@ -691,13 +691,13 @@ fn convert_tag(
     handler: HandlerContext<'_>,
 ) {
     let options = handler.options;
-    let ctx = handler.ctx;
     let depth = handler.depth;
     let dom_ctx = handler.dom_ctx;
     let tag_name = normalized_node_tag_name(node_handle, tag, parser, dom_ctx);
     let djot_scope = djot_context(node_handle, parser, tag_name.as_ref(), handler);
-    let ctx = djot_scope.as_ref().unwrap_or(ctx);
-
+    let ctx = djot_scope.as_ref().unwrap_or(handler.ctx);
+    #[cfg(feature = "visitor")]
+    let visitor_output_start = output.len();
     #[cfg(feature = "visitor")]
     let visitor_element_state = if ctx.skip_visitor_hooks {
         None
@@ -710,7 +710,13 @@ fn convert_tag(
         match action {
             VisitAction::Continue => Some(state),
             VisitAction::Skip => return,
-            VisitAction::Custom => return,
+            VisitAction::Custom => {
+                if let Some(replacement) = output.get(visitor_output_start..) {
+                    collect_document_attributes(tag_name.as_ref(), tag, ctx);
+                    super::structure_capture::replace_element_at_start(tag_name.as_ref(), tag, ctx, replacement);
+                }
+                return;
+            }
             VisitAction::Error => return,
         }
     } else {
@@ -728,40 +734,34 @@ fn convert_tag(
         return;
     }
     collect_document_attributes(tag_name.as_ref(), tag, ctx);
-
+    let structure_capture = super::structure_capture::begin_element(tag_name.as_ref(), tag, ctx);
     #[cfg_attr(not(feature = "visitor"), allow(unused_variables))]
     let element_output_start = output.len();
-
     strip_breaks_before_block(tag_name.as_ref(), output, options, ctx);
 
-    if super::main_dispatch::dispatch_tag(
+    #[cfg_attr(not(feature = "visitor"), allow(unused_variables))]
+    let stop = super::main_dispatch::dispatch_tag(
         tag_name.as_ref(),
         node_handle,
         tag,
         parser,
         output,
         HandlerContext::new(options, ctx, depth, dom_ctx),
-    ) {
-        return;
-    }
+    );
 
     #[cfg(feature = "visitor")]
-    if let (Some(visitor_handle), Some(state)) = (ctx.visitor.as_ref(), visitor_element_state.as_ref()) {
-        use crate::converter::visitor_hooks::{VisitorElementEndContext, handle_visitor_element_end};
-
-        handle_visitor_element_end(
-            visitor_handle,
-            tag_name.as_ref(),
-            state,
+    if !stop {
+        super::structure_capture::handle_visitor_end(super::structure_capture::VisitorEndCapture {
+            state: visitor_element_state.as_ref(),
+            tag_name: tag_name.as_ref(),
             tag,
-            VisitorElementEndContext {
-                output,
-                element_output_start,
-                ctx,
-                depth,
-            },
-        );
+            output,
+            element_output_start,
+            ctx,
+            depth,
+        });
     }
+    super::structure_capture::finish_element(structure_capture, tag_name.as_ref(), tag, ctx);
 }
 
 fn normalized_node_tag_name<'a>(

@@ -133,6 +133,7 @@ fn append_heading(output: &mut String, heading_text: &str, options: &ConversionO
     output.push_str(heading_text);
 }
 
+#[cfg_attr(not(feature = "metadata"), allow(unused_variables))]
 fn record_heading(
     node_handle: &NodeHandle,
     parser: &Parser,
@@ -140,6 +141,7 @@ fn record_heading(
     level: usize,
     handler: HandlerContext<'_>,
 ) {
+    #[cfg(feature = "metadata")]
     let id = node_handle
         .get(parser)
         .and_then(|node| match node {
@@ -153,14 +155,7 @@ fn record_heading(
         if let Some(ref collector) = handler.ctx.metadata_collector {
             collector
                 .borrow_mut()
-                .add_header(level as u8, normalized.to_string(), id.clone(), handler.depth, 0);
-        }
-    }
-    if !handler.ctx.in_table_cell {
-        if let Some(ref collector) = handler.ctx.structure_collector {
-            collector
-                .borrow_mut()
-                .push_heading(level as u8, normalized, id.as_deref());
+                .add_header(level as u8, normalized.to_string(), id, handler.depth, 0);
         }
     }
 }
@@ -408,9 +403,22 @@ fn visitor_heading_output(
             push_heading(&mut buf, ctx, handler.options, level, normalized);
             Some(buf)
         }
-        VisitResult::Custom(custom) => Some(custom),
-        VisitResult::Skip => None,
+        VisitResult::Custom(custom) => {
+            if let Some(collector) = ctx.structure_collector.as_ref() {
+                collector.borrow_mut().replace_current_element(Some(&custom));
+            }
+            Some(custom)
+        }
+        VisitResult::Skip => {
+            if let Some(collector) = ctx.structure_collector.as_ref() {
+                collector.borrow_mut().replace_current_element(None);
+            }
+            None
+        }
         VisitResult::Error(err) => {
+            if let Some(collector) = ctx.structure_collector.as_ref() {
+                collector.borrow_mut().replace_current_element(None);
+            }
             if ctx.visitor_error.borrow().is_none() {
                 *ctx.visitor_error.borrow_mut() = Some(err);
             }
