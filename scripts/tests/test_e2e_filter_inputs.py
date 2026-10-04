@@ -1,6 +1,7 @@
 """Keep every gated E2E job's path filters aligned with the inputs it reads."""
 
 import copy
+import posixpath
 import re
 import tomllib
 from pathlib import Path
@@ -14,8 +15,9 @@ ALEF_PATH = ROOT / "alef.toml"
 OUTPUT_FILTER = re.compile(r"steps\.filter\.outputs\.([a-z]+) == 'true'")
 ALEF_LANGUAGE = re.compile(r"alef test --e2e --lang ([a-z_]+)")
 CARGO_PACKAGE = re.compile(r"(?:^|\s)-p\s+([a-z0-9_-]+)")
-SCRIPT_PATH = re.compile(r"(?:^|[\s\"'])(scripts/[A-Za-z0-9_./-]+)")
+SCRIPT_PATH = re.compile(r"(?:^|[\s\"'])((?:\.\.?/)*scripts/[A-Za-z0-9_./-]+)")
 CHANGE_DIRECTORY = re.compile(r"(?:^|&&|;)\s*cd\s+([^\s;&]+)")
+REPOSITORY_PATH_PREFIXES = ("crates/", "packages/", "e2e/", "scripts/")
 
 
 def _cargo_packages() -> dict[str, str]:
@@ -41,28 +43,52 @@ def _commands(job: dict[str, Any], alef: dict[str, Any]) -> list[str]:
     return commands
 
 
+def _repository_path(path: object, working_directory: str = ".") -> str | None:
+    value = str(path).strip("'\"")
+    if not value or "${{" in value or value.startswith("/"):
+        return None
+    resolved = posixpath.normpath(posixpath.join(working_directory, value))
+    if resolved.startswith(REPOSITORY_PATH_PREFIXES):
+        return resolved
+    return None
+
+
+def _command_inputs(command: str, working_directory: str, packages: dict[str, str]) -> set[str]:
+    inputs = {
+        path
+        for match in SCRIPT_PATH.findall(command)
+        if (path := _repository_path(match, working_directory)) is not None
+    }
+    inputs.update(
+        path
+        for match in CHANGE_DIRECTORY.findall(command)
+        if (path := _repository_path(match, working_directory)) is not None
+    )
+    inputs.update(packages[package] for package in CARGO_PACKAGE.findall(command))
+    return inputs
+
+
 def _job_inputs(job: dict[str, Any], alef: dict[str, Any], packages: dict[str, str]) -> set[str]:
     inputs = {".github/workflows/ci-e2e.yaml"}
     commands = _commands(job, alef)
     if any(ALEF_LANGUAGE.search(command) for command in commands):
         inputs.add("alef.toml")
     for step in job.get("steps", []):
-        if directory := step.get("working-directory"):
-            inputs.add(str(directory))
+        working_directory = str(step.get("working-directory", "."))
+        if directory := _repository_path(working_directory):
+            inputs.add(directory)
         options = step.get("with", {})
-        if directory := options.get("crate-dir"):
-            inputs.add(str(directory))
+        for key, value in options.items():
+            if (key == "working-directory" or key.endswith(("-dir", "-script"))) and (path := _repository_path(value)):
+                inputs.add(path)
         for key in ("crate-name", "ffi-crate-name"):
             if package := options.get(key):
                 inputs.add(packages[str(package)])
+        inputs.update(_command_inputs(str(step.get("run", "")), working_directory, packages))
+    step_commands = {str(step.get("run", "")) for step in job.get("steps", [])}
     for command in commands:
-        inputs.update(SCRIPT_PATH.findall(command))
-        inputs.update(
-            path.strip("'\"")
-            for path in CHANGE_DIRECTORY.findall(command)
-            if path.startswith(("crates/", "packages/", "e2e/", "scripts/"))
-        )
-        inputs.update(packages[package] for package in CARGO_PACKAGE.findall(command))
+        if command not in step_commands:
+            inputs.update(_command_inputs(command, ".", packages))
     return inputs
 
 
@@ -109,3 +135,42 @@ def test_missing_jni_filter_input_is_reported() -> None:
     problems = _filter_input_problems(changed, alef)
 
     assert "build-kotlin-android: no assigned filter covers crates/html-to-markdown-rs-jni" in problems
+
+
+def test_missing_action_script_filter_input_is_reported() -> None:
+    workflow = yaml.safe_load(WORKFLOW_PATH.read_text(encoding="utf-8"))
+    alef = tomllib.loads(ALEF_PATH.read_text(encoding="utf-8"))
+    changed = copy.deepcopy(workflow)
+    filters = yaml.safe_load(_filter_step(changed)["with"]["filters"])
+    filters["r"].remove("scripts/ci/r/**")
+    _filter_step(changed)["with"]["filters"] = yaml.safe_dump(filters)
+
+    problems = _filter_input_problems(changed, alef)
+
+    assert "test-r: no assigned filter covers scripts/ci/r/install-deps.sh" in problems
+
+
+def test_missing_action_working_directory_filter_input_is_reported() -> None:
+    workflow = yaml.safe_load(WORKFLOW_PATH.read_text(encoding="utf-8"))
+    alef = tomllib.loads(ALEF_PATH.read_text(encoding="utf-8"))
+    changed = copy.deepcopy(workflow)
+    filters = yaml.safe_load(_filter_step(changed)["with"]["filters"])
+    filters["ruby"].remove("packages/ruby/**")
+    _filter_step(changed)["with"]["filters"] = yaml.safe_dump(filters)
+
+    problems = _filter_input_problems(changed, alef)
+
+    assert "build-ruby: no assigned filter covers packages/ruby" in problems
+
+
+def test_missing_relative_script_filter_input_is_reported() -> None:
+    workflow = yaml.safe_load(WORKFLOW_PATH.read_text(encoding="utf-8"))
+    alef = tomllib.loads(ALEF_PATH.read_text(encoding="utf-8"))
+    changed = copy.deepcopy(workflow)
+    filters = yaml.safe_load(_filter_step(changed)["with"]["filters"])
+    filters["ruby"].remove("scripts/ci/ruby/**")
+    _filter_step(changed)["with"]["filters"] = yaml.safe_dump(filters)
+
+    problems = _filter_input_problems(changed, alef)
+
+    assert "test-ruby: no assigned filter covers scripts/ci/ruby/run-rspec-unix.sh" in problems
