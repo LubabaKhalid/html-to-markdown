@@ -4,6 +4,7 @@ set -euo pipefail
 
 ROOT="CHANGELOG.md"
 MIRROR="docs-site/src/content/docs/changelog.md"
+ARCHIVE_COUNT=5
 
 # ~keep Nothing syncs these two files, so they diverged unnoticed: the mirror's 3.15.0 section
 # carried the wrong release date, was missing the alef re-pin and the R-binding entries, and
@@ -12,8 +13,20 @@ MIRROR="docs-site/src/content/docs/changelog.md"
 # out of `[Unreleased]`, leaving it empty on `main`, so an Unreleased-only comparison would
 # compare zero lines and pass while a released section drifted. The mirror's frontmatter and
 # preamble differ by design and sit above that heading, so they are excluded.
+# ~keep Trailing blank lines are formatter-owned and carry no entry content, so only those are
+# ~keep discarded; blank lines between entries remain part of the byte-for-byte comparison.
 extract_entries() {
-  awk '/^## \[/ { found = 1 } found' "$1"
+  awk '
+    /^## \[/ { found = 1 }
+    found && /^[[:space:]]*$/ { pending += 1; next }
+    found {
+      while (pending > 0) {
+        print ""
+        pending -= 1
+      }
+      print
+    }
+  ' "$1"
 }
 
 workdir="$(mktemp -d)"
@@ -21,7 +34,8 @@ workdir="$(mktemp -d)"
 trap 'rm -rf "$workdir"' EXIT
 
 failures=0
-for path in "$ROOT" "$MIRROR"; do
+check_file() {
+  path="$1"
   if [ ! -f "$path" ]; then
     echo "::error::$path is missing"
     failures=$((failures + 1))
@@ -29,24 +43,43 @@ for path in "$ROOT" "$MIRROR"; do
     echo "::error::$path has no '## [' version heading — this check would compare nothing"
     failures=$((failures + 1))
   fi
+}
+
+compare_pair() {
+  root="$1"
+  mirror="$2"
+  label="$3"
+  check_file "$root"
+  check_file "$mirror"
+  [ "$failures" -eq 0 ] || return
+
+  extract_entries "$root" >"$workdir/root-$label.txt"
+  extract_entries "$mirror" >"$workdir/mirror-$label.txt"
+  root_lines="$(wc -l <"$workdir/root-$label.txt" | tr -d ' ')"
+  mirror_lines="$(wc -l <"$workdir/mirror-$label.txt" | tr -d ' ')"
+  echo "changelog entries: $root has $root_lines lines, $mirror has $mirror_lines lines"
+
+  if [ "$root_lines" -eq 0 ]; then
+    echo "::error::no changelog entries were extracted from $root — nothing was compared"
+    failures=$((failures + 1))
+    return
+  fi
+
+  if ! diff -q "$workdir/root-$label.txt" "$workdir/mirror-$label.txt" >/dev/null 2>&1; then
+    diff -u "$workdir/root-$label.txt" "$workdir/mirror-$label.txt" | head -60
+    echo "::error::$mirror is a hand-maintained mirror of $root and has drifted. Copy the changed entries from $root into $mirror."
+    failures=$((failures + 1))
+    return
+  fi
+
+  echo "ok: the changelog entries match ($root_lines lines)"
+}
+
+compare_pair "$ROOT" "$MIRROR" main
+archive=1
+while [ "$archive" -le "$ARCHIVE_COUNT" ]; do
+  compare_pair "changelog-archive-$archive.md" "docs-site/src/content/docs/changelog-archive-$archive.md" "archive-$archive"
+  archive=$((archive + 1))
 done
+
 [ "$failures" -eq 0 ] || exit 1
-
-extract_entries "$ROOT" >"$workdir/root.txt"
-extract_entries "$MIRROR" >"$workdir/mirror.txt"
-root_lines="$(wc -l <"$workdir/root.txt" | tr -d ' ')"
-mirror_lines="$(wc -l <"$workdir/mirror.txt" | tr -d ' ')"
-echo "changelog entries: $ROOT has $root_lines lines, $MIRROR has $mirror_lines lines"
-
-if [ "$root_lines" -eq 0 ]; then
-  echo "::error::no changelog entries were extracted from $ROOT — nothing was compared"
-  exit 1
-fi
-
-if ! diff -q "$workdir/root.txt" "$workdir/mirror.txt" >/dev/null 2>&1; then
-  diff -u "$workdir/root.txt" "$workdir/mirror.txt" | head -60
-  echo "::error::$MIRROR is a hand-maintained mirror of $ROOT and has drifted. Copy the changed entries from $ROOT into $MIRROR."
-  exit 1
-fi
-
-echo "ok: the changelog entries match ($root_lines lines)"
