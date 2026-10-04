@@ -43,7 +43,7 @@ jobs:
       run-build-csharp: ${{ github.event_name == 'workflow_dispatch' || steps.filter.outputs.core == 'true' || steps.filter.outputs.csharp == 'true' }}
       run-build-java: ${{ github.event_name == 'workflow_dispatch' || steps.filter.outputs.core == 'true' || steps.filter.outputs.java == 'true' }}
       run-build-wasm: ${{ github.event_name == 'workflow_dispatch' || steps.filter.outputs.core == 'true' || steps.filter.outputs.wasm == 'true' }}
-      run-build-kotlin-android: ${{ github.event_name == 'workflow_dispatch' || steps.filter.outputs.core == 'true' || steps.filter.outputs.ffi == 'true' || steps.filter.outputs.kotlin == 'true' }}
+      run-build-kotlin-android: ${{ github.event_name == 'workflow_dispatch' || steps.filter.outputs.core == 'true' || steps.filter.outputs.kotlin == 'true' }}
       run-test-python: ${{ github.event_name == 'workflow_dispatch' || steps.filter.outputs.core == 'true' || steps.filter.outputs.python == 'true' }}
       run-test-node: ${{ github.event_name == 'workflow_dispatch' || steps.filter.outputs.core == 'true' || steps.filter.outputs.node == 'true' }}
       run-test-ruby: ${{ github.event_name == 'workflow_dispatch' || steps.filter.outputs.core == 'true' || steps.filter.outputs.ruby == 'true' }}
@@ -53,10 +53,10 @@ jobs:
       run-test-java: ${{ github.event_name == 'workflow_dispatch' || steps.filter.outputs.core == 'true' || steps.filter.outputs.java == 'true' }}
       run-test-elixir: ${{ github.event_name == 'workflow_dispatch' || steps.filter.outputs.core == 'true' || steps.filter.outputs.ffi == 'true' || steps.filter.outputs.elixir == 'true' }}
       run-test-r: ${{ github.event_name == 'workflow_dispatch' || steps.filter.outputs.core == 'true' || steps.filter.outputs.r == 'true' }}
-      run-test-c-ffi: ${{ github.event_name == 'workflow_dispatch' || steps.filter.outputs.core == 'true' || steps.filter.outputs.ffi == 'true' }}
+      run-test-c-ffi: ${{ github.event_name == 'workflow_dispatch' || steps.filter.outputs.core == 'true' || steps.filter.outputs.ffi == 'true' || steps.filter.outputs.cffi == 'true' }}
       run-test-c-ffi-windows: ${{ github.event_name == 'workflow_dispatch' || steps.filter.outputs.core == 'true' || steps.filter.outputs.ffi == 'true' }}
       run-test-wasm: ${{ github.event_name == 'workflow_dispatch' || steps.filter.outputs.core == 'true' || steps.filter.outputs.wasm == 'true' }}
-      run-test-kotlin-android: ${{ github.event_name == 'workflow_dispatch' || steps.filter.outputs.core == 'true' || steps.filter.outputs.ffi == 'true' || steps.filter.outputs.kotlin == 'true' }}
+      run-test-kotlin-android: ${{ github.event_name == 'workflow_dispatch' || steps.filter.outputs.core == 'true' || steps.filter.outputs.kotlin == 'true' }}
       run-test-swift: ${{ github.event_name == 'workflow_dispatch' || steps.filter.outputs.core == 'true' || steps.filter.outputs.ffi == 'true' || steps.filter.outputs.swift == 'true' }}
       run-test-dart: ${{ github.event_name == 'workflow_dispatch' || steps.filter.outputs.core == 'true' || steps.filter.outputs.dart == 'true' }}
       run-test-zig: ${{ github.event_name == 'workflow_dispatch' || steps.filter.outputs.core == 'true' || steps.filter.outputs.ffi == 'true' || steps.filter.outputs.zig == 'true' }}
@@ -81,9 +81,10 @@ jobs:
             ffi:
               - 'crates/html-to-markdown-ffi/**'
               - 'crates/html-to-markdown/**'
-              - 'e2e/c/**'
               - 'Cargo.toml'
               - 'Cargo.lock'
+            cffi:
+              - 'e2e/c/**'
             python:
               - 'crates/html-to-markdown-py/**'
               - 'crates/html-to-markdown-cli/**'
@@ -155,7 +156,6 @@ jobs:
               # ~keep build-kotlin-android builds html-to-markdown-rs-jni, NOT the plain
               # ~keep C-FFI crate; without this a JNI-only change skipped both Kotlin jobs.
               - 'crates/html-to-markdown-rs-jni/**'
-              - 'crates/html-to-markdown-ffi/**'
               - 'e2e/kotlin_android/**'
               - 'fixtures/**'
             swift:

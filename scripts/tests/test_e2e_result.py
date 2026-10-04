@@ -38,7 +38,7 @@ LEG_FILTERS = {
     "build-csharp": {"core", "csharp"},
     "build-java": {"core", "java"},
     "build-wasm": {"core", "wasm"},
-    "build-kotlin-android": {"core", "ffi", "kotlin"},
+    "build-kotlin-android": {"core", "kotlin"},
     "test-python": {"core", "python"},
     "test-node": {"core", "node"},
     "test-ruby": {"core", "ruby"},
@@ -48,10 +48,10 @@ LEG_FILTERS = {
     "test-java": {"core", "java"},
     "test-elixir": {"core", "ffi", "elixir"},
     "test-r": {"core", "r"},
-    "test-c-ffi": {"core", "ffi"},
+    "test-c-ffi": {"core", "ffi", "cffi"},
     "test-c-ffi-windows": {"core", "ffi"},
     "test-wasm": {"core", "wasm"},
-    "test-kotlin-android": {"core", "ffi", "kotlin"},
+    "test-kotlin-android": {"core", "kotlin"},
     "test-swift": {"core", "ffi", "swift"},
     "test-dart": {"core", "dart"},
     "test-zig": {"core", "ffi", "zig"},
@@ -395,6 +395,15 @@ def test_should_name_only_filters_the_change_detection_step_defines(workflow: di
     defined = set(yaml.safe_load(step["with"]["filters"]))
 
     assert set().union(*LEG_FILTERS.values()) <= defined
+
+
+def test_c_e2e_and_kotlin_inputs_have_independent_filters(workflow: dict[str, Any]) -> None:
+    (step,) = [step for step in workflow["jobs"]["changes"]["steps"] if step.get("id") == "filter"]
+    filters = yaml.safe_load(step["with"]["filters"])
+
+    assert "e2e/c/**" in filters["cffi"]
+    assert "e2e/c/**" not in filters["ffi"]
+    assert "crates/html-to-markdown-ffi/**" not in filters["kotlin"]
 
 
 def test_should_report_a_filter_term_dropped_from_an_output(workflow: dict[str, Any]) -> None:
