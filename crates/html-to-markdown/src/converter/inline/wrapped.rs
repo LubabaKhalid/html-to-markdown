@@ -165,6 +165,28 @@ fn move_leading_hard_breaks<'a>(
     ctx: &Context,
     options: &ConversionOptions,
 ) -> &'a str {
+    // ~keep Table-cell block boundaries are normalized by the cell renderer; hoisting one from
+    // ~keep an inline wrapper turns the folded separator into literal hard-break syntax (#645).
+    if ctx.in_table_cell {
+        return content;
+    }
+
+    let mut after_breaks = content;
+    loop {
+        let candidate = after_breaks.trim_start_matches([' ', '\t']);
+        let Some(rest) = ["\\\n", "\n"]
+            .into_iter()
+            .find_map(|marker| candidate.strip_prefix(marker))
+        else {
+            break;
+        };
+        after_breaks = rest;
+    }
+    // ~keep A break-only wrapper separates adjacent words instead of authoring a hard break (#502).
+    if after_breaks.trim().is_empty() {
+        return content;
+    }
+
     let mut remaining = content;
     let mut moved = false;
     loop {
