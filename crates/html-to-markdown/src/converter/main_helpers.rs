@@ -551,6 +551,69 @@ pub fn repair_with_html5ever(input: &str) -> Option<String> {
     String::from_utf8(buf).ok()
 }
 
+/// Rebuild a document when head content precedes an authored `<head>` element.
+///
+/// The HTML tree builder places that content in an implicit head and ignores the later head
+/// start tag. The lightweight parser preserves source nesting, so its tree needs this targeted
+/// repair before either conversion tier reads metadata or renders the body.
+pub fn repair_head_content_before_explicit_head(input: &str) -> Option<String> {
+    let head_start = last_start_tag(input.as_bytes(), b"head")?;
+    const HEAD_CONTENT: [&[u8]; 11] = [
+        b"base",
+        b"basefont",
+        b"bgsound",
+        b"link",
+        b"meta",
+        b"noframes",
+        b"noscript",
+        b"script",
+        b"style",
+        b"template",
+        b"title",
+    ];
+    if !HEAD_CONTENT
+        .iter()
+        .any(|name| first_start_tag(input.as_bytes(), name).is_some_and(|start| start < head_start))
+    {
+        return None;
+    }
+
+    let dom = tl::parse(input, tl::ParserOptions::default()).ok()?;
+    if !document_head_search(dom.children(), dom.parser()).1 {
+        return None;
+    }
+    repair_with_html5ever(input)
+}
+
+fn first_start_tag(bytes: &[u8], name: &[u8]) -> Option<usize> {
+    bytes
+        .iter()
+        .enumerate()
+        .find_map(|(start, _)| is_start_tag_at(bytes, name, start).then_some(start))
+}
+
+fn last_start_tag(bytes: &[u8], name: &[u8]) -> Option<usize> {
+    bytes
+        .iter()
+        .enumerate()
+        .rev()
+        .find_map(|(start, _)| is_start_tag_at(bytes, name, start).then_some(start))
+}
+
+fn is_start_tag_at(bytes: &[u8], name: &[u8], start: usize) -> bool {
+    if bytes.get(start) != Some(&b'<') {
+        return false;
+    }
+    let tag_start = start + 1;
+    let tag_end = tag_start + name.len();
+    bytes
+        .get(tag_start..tag_end)
+        .is_some_and(|candidate| candidate.eq_ignore_ascii_case(name))
+        && bytes
+            .get(tag_end)
+            .is_some_and(|next| next.is_ascii_whitespace() || matches!(next, b'/' | b'>'))
+}
+
 /// Format metadata as YAML frontmatter.
 ///
 /// ~keep The `title` key is present whenever a title element was seen, even an empty one, so
@@ -795,6 +858,11 @@ fn head_element_metadata(
 /// The first `<head>` element below `roots` before the body starts. A browser's parser ignores
 /// a `<head>` tag once the body has started, at text or at a tag that [`starts_body`].
 pub fn document_head(roots: &[tl::NodeHandle], parser: &tl::Parser) -> Option<tl::NodeHandle> {
+    document_head_search(roots, parser).0
+}
+
+fn document_head_search(roots: &[tl::NodeHandle], parser: &tl::Parser) -> (Option<tl::NodeHandle>, bool) {
+    let mut saw_head_content = false;
     let mut work: Vec<_> = roots.iter().rev().copied().collect();
     while let Some(handle) = work.pop() {
         match handle.get(parser) {
@@ -804,26 +872,26 @@ pub fn document_head(roots: &[tl::NodeHandle], parser: &tl::Parser) -> Option<tl
                     Some(tl::Node::Tag(tag)) if tag.name().as_bytes().eq_ignore_ascii_case(b"html")
                 );
                 if !is_ignorable_before_head(&text.as_utf8_str(), next_is_html) {
-                    return None;
+                    return (None, false);
                 }
             }
             Some(tl::Node::Tag(tag)) => {
                 let name = tag.name().as_bytes().to_ascii_lowercase();
                 match name.as_slice() {
-                    b"head" => return Some(handle),
+                    b"head" => return (Some(handle), saw_head_content),
                     b"html" => {
                         let first = work.len();
                         work.extend(tag.children().top().iter().copied());
                         work[first..].reverse();
                     }
-                    name if starts_body(name) => return None,
-                    _ => {}
+                    name if starts_body(name) => return (None, false),
+                    _ => saw_head_content = true,
                 }
             }
             _ => {}
         }
     }
-    None
+    (None, false)
 }
 
 /// Whether a run of text before the head is found should be skipped rather than ending the

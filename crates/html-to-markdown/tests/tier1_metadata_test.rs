@@ -386,6 +386,25 @@ fn should_report_the_first_title_on_both_tiers() {
 }
 
 #[test]
+fn should_use_a_title_before_an_explicit_head_on_both_tiers() {
+    let html = "<title>First</title><head><title>Second</title></head><p>x</p>";
+    let expected = "---\ntitle: First\n---\n\nx\n";
+    assert_eq!(t1(html), expected);
+    assert_eq!(t2(html), expected);
+
+    #[cfg(feature = "metadata")]
+    {
+        let options = ConversionOptions {
+            tier_strategy: TierStrategy::Tier2,
+            extract_metadata: true,
+            ..ConversionOptions::default()
+        };
+        let document = convert(html, Some(options)).unwrap().metadata.document;
+        assert_eq!(document.title.as_deref(), Some("First"));
+    }
+}
+
+#[test]
 fn should_ignore_a_head_inside_the_body_on_both_tiers() {
     for html in [
         "<html><head></head><body><head><title>Stray</title></head><p>x</p></body></html>",

@@ -102,11 +102,15 @@ fn convert_inner(html: &str, options: ConversionOptions) -> Result<ConversionRes
     }
 
     // ~keep Both tiers convert this text, so the base is read from it too.
-    let normalized_html = normalize_input(html)?;
+    let normalized_input = normalize_input(html)?;
+    // ~keep A browser puts head content before an explicit `<head>` into the implicit head it
+    // ~keep already opened. Repair this rare ordering once so both tiers consume that tree.
+    let repaired_head = crate::converter::repair_head_content_before_explicit_head(&normalized_input);
+    let normalized_html = repaired_head.as_deref().unwrap_or(&normalized_input);
 
     // ~keep The same `<base href>` is the `base` metadata, so both read it here, once.
     let document_base_href = (options.base_url.is_some() || options.extract_metadata)
-        .then(|| crate::converter::url_resolve::document_base_href(&normalized_html))
+        .then(|| crate::converter::url_resolve::document_base_href(normalized_html))
         .flatten();
 
     // ~keep Computed once, from the normalized input, and reused for both the
@@ -157,7 +161,7 @@ fn convert_inner(html: &str, options: ConversionOptions) -> Result<ConversionRes
             let decision = crate::converter::tier1::router::classify(&stub_report, &options);
             if decision == crate::converter::tier1::RouterDecision::Tier1 {
                 match crate::converter::tier1::run_with_base(
-                    normalized_html.as_ref(),
+                    normalized_html,
                     &stub_report,
                     &options,
                     effective_base.clone(),
@@ -204,7 +208,7 @@ fn convert_inner(html: &str, options: ConversionOptions) -> Result<ConversionRes
             // ~keep stripped or bails cleanly.
             let stub_report = crate::converter::prescan::PrescanReport::default();
             match crate::converter::tier1::run_with_base(
-                normalized_html.as_ref(),
+                normalized_html,
                 &stub_report,
                 &options,
                 effective_base.clone(),
@@ -242,7 +246,7 @@ fn convert_inner(html: &str, options: ConversionOptions) -> Result<ConversionRes
     let visitor = options.visitor.clone();
 
     if !options.wrap {
-        if let Some(markdown) = fast_text_only(normalized_html.as_ref(), &options) {
+        if let Some(markdown) = fast_text_only(normalized_html, &options) {
             return Ok(ConversionResult {
                 content: Some(markdown),
                 ..ConversionResult::default()
@@ -314,7 +318,7 @@ fn convert_inner(html: &str, options: ConversionOptions) -> Result<ConversionRes
     );
     let convert_outcome = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| -> Result<ConvertOutput> {
         crate::converter::convert_html_impl(
-            normalized_html.as_ref(),
+            normalized_html,
             &options,
             crate::converter::main::ConversionParameters {
                 #[cfg(feature = "inline-images")]
