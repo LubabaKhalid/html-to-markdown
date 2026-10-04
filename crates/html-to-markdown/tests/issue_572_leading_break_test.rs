@@ -52,6 +52,36 @@ fn should_keep_a_break_inside_inline_wrappers_after_paragraph_text() {
 }
 
 #[test]
+fn should_keep_a_break_after_content_inside_emphasis_and_strong() {
+    for (html, expected) in [
+        ("<p><em>A<br>B</em></p>", "*A  \nB*\n"),
+        ("<p><strong>A<br>B</strong></p>", "**A  \nB**\n"),
+    ] {
+        assert_all_tiers(html, expected);
+    }
+}
+
+#[test]
+fn should_keep_a_break_after_content_inside_nested_inline_wrappers() {
+    for (html, expected) in [
+        ("<p><em><strong>A<br>B</strong></em></p>", "***A  \nB***\n"),
+        ("<p><strong><em>A<br>B</em></strong></p>", "***A  \nB***\n"),
+    ] {
+        assert_all_tiers(html, expected);
+    }
+}
+
+#[test]
+fn should_drop_a_leading_break_inside_nested_inline_wrappers() {
+    for html in [
+        "<p><em><strong><br>B</strong></em></p>",
+        "<p><strong><em><br>B</em></strong></p>",
+    ] {
+        assert_all_tiers(html, "***B***\n");
+    }
+}
+
+#[test]
 fn should_keep_a_leading_top_level_break() {
     assert_all_tiers("<br>B", "\nB\n");
 }
