@@ -88,7 +88,7 @@ jobs:
         env:
           RUSTFLAGS: "-D warnings"
         run: |
-          cargo check -p html-to-markdown-rs --no-default-features
+          cargo clippy -p html-to-markdown-rs --all-targets --no-default-features -- -D warnings
           cargo check -p html-to-markdown-rs --no-default-features --features visitor
           cargo check -p html-to-markdown-rs --no-default-features --features metadata
           cargo check -p html-to-markdown-rs --no-default-features --features inline-images

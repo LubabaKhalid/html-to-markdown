@@ -1,5 +1,5 @@
-#![cfg(feature = "testkit")]
 #![allow(missing_docs)]
+#![cfg(feature = "testkit")]
 
 use html_to_markdown_rs::{ConversionOptions, TierStrategy, convert};
 
