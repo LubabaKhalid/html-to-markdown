@@ -9,6 +9,135 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.17.0] - 2026-10-04
+
+### Added
+
+- Structure extraction now records inline annotations during the conversion traversal, including
+  links and inline formatting, while preserving visitor, exclusion and depth semantics
+  ([#741](https://github.com/xberg-io/html-to-markdown/issues/741)).
+- The WASM converter now rejects inputs above a configurable 2 MiB default limit with a typed
+  error, preventing unexpectedly large allocations in browser and edge runtimes
+  ([#508](https://github.com/xberg-io/html-to-markdown/issues/508)).
+
+### Changed
+
+- WASM class-valued getters and setters now use explicit detached-copy semantics; callers reassign
+  modified values rather than mutating an ineffective borrowed wrapper
+  ([#729](https://github.com/xberg-io/html-to-markdown/issues/729)).
+- Conversion reuses validated parser state and precomputed sibling context, and raw-text stripping
+  uses byte-search skipping, reducing repeated DOM and scan work without changing output
+  ([#649](https://github.com/xberg-io/html-to-markdown/issues/649),
+  [#715](https://github.com/xberg-io/html-to-markdown/issues/715)).
+- Rust and polyglot dependencies, supported toolchains and generated bindings were refreshed; Alef
+  is pinned to 0.103.14.
+- CI now uses baseline-free quality gates, stricter delegated-workflow checks and reliable benchmark
+  timing and regression thresholds
+  ([#736](https://github.com/xberg-io/html-to-markdown/issues/736),
+  [#738](https://github.com/xberg-io/html-to-markdown/issues/738)).
+
+### Fixed
+
+- Lists, task items, block quotes and wrapped output now preserve markers, indentation, hard breaks
+  and block boundaries across nested and inline containers
+  ([#594](https://github.com/xberg-io/html-to-markdown/issues/594),
+  [#603](https://github.com/xberg-io/html-to-markdown/issues/603),
+  [#604](https://github.com/xberg-io/html-to-markdown/issues/604),
+  [#607](https://github.com/xberg-io/html-to-markdown/issues/607),
+  [#611](https://github.com/xberg-io/html-to-markdown/issues/611),
+  [#612](https://github.com/xberg-io/html-to-markdown/issues/612),
+  [#613](https://github.com/xberg-io/html-to-markdown/issues/613),
+  [#614](https://github.com/xberg-io/html-to-markdown/issues/614),
+  [#615](https://github.com/xberg-io/html-to-markdown/issues/615),
+  [#616](https://github.com/xberg-io/html-to-markdown/issues/616),
+  [#617](https://github.com/xberg-io/html-to-markdown/issues/617),
+  [#619](https://github.com/xberg-io/html-to-markdown/issues/619),
+  [#620](https://github.com/xberg-io/html-to-markdown/issues/620),
+  [#622](https://github.com/xberg-io/html-to-markdown/issues/622),
+  [#623](https://github.com/xberg-io/html-to-markdown/issues/623),
+  [#625](https://github.com/xberg-io/html-to-markdown/issues/625),
+  [#626](https://github.com/xberg-io/html-to-markdown/issues/626),
+  [#627](https://github.com/xberg-io/html-to-markdown/issues/627),
+  [#629](https://github.com/xberg-io/html-to-markdown/issues/629),
+  [#630](https://github.com/xberg-io/html-to-markdown/issues/630),
+  [#631](https://github.com/xberg-io/html-to-markdown/issues/631),
+  [#633](https://github.com/xberg-io/html-to-markdown/issues/633),
+  [#634](https://github.com/xberg-io/html-to-markdown/issues/634),
+  [#635](https://github.com/xberg-io/html-to-markdown/issues/635),
+  [#636](https://github.com/xberg-io/html-to-markdown/issues/636),
+  [#637](https://github.com/xberg-io/html-to-markdown/issues/637),
+  [#643](https://github.com/xberg-io/html-to-markdown/issues/643),
+  [#650](https://github.com/xberg-io/html-to-markdown/issues/650),
+  [#651](https://github.com/xberg-io/html-to-markdown/issues/651),
+  [#653](https://github.com/xberg-io/html-to-markdown/issues/653),
+  [#654](https://github.com/xberg-io/html-to-markdown/issues/654),
+  [#655](https://github.com/xberg-io/html-to-markdown/issues/655),
+  [#657](https://github.com/xberg-io/html-to-markdown/issues/657),
+  [#658](https://github.com/xberg-io/html-to-markdown/issues/658),
+  [#659](https://github.com/xberg-io/html-to-markdown/issues/659),
+  [#662](https://github.com/xberg-io/html-to-markdown/issues/662),
+  [#668](https://github.com/xberg-io/html-to-markdown/issues/668),
+  [#669](https://github.com/xberg-io/html-to-markdown/issues/669),
+  [#674](https://github.com/xberg-io/html-to-markdown/issues/674),
+  [#675](https://github.com/xberg-io/html-to-markdown/issues/675),
+  [#678](https://github.com/xberg-io/html-to-markdown/issues/678),
+  [#680](https://github.com/xberg-io/html-to-markdown/issues/680),
+  [#681](https://github.com/xberg-io/html-to-markdown/issues/681),
+  [#686](https://github.com/xberg-io/html-to-markdown/issues/686),
+  [#734](https://github.com/xberg-io/html-to-markdown/issues/734)).
+- Markdown and Djot escaping now keeps literal markers, rule-like text, table delimiters, code-span
+  backticks and hard breaks valid in their surrounding container
+  ([#624](https://github.com/xberg-io/html-to-markdown/issues/624),
+  [#638](https://github.com/xberg-io/html-to-markdown/issues/638),
+  [#661](https://github.com/xberg-io/html-to-markdown/issues/661),
+  [#688](https://github.com/xberg-io/html-to-markdown/issues/688),
+  [#689](https://github.com/xberg-io/html-to-markdown/issues/689),
+  [#697](https://github.com/xberg-io/html-to-markdown/issues/697),
+  [#705](https://github.com/xberg-io/html-to-markdown/issues/705),
+  [#706](https://github.com/xberg-io/html-to-markdown/issues/706),
+  [#707](https://github.com/xberg-io/html-to-markdown/issues/707),
+  [#708](https://github.com/xberg-io/html-to-markdown/issues/708),
+  [#709](https://github.com/xberg-io/html-to-markdown/issues/709),
+  [#710](https://github.com/xberg-io/html-to-markdown/issues/710),
+  [#713](https://github.com/xberg-io/html-to-markdown/issues/713),
+  [#735](https://github.com/xberg-io/html-to-markdown/issues/735)).
+- Tables and headings now retain surrounding text, block boundaries, checkboxes and nested content
+  consistently between the full and fast converters
+  ([#628](https://github.com/xberg-io/html-to-markdown/issues/628),
+  [#645](https://github.com/xberg-io/html-to-markdown/issues/645),
+  [#646](https://github.com/xberg-io/html-to-markdown/issues/646),
+  [#647](https://github.com/xberg-io/html-to-markdown/issues/647),
+  [#679](https://github.com/xberg-io/html-to-markdown/issues/679),
+  [#692](https://github.com/xberg-io/html-to-markdown/issues/692),
+  [#702](https://github.com/xberg-io/html-to-markdown/issues/702),
+  [#722](https://github.com/xberg-io/html-to-markdown/issues/722),
+  [#723](https://github.com/xberg-io/html-to-markdown/issues/723),
+  [#724](https://github.com/xberg-io/html-to-markdown/issues/724),
+  [#725](https://github.com/xberg-io/html-to-markdown/issues/725),
+  [#730](https://github.com/xberg-io/html-to-markdown/issues/730),
+  [#732](https://github.com/xberg-io/html-to-markdown/issues/732)).
+- Hard line breaks now remain in place across source whitespace, inline buffers, links and both
+  Markdown and Djot output
+  ([#690](https://github.com/xberg-io/html-to-markdown/issues/690),
+  [#691](https://github.com/xberg-io/html-to-markdown/issues/691),
+  [#693](https://github.com/xberg-io/html-to-markdown/issues/693),
+  [#696](https://github.com/xberg-io/html-to-markdown/issues/696),
+  [#698](https://github.com/xberg-io/html-to-markdown/issues/698),
+  [#704](https://github.com/xberg-io/html-to-markdown/issues/704),
+  [#711](https://github.com/xberg-io/html-to-markdown/issues/711),
+  [#718](https://github.com/xberg-io/html-to-markdown/issues/718)).
+- Metadata, preprocessing and URL handling now preserve effective base URLs and titles, remove page
+  headers as configured, and ignore link-like text inside raw-text elements
+  ([#608](https://github.com/xberg-io/html-to-markdown/issues/608),
+  [#716](https://github.com/xberg-io/html-to-markdown/issues/716),
+  [#719](https://github.com/xberg-io/html-to-markdown/issues/719),
+  [#739](https://github.com/xberg-io/html-to-markdown/issues/739),
+  [#740](https://github.com/xberg-io/html-to-markdown/issues/740)).
+- The fast converter builds cleanly without default features, and generated R reference pages now
+  match the public API
+  ([#593](https://github.com/xberg-io/html-to-markdown/issues/593),
+  [#596](https://github.com/xberg-io/html-to-markdown/issues/596)).
+
 ## [3.16.0] - 2026-10-02
 
 ### Added

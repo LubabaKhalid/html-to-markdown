@@ -1,6 +1,6 @@
 {
   "name": "@xberg-io/opencode-html-to-markdown",
-  "version": "3.16.0",
+  "version": "3.17.0",
   "description": "Fast, lossless HTML→Markdown conversion with structured metadata, tables, and document-structure extraction.",
   "keywords": [
     "html-to-markdown",
@@ -26,6 +26,6 @@
     "README.md"
   ],
   "dependencies": {
-    "@opencode-ai/plugin": "^1.17.8"
+    "@opencode/plugin": "^2.0.20"
   }
 }

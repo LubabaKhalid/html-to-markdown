@@ -1,29 +1,31 @@
 // AI-RULEZ :: GENERATED FILE — DO NOT EDIT
-// Content-Hash: blake3:764d1087e8dcd39db2f82f8f114e99aab9be9dddce1565d99b6b6b5015c8d6de
-// Source-Hash: blake3:ad100f68d8261e4611e9d932c00386da4c79029e020aad41489989f01ce7f00e
+// Content-Hash: blake3:672d70b0ed79a049b892ad6d85d28c19dd1599fc6235b00071fc6a2860c05e71
+// Source-Hash: blake3:5cddf22ca2a6726d96d4be622369ebeaea1529a2ececa777eb837ed1053d6c95
 // Schema-Version: v1
 
-import { tool } from "@opencode-ai/plugin";
+import { Plugin } from "@opencode/plugin";
 import { spawn } from "node:child_process";
 
-const schema = tool.schema;
-
-const headingStyle = schema
-  .enum(["atx", "underlined", "atx-closed"])
-  .optional()
-  .describe("Markdown heading style. Default: atx.");
-
-const codeBlockStyle = schema
-  .enum(["backticks", "indented", "tildes"])
-  .optional()
-  .describe("Code block fence style. Default: backticks.");
-
-const outputFormat = schema.enum(["markdown", "djot"]).optional().describe("Output markup format. Default: markdown.");
-
-const preset = schema
-  .enum(["minimal", "standard", "aggressive"])
-  .optional()
-  .describe("Preprocessing aggressiveness. Requires `preprocess`. Default: standard.");
+const headingStyle = {
+  type: "string",
+  enum: ["atx", "underlined", "atx-closed"],
+  description: "Markdown heading style. Default: atx.",
+};
+const codeBlockStyle = {
+  type: "string",
+  enum: ["backticks", "indented", "tildes"],
+  description: "Markdown code block style. Default: backticks.",
+};
+const outputFormat = {
+  type: "string",
+  enum: ["markdown", "djot"],
+  description: "Output markup format. Default: markdown.",
+};
+const preset = {
+  type: "string",
+  enum: ["minimal", "standard", "aggressive"],
+  description: "Preprocessing aggressiveness. Requires `preprocess`. Default: standard.",
+};
 
 function hasValue(value) {
   return value !== undefined && value !== null && value !== "";
@@ -41,14 +43,12 @@ function pushFlag(args, name, value) {
   }
 }
 
-function runCli(args, context, stdin) {
-  const directory = context?.directory ?? context?.worktree ?? process.cwd();
-
+function runCli(args, context, directory, stdin) {
   return new Promise((resolve, reject) => {
     const child = spawn("html-to-markdown", args, {
       cwd: directory,
       env: process.env,
-      signal: context?.abort,
+      signal: context?.signal,
       stdio: [stdin === undefined ? "ignore" : "pipe", "pipe", "pipe"],
     });
 
@@ -60,8 +60,7 @@ function runCli(args, context, stdin) {
     child.on("error", (error) => {
       if (error.code === "ENOENT") {
         resolve({
-          title: "html-to-markdown CLI not found",
-          output:
+          content:
             "Install the html-to-markdown CLI with `brew install xberg-io/tap/html-to-markdown`, or run it via `npx -y @xberg-io/html-to-markdown-cli` / `uvx --from html-to-markdown-cli html-to-markdown`.",
           metadata: { exitCode: 127, command: "html-to-markdown" },
         });
@@ -75,8 +74,7 @@ function runCli(args, context, stdin) {
       const output = [stdoutText, stderrText && `stderr:\n${stderrText}`].filter(Boolean).join("\n\n");
 
       resolve({
-        title: exitCode === 0 ? "html-to-markdown" : "html-to-markdown failed",
-        output: output || "(no output)",
+        content: output || "(no output)",
         metadata: { exitCode, signal, command: "html-to-markdown" },
       });
     });
@@ -96,92 +94,109 @@ function styleArgs(args, params) {
   pushOption(args, "--preset", params.preset);
 }
 
-export const HtmlToMarkdownPlugin = async () => ({
-  tool: {
-    html_to_markdown_convert: tool({
-      description:
-        "Convert an HTML file or HTML string to Markdown (or Djot) with the html-to-markdown CLI. Provide either `path` or `html`.",
-      args: {
-        path: schema.string().min(1).optional().describe("Path to a local HTML file."),
-        html: schema.string().min(1).optional().describe("Inline HTML to convert (used when `path` is omitted)."),
-        heading_style: headingStyle,
-        code_block_style: codeBlockStyle,
-        output_format: outputFormat,
-        preprocess: schema.boolean().optional().describe("Strip navigation, ads, and forms before converting."),
-        preset,
-      },
-      async execute(args, context) {
-        const cliArgs = [];
-        styleArgs(cliArgs, args);
+export default Plugin.define({
+  id: "html-to-markdown",
+  async setup(ctx) {
+    await ctx.tool.transform((editor) => {
+      editor.add({
+        name: "html_to_markdown_convert",
+        description:
+          "Convert an HTML file or HTML string to Markdown (or Djot) with the html-to-markdown CLI. Provide either `path` or `html`.",
+        input: {
+          type: "object",
+          properties: {
+            path: { type: "string", minLength: 1, description: "Path to a local HTML file." },
+            html: { type: "string", minLength: 1, description: "Inline HTML to convert when path is omitted." },
+            heading_style: headingStyle,
+            code_block_style: codeBlockStyle,
+            output_format: outputFormat,
+            preprocess: { type: "boolean", description: "Strip navigation, ads, and forms before converting." },
+            preset,
+          },
+          additionalProperties: false,
+        },
+        async execute(args, context) {
+          const cliArgs = [];
+          styleArgs(cliArgs, args);
 
-        if (hasValue(args.path)) {
-          cliArgs.push(args.path);
-          return runCli(cliArgs, context);
-        }
-        if (hasValue(args.html)) {
-          return runCli(cliArgs, context, args.html);
-        }
-        throw new Error("Provide either `path` or `html`.");
-      },
-    }),
-    html_to_markdown_fetch_url: tool({
-      description: "Fetch a URL and convert its HTML to Markdown (or Djot) with the html-to-markdown CLI.",
-      args: {
-        url: schema.string().min(1).describe("URL to fetch and convert."),
-        heading_style: headingStyle,
-        code_block_style: codeBlockStyle,
-        output_format: outputFormat,
-        preprocess: schema.boolean().optional().describe("Strip navigation, ads, and forms before converting."),
-        preset,
-        user_agent: schema.string().min(1).optional().describe("Custom User-Agent header for the fetch."),
-      },
-      async execute(args, context) {
-        const cliArgs = ["--url", args.url];
-        pushOption(cliArgs, "--user-agent", args.user_agent);
-        styleArgs(cliArgs, args);
-        return runCli(cliArgs, context);
-      },
-    }),
-    html_to_markdown_extract: tool({
-      description:
-        "Extract structured metadata, tables, and (optionally) document structure from HTML as JSON. Returns the full ConversionResult. Provide `path`, `html`, or `url`.",
-      args: {
-        path: schema.string().min(1).optional().describe("Path to a local HTML file."),
-        html: schema
-          .string()
-          .min(1)
-          .optional()
-          .describe("Inline HTML to analyze (used when `path` and `url` are omitted)."),
-        url: schema.string().min(1).optional().describe("URL to fetch and analyze."),
-        include_structure: schema
-          .boolean()
-          .optional()
-          .describe("Include the document structure tree in the JSON output."),
-        no_content: schema
-          .boolean()
-          .optional()
-          .describe("Suppress the Markdown content field — return metadata/tables/images only."),
-      },
-      async execute(args, context) {
-        const cliArgs = ["--json"];
-        pushFlag(cliArgs, "--include-structure", args.include_structure);
-        pushFlag(cliArgs, "--no-content", args.no_content);
+          if (hasValue(args.path)) {
+            cliArgs.push(args.path);
+            return runCli(cliArgs, context, ctx.location.directory);
+          }
+          if (hasValue(args.html)) {
+            return runCli(cliArgs, context, ctx.location.directory, args.html);
+          }
+          throw new Error("Provide either `path` or `html`.");
+        },
+      });
+      editor.add({
+        name: "html_to_markdown_fetch_url",
+        description: "Fetch a URL and convert its HTML to Markdown (or Djot) with the html-to-markdown CLI.",
+        input: {
+          type: "object",
+          properties: {
+            url: { type: "string", minLength: 1, description: "URL to fetch and convert." },
+            heading_style: headingStyle,
+            code_block_style: codeBlockStyle,
+            output_format: outputFormat,
+            preprocess: { type: "boolean", description: "Strip navigation, ads, and forms before converting." },
+            preset,
+            user_agent: { type: "string", minLength: 1, description: "Custom User-Agent header for the fetch." },
+          },
+          required: ["url"],
+          additionalProperties: false,
+        },
+        async execute(args, context) {
+          const cliArgs = ["--url", args.url];
+          pushOption(cliArgs, "--user-agent", args.user_agent);
+          styleArgs(cliArgs, args);
+          return runCli(cliArgs, context, ctx.location.directory);
+        },
+      });
+      editor.add({
+        name: "html_to_markdown_extract",
+        description:
+          "Extract structured metadata, tables, and (optionally) document structure from HTML as JSON. Returns the full ConversionResult. Provide `path`, `html`, or `url`.",
+        input: {
+          type: "object",
+          properties: {
+            path: { type: "string", minLength: 1, description: "Path to a local HTML file." },
+            html: {
+              type: "string",
+              minLength: 1,
+              description: "Inline HTML to analyze when path and url are omitted.",
+            },
+            url: { type: "string", minLength: 1, description: "URL to fetch and analyze." },
+            include_structure: {
+              type: "boolean",
+              description: "Include the document structure tree in the JSON output.",
+            },
+            no_content: {
+              type: "boolean",
+              description: "Suppress Markdown content and return metadata, tables, and images only.",
+            },
+          },
+          additionalProperties: false,
+        },
+        async execute(args, context) {
+          const cliArgs = ["--json"];
+          pushFlag(cliArgs, "--include-structure", args.include_structure);
+          pushFlag(cliArgs, "--no-content", args.no_content);
 
-        if (hasValue(args.url)) {
-          cliArgs.push("--url", args.url);
-          return runCli(cliArgs, context);
-        }
-        if (hasValue(args.path)) {
-          cliArgs.push(args.path);
-          return runCli(cliArgs, context);
-        }
-        if (hasValue(args.html)) {
-          return runCli(cliArgs, context, args.html);
-        }
-        throw new Error("Provide one of `path`, `html`, or `url`.");
-      },
-    }),
+          if (hasValue(args.url)) {
+            cliArgs.push("--url", args.url);
+            return runCli(cliArgs, context, ctx.location.directory);
+          }
+          if (hasValue(args.path)) {
+            cliArgs.push(args.path);
+            return runCli(cliArgs, context, ctx.location.directory);
+          }
+          if (hasValue(args.html)) {
+            return runCli(cliArgs, context, ctx.location.directory, args.html);
+          }
+          throw new Error("Provide one of `path`, `html`, or `url`.");
+        },
+      });
+    });
   },
 });
-
-export default HtmlToMarkdownPlugin;
