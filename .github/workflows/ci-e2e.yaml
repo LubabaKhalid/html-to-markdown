@@ -1,18 +1,15 @@
 name: CI E2E
-
 on:
   push:
     branches: [main]
   pull_request:
     branches: [main]
   workflow_dispatch: {}
-
 # ~keep `github.sha` not `github.ref` for pushes: a cancelled run reports neither pass
 # ~keep nor fail, and cancelling main's previous run is one of the two ways 3.15.0's R break shipped.
 concurrency:
   group: ci-e2e-${{ github.event.pull_request.number || github.sha }}
   cancel-in-progress: true
-
 env:
   CARGO_TERM_COLOR: always
   CARGO_INCREMENTAL: 0
@@ -21,10 +18,8 @@ env:
   GO_VERSION: "1.26.0"
   GO_TOOLCHAIN: "go1.26.0"
   GOLANGCI_LINT_VERSION: "latest"
-
 permissions:
   contents: read
-
 jobs:
   changes:
     name: "Detect Changes"
@@ -61,196 +56,127 @@ jobs:
       run-test-dart: ${{ github.event_name == 'workflow_dispatch' || steps.filter.outputs.core == 'true' || steps.filter.outputs.dart == 'true' }}
       run-test-zig: ${{ github.event_name == 'workflow_dispatch' || steps.filter.outputs.core == 'true' || steps.filter.outputs.ffi == 'true' || steps.filter.outputs.zig == 'true' }}
     steps:
-      - name: Checkout
-        uses: actions/checkout@v7
-
+      - { "name": "Checkout", "uses": "actions/checkout@v7" }
       - name: Detect changes
         uses: dorny/paths-filter@v4
         id: filter
         with:
           filters: |
             core:
-              - 'crates/html-to-markdown/**'
-              - 'Cargo.toml'
-              - 'Cargo.lock'
-              - 'rust-toolchain.toml'
-              - '.cargo/config.toml'
-              - 'fixtures/**'
-              - 'alef.toml'
-              - '.github/workflows/ci-e2e.yaml'
+              - "crates/html-to-markdown/**"
+              - "Cargo.toml"
+              - "Cargo.lock"
+              - "rust-toolchain.toml"
+              - ".cargo/config.toml"
+              - "fixtures/**"
+              - "alef.toml"
+              - ".github/workflows/ci-e2e.yaml"
             ffi:
-              - 'crates/html-to-markdown-ffi/**'
-              - 'crates/html-to-markdown/**'
-              - 'Cargo.toml'
-              - 'Cargo.lock'
+              - "crates/html-to-markdown-ffi/**"
+              - "crates/html-to-markdown/**"
+              - "Cargo.toml"
+              - "Cargo.lock"
             cffi:
-              - 'e2e/c/**'
+              - "e2e/c/**"
             python:
-              - 'crates/html-to-markdown-py/**'
-              - 'crates/html-to-markdown-cli/**'
-              - 'packages/python/**'
-              - 'e2e/python/**'
-              - 'pyproject.toml'
-              - 'uv.lock'
-              - 'uv.toml'
-              - 'fixtures/**'
+              - "crates/html-to-markdown-py/**"
+              - "crates/html-to-markdown-cli/**"
+              - "packages/python/**"
+              - "e2e/python/**"
+              - "pyproject.toml"
+              - "uv.lock"
+              - "uv.toml"
+              - "fixtures/**"
             node:
-              - 'crates/html-to-markdown-node/**'
-              - 'e2e/node/**'
-              - 'package.json'
-              - 'pnpm-lock.yaml'
-              - 'pnpm-workspace.yaml'
-              - 'fixtures/**'
+              - "crates/html-to-markdown-node/**"
+              - "e2e/node/**"
+              - "package.json"
+              - "pnpm-lock.yaml"
+              - "pnpm-workspace.yaml"
+              - "fixtures/**"
             ruby:
-              - 'packages/ruby/**'
-              - 'crates/html-to-markdown-cli/**'
-              - 'scripts/ci/ruby/**'
-              - 'e2e/ruby/**'
-              - 'fixtures/**'
+              - "packages/ruby/**"
+              - "crates/html-to-markdown-cli/**"
+              - "scripts/ci/ruby/**"
+              - "e2e/ruby/**"
+              - "fixtures/**"
             php:
-              - 'crates/html-to-markdown-php/**'
-              - 'scripts/ci/php/**'
-              - 'e2e/php/**'
-              - 'composer.json'
-              - 'composer.lock'
-              - 'fixtures/**'
+              - "crates/html-to-markdown-php/**"
+              - "scripts/ci/php/**"
+              - "e2e/php/**"
+              - "composer.json"
+              - "composer.lock"
+              - "fixtures/**"
             go:
-              - 'packages/go/**'
-              - 'scripts/ci/go/**'
-              - 'e2e/go/**'
-              - 'crates/html-to-markdown-ffi/**'
-              - 'fixtures/**'
+              - "packages/go/**"
+              - "scripts/ci/go/**"
+              - "e2e/go/**"
+              - "crates/html-to-markdown-ffi/**"
+              - "fixtures/**"
             java:
-              - 'packages/java/**'
-              - 'e2e/java/**'
-              - 'crates/html-to-markdown-ffi/**'
-              - 'fixtures/**'
+              - "packages/java/**"
+              - "e2e/java/**"
+              - "crates/html-to-markdown-ffi/**"
+              - "fixtures/**"
             elixir:
-              - 'packages/elixir/**'
-              - 'scripts/ci/elixir/**'
-              - 'e2e/elixir/**'
-              - 'crates/html-to-markdown-ffi/**'
-              - 'fixtures/**'
+              - "packages/elixir/**"
+              - "scripts/ci/elixir/**"
+              - "e2e/elixir/**"
+              - "crates/html-to-markdown-ffi/**"
+              - "fixtures/**"
             r:
-              - 'packages/r/**'
-              - 'scripts/ci/r/**'
-              - 'e2e/r/**'
-              - 'fixtures/**'
+              - "packages/r/**"
+              - "scripts/ci/r/**"
+              - "e2e/r/**"
+              - "fixtures/**"
             wasm:
-              - 'crates/html-to-markdown-wasm/**'
-              - 'scripts/ci/wasm/**'
-              - 'scripts/common/**'
-              - 'e2e/wasm/**'
-              - 'package.json'
-              - 'pnpm-lock.yaml'
-              - 'pnpm-workspace.yaml'
-              - 'fixtures/**'
+              - "crates/html-to-markdown-wasm/**"
+              - "scripts/ci/wasm/**"
+              - "scripts/common/**"
+              - "e2e/wasm/**"
+              - "package.json"
+              - "pnpm-lock.yaml"
+              - "pnpm-workspace.yaml"
+              - "fixtures/**"
             csharp:
-              - 'packages/csharp/**'
-              - 'scripts/ci/csharp/**'
-              - 'e2e/csharp/**'
-              - 'crates/html-to-markdown-ffi/**'
-              - 'fixtures/**'
+              - "packages/csharp/**"
+              - "scripts/ci/csharp/**"
+              - "e2e/csharp/**"
+              - "crates/html-to-markdown-ffi/**"
+              - "fixtures/**"
             kotlin:
-              - 'packages/kotlin-android/**'
+              - "packages/kotlin-android/**"
               # ~keep build-kotlin-android builds html-to-markdown-rs-jni, NOT the plain
               # ~keep C-FFI crate; without this a JNI-only change skipped both Kotlin jobs.
-              - 'crates/html-to-markdown-rs-jni/**'
-              - 'e2e/kotlin_android/**'
-              - 'fixtures/**'
+              - "crates/html-to-markdown-rs-jni/**"
+              - "e2e/kotlin_android/**"
+              - "fixtures/**"
             swift:
-              - 'packages/swift/**'
-              - 'e2e/swift_e2e/**'
-              - 'fixtures/**'
+              - "packages/swift/**"
+              - "e2e/swift_e2e/**"
+              - "fixtures/**"
             dart:
-              - 'packages/dart/**'
-              - 'e2e/dart/**'
-              - 'fixtures/**'
+              - "packages/dart/**"
+              - "e2e/dart/**"
+              - "fixtures/**"
             zig:
-              - 'packages/zig/**'
-              - 'e2e/zig/**'
-              - 'crates/html-to-markdown-ffi/**'
-              - 'fixtures/**'
-
+              - "packages/zig/**"
+              - "e2e/zig/**"
+              - "crates/html-to-markdown-ffi/**"
+              - "fixtures/**"
   # ~keep e2e/ is entirely generated from fixtures/ (html-to-markdown audit #40).
   # Nothing previously regenerated it in CI and diffed the result, so a fixture or
   # generator change could drift from the checked-in e2e suite indefinitely.
   e2e-freshness:
     name: "Verify: e2e freshness"
-    runs-on: ubuntu-24.04-arm
-    timeout-minutes: 30
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v7
-
-      - name: Setup Rust
-        uses: xberg-io/actions/setup-rust@v1
-        with:
-          cache-key-prefix: e2e-freshness
-
-      # ~keep alef formats the Elixir suite with `mix format` during generation. Without mix on
-      # PATH it degrades to a WARN and emits unformatted output, which the drift check below then
-      # reports as staleness that has nothing to do with fixtures/ — the whole job failed on
-      # e2e/elixir/**.exs for that reason alone. Only the formatter is needed here, so no hex,
-      # rebar or dependency install. Every other language's formatter is already on the runner
-      # image or installed by the steps below.
-      - name: Setup Elixir
-        uses: erlef/setup-beam@v1
-        with:
-          elixir-version: "1.19"
-          otp-version: "28.1"
-
-      - name: Install Task
-        uses: xberg-io/actions/install-task@v1
-
-      - name: Install alef
-        uses: xberg-io/actions/install-alef@v1
-
-      # ~keep Alef delegates C# formatting to Poly's clang-format adapter. Ubuntu's clang-format
-      # 18 leaves nullable switch assertions unformatted; pin the generator's local formatter
-      # version so freshness compares fixture changes rather than formatter-version differences.
-      - name: Setup generation formatter
-        uses: xberg-io/actions/setup-c-cpp-tools@v1
-        with:
-          clang-format-version: "23.1.0"
-          install-cppcheck: "false"
-          install-shellcheck: "false"
-
-      # ~keep `alef e2e generate` formats every suite it emits by shelling out to poly. With
-      # poly absent this job failed all 16 languages with "poly not found on PATH" before the
-      # drift check below ever ran, so the gate could not report on the drift it exists to catch.
-      - name: Install poly
-        uses: Goldziher/poly@v0
-
-      - name: Regenerate e2e suites
-        run: task e2e:generate
-        shell: bash
-
-      - name: Fail if generated e2e/ drifted from committed output
-        # ~keep `git diff` reports only tracked paths, so a regeneration that ADDS a new suite
-        # left the gate at exit 0 — it could not fail on the defect it exists to catch. Use
-        # `git status --porcelain -uall`, which reports additions, modifications and deletions.
-        run: |
-          drift="$(git status --porcelain --untracked-files=all -- e2e/)"
-          if [ -n "$drift" ]; then
-            echo "::error::e2e/ is stale — regenerating from fixtures/ changed the tree. Run 'task e2e:generate' and commit the result."
-            printf '%s\n' "$drift"
-            git diff -- e2e/
-            exit 1
-          fi
-        shell: bash
-
-  # ~keep The FFI crate is the shared cross-compile base for the C, Go, Java, and
-  # C# publish legs, all of which build it for macos-15-intel (darwin x64) and
-  # windows-11-arm (windows arm64) too. Those two targets were previously only
-  # ever compiled at publish time — cover them here so a cross-compile break
-  # surfaces on the commit that causes it, not at tag time.
+    uses: ./.github/workflows/ci-e2e-delegated.yaml
+    with:
+      task: e2e-freshness
+    secrets: inherit
   build-ffi:
     needs: [changes]
     name: "Build: FFI (${{ matrix.runner }})"
     if: needs.changes.outputs.run-build-ffi == 'true'
-    runs-on: ${{ matrix.runner }}
-    timeout-minutes: 60
     strategy:
       fail-fast: false
       matrix:
@@ -261,81 +187,11 @@ jobs:
           - macos-15-intel
           - windows-latest
           - windows-11-arm
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v7
-        id: checkout
-
-      - name: Free disk space
-        if: startsWith(matrix.runner, 'ubuntu')
-        uses: xberg-io/actions/free-disk-space-linux@v1
-        with:
-          show-initial: "false"
-          show-final: "true"
-
-      - name: Setup Rust
-        uses: xberg-io/actions/setup-rust@v1
-        with:
-          cache-key-prefix: ffi-${{ matrix.runner }}
-          use-sccache: false
-
-      - name: Build html-to-markdown-ffi (release, Unix)
-        if: "!startsWith(matrix.runner, 'windows')"
-        run: cargo build --release --locked -p html-to-markdown-ffi
-        shell: bash
-        env:
-          CARGO_TERM_COLOR: always
-          CARGO_INCREMENTAL: "0"
-          RUST_BACKTRACE: short
-          ALEF_EXPORT_GENERATED_HEADERS: "1"
-
-      - name: Build html-to-markdown-ffi (debug, Windows)
-        if: startsWith(matrix.runner, 'windows')
-        run: cargo build --locked -p html-to-markdown-ffi
-        shell: bash
-        env:
-          CARGO_TERM_COLOR: always
-          ALEF_EXPORT_GENERATED_HEADERS: "1"
-
-      # ~keep `test -f` alone only proves build.rs wrote *a* header — it says
-      # nothing about whether the freshly-generated header matches the one
-      # committed to git, so a stale checked-in header could never fail this
-      # step. Diff against git to actually assert freshness. build.rs rewrites both
-      # header copies only when ALEF_EXPORT_GENERATED_HEADERS is set, so every build
-      # this check follows sets it; without it the diff compares each header with itself.
-      - name: Verify header is fresh
-        shell: bash
-        run: |
-          HEADER="crates/html-to-markdown-ffi/include/html_to_markdown.h"
-          GO_HEADER="packages/go/include/html_to_markdown.h"
-          for file in "$HEADER" "$GO_HEADER"; do
-            test -f "$file" || {
-              echo "::error::$file is missing after the build. Run 'ALEF_EXPORT_GENERATED_HEADERS=1 cargo build -p html-to-markdown-ffi' and commit the result."
-              exit 1
-            }
-          done
-          git diff --exit-code -- "$HEADER" "$GO_HEADER" || {
-            echo "::error::$HEADER or $GO_HEADER is stale: cbindgen regenerated a different header than the one committed. Run 'ALEF_EXPORT_GENERATED_HEADERS=1 cargo build -p html-to-markdown-ffi' and commit the result."
-            exit 1
-          }
-          echo "Headers verified fresh: $HEADER $GO_HEADER"
-
-      - name: Upload FFI artifacts
-        if: "!startsWith(matrix.runner, 'windows')"
-        uses: actions/upload-artifact@v7
-        with:
-          name: ffi-${{ matrix.runner }}
-          path: |
-            target/release/libhtml_to_markdown_ffi.*
-            target/release/html_to_markdown_ffi.*
-            crates/html-to-markdown-ffi/include/html_to_markdown.h
-          retention-days: 7
-          if-no-files-found: warn
-
-      - name: Cleanup Rust cache
-        if: always() && steps.checkout.outcome == 'success'
-        uses: xberg-io/actions/cleanup-rust-cache@v1
-
+    uses: ./.github/workflows/ci-e2e-delegated.yaml
+    with:
+      task: build-ffi
+      runner: ${{ matrix.runner }}
+    secrets: inherit
   build-python:
     needs: [changes]
     name: "Build: Python (${{ matrix.os }})"
@@ -348,29 +204,22 @@ jobs:
         os: [ubuntu-latest, windows-latest, macos-latest]
         python: ["3.10", "3.12", "3.14"]
     steps:
-      - name: Checkout
-        uses: actions/checkout@v7
-        id: checkout
-
-      - name: Install Task
-        uses: xberg-io/actions/install-task@v1
-
-      - name: Install uv
-        uses: astral-sh/setup-uv@v10.1.0
-        with:
-          enable-cache: true
-
-      - name: Set up Python
-        uses: actions/setup-python@v7
-        with:
-          python-version: ${{ matrix.python }}
-
-      - name: Setup Rust
-        uses: xberg-io/actions/setup-rust@v1
-        with:
-          components: rustfmt, clippy, llvm-tools-preview
-          cache-key-prefix: python-${{ matrix.os }}-${{ matrix.python }}
-
+      - { "name": "Checkout", "uses": "actions/checkout@v7", "id": "checkout" }
+      - { "name": "Install Task", "uses": "xberg-io/actions/install-task@v1" }
+      - { "name": "Install uv", "uses": "astral-sh/setup-uv@v10.1.0", "with": { "enable-cache": true } }
+      - {
+          "name": "Set up Python",
+          "uses": "actions/setup-python@v7",
+          "with": { "python-version": "${{ matrix.python }}" },
+        }
+      - {
+          "name": "Setup Rust",
+          "uses": "xberg-io/actions/setup-rust@v1",
+          "with": {
+            "components": "rustfmt, clippy, llvm-tools-preview",
+            "cache-key-prefix": "python-${{ matrix.os }}-${{ matrix.python }}",
+          },
+        }
       - name: Install Python Dependencies
         uses: nick-fields/retry@v4
         with:
@@ -384,21 +233,17 @@ jobs:
             fi
             uv sync --all-extras --no-install-project --no-install-workspace
           shell: bash
-
       - name: Build Python Bindings
         run: |
           uv pip install maturin
           cd packages/python && uv run maturin develop --release
         shell: bash
-
-      - name: Build CLI binary
-        run: cargo build --release --locked -p html-to-markdown-cli
-        shell: bash
-
-      - name: Cleanup Rust cache
-        if: always() && steps.checkout.outcome == 'success'
-        uses: xberg-io/actions/cleanup-rust-cache@v1
-
+      - { "name": "Build CLI binary", "run": "cargo build --release --locked -p html-to-markdown-cli", "shell": "bash" }
+      - {
+          "name": "Cleanup Rust cache",
+          "if": "always() && steps.checkout.outcome == 'success'",
+          "uses": "xberg-io/actions/cleanup-rust-cache@v1",
+        }
   build-node:
     needs: [changes]
     name: "Build: Node (${{ matrix.os }}, ${{ matrix.runtime }})"
@@ -414,49 +259,48 @@ jobs:
           - os: windows-latest
             runtime: bun
     steps:
-      - name: Checkout
-        uses: actions/checkout@v7
-        id: checkout
-
-      - name: Install Task
-        uses: xberg-io/actions/install-task@v1
-
-      - name: Setup Rust
-        uses: xberg-io/actions/setup-rust@v1
-        with:
-          cache-key-prefix: node-${{ matrix.os }}-${{ matrix.runtime }}
-
-      - name: Setup Node.js workspace
-        if: matrix.runtime == 'node'
-        uses: xberg-io/actions/setup-node-workspace@v1
-
-      - name: Setup Bun
-        if: matrix.runtime == 'bun'
-        uses: oven-sh/setup-bun@v2
-        with:
-          bun-version: latest
-
-      - name: Build NAPI-RS Bindings (Node.js)
-        if: matrix.runtime == 'node'
-        uses: xberg-io/actions/build-node-napi@v1
-        with:
-          crate-dir: crates/html-to-markdown-node
-
-      - name: Install workspace dependencies (Bun)
-        if: matrix.runtime == 'bun'
-        run: bun install
-        shell: bash
-
-      - name: Build NAPI-RS Bindings (Bun)
-        if: matrix.runtime == 'bun'
-        working-directory: crates/html-to-markdown-node
-        run: bun run build
-        shell: bash
-
-      - name: Cleanup Rust cache
-        if: always() && steps.checkout.outcome == 'success'
-        uses: xberg-io/actions/cleanup-rust-cache@v1
-
+      - { "name": "Checkout", "uses": "actions/checkout@v7", "id": "checkout" }
+      - { "name": "Install Task", "uses": "xberg-io/actions/install-task@v1" }
+      - {
+          "name": "Setup Rust",
+          "uses": "xberg-io/actions/setup-rust@v1",
+          "with": { "cache-key-prefix": "node-${{ matrix.os }}-${{ matrix.runtime }}" },
+        }
+      - {
+          "name": "Setup Node.js workspace",
+          "if": "matrix.runtime == 'node'",
+          "uses": "xberg-io/actions/setup-node-workspace@v1",
+        }
+      - {
+          "name": "Setup Bun",
+          "if": "matrix.runtime == 'bun'",
+          "uses": "oven-sh/setup-bun@v2",
+          "with": { "bun-version": "latest" },
+        }
+      - {
+          "name": "Build NAPI-RS Bindings (Node.js)",
+          "if": "matrix.runtime == 'node'",
+          "uses": "xberg-io/actions/build-node-napi@v1",
+          "with": { "crate-dir": "crates/html-to-markdown-node" },
+        }
+      - {
+          "name": "Install workspace dependencies (Bun)",
+          "if": "matrix.runtime == 'bun'",
+          "run": "bun install",
+          "shell": "bash",
+        }
+      - {
+          "name": "Build NAPI-RS Bindings (Bun)",
+          "if": "matrix.runtime == 'bun'",
+          "working-directory": "crates/html-to-markdown-node",
+          "run": "bun run build",
+          "shell": "bash",
+        }
+      - {
+          "name": "Cleanup Rust cache",
+          "if": "always() && steps.checkout.outcome == 'success'",
+          "uses": "xberg-io/actions/cleanup-rust-cache@v1",
+        }
   # ~keep The musl platform packages are cross-compiled through zig and were only ever built at
   # publish time, where both legs failed and skipped the whole npm publish. This mirrors the
   # publish job's steps so a broken cross-compile surfaces on the commit that causes it.
@@ -471,39 +315,37 @@ jobs:
       matrix:
         target: [x86_64-unknown-linux-musl, aarch64-unknown-linux-musl]
     steps:
-      - name: Checkout
-        uses: actions/checkout@v7
-        id: checkout
-
-      - name: Setup Rust
-        uses: xberg-io/actions/setup-rust@v1
-        with:
-          target: ${{ matrix.target }}
-          cache-key-prefix: node-musl-${{ matrix.target }}
-          configure-musl-cc: "false"
-
-      - name: Setup Node.js workspace
-        uses: xberg-io/actions/setup-node-workspace@v1
-        with:
-          node-version: "24"
-
-      - name: Setup Zig
-        uses: xberg-io/actions/setup-zig@v1
-        with:
-          version: "0.16.0"
-
-      - name: Install cargo-zigbuild
-        shell: bash
-        run: command -v cargo-zigbuild || cargo install --locked cargo-zigbuild
-
-      - name: Build native module
-        uses: xberg-io/actions/build-node-napi@v1
-        with:
-          crate-dir: crates/html-to-markdown-node
-          target: ${{ matrix.target }}
-          cross-compile: "true"
-          install-deps: "false"
-
+      - { "name": "Checkout", "uses": "actions/checkout@v7", "id": "checkout" }
+      - {
+          "name": "Setup Rust",
+          "uses": "xberg-io/actions/setup-rust@v1",
+          "with": {
+            "target": "${{ matrix.target }}",
+            "cache-key-prefix": "node-musl-${{ matrix.target }}",
+            "configure-musl-cc": "false",
+          },
+        }
+      - {
+          "name": "Setup Node.js workspace",
+          "uses": "xberg-io/actions/setup-node-workspace@v1",
+          "with": { "node-version": "24" },
+        }
+      - { "name": "Setup Zig", "uses": "xberg-io/actions/setup-zig@v1", "with": { "version": "0.16.0" } }
+      - {
+          "name": "Install cargo-zigbuild",
+          "shell": "bash",
+          "run": "command -v cargo-zigbuild || cargo install --locked cargo-zigbuild",
+        }
+      - {
+          "name": "Build native module",
+          "uses": "xberg-io/actions/build-node-napi@v1",
+          "with": {
+            "crate-dir": "crates/html-to-markdown-node",
+            "target": "${{ matrix.target }}",
+            "cross-compile": "true",
+            "install-deps": "false",
+          },
+        }
       - name: Verify the platform package holds a native module
         shell: bash
         working-directory: crates/html-to-markdown-node
@@ -517,11 +359,11 @@ jobs:
           fi
           file "${node_file}"
           echo "Verified: $(basename "$(dirname "${node_file}")") contains $(basename "${node_file}")"
-
-      - name: Cleanup Rust cache
-        if: always() && steps.checkout.outcome == 'success'
-        uses: xberg-io/actions/cleanup-rust-cache@v1
-
+      - {
+          "name": "Cleanup Rust cache",
+          "if": "always() && steps.checkout.outcome == 'success'",
+          "uses": "xberg-io/actions/cleanup-rust-cache@v1",
+        }
   # ~keep aarch64-unknown-linux-gnu is cross-compiled through the docker-based
   # @napi-rs/cross-toolchain (napi build --use-napi-cross), a different code path
   # than the host-native builds above and the zig cross-compile below. It was only
@@ -532,50 +374,10 @@ jobs:
     needs: [changes]
     name: "Build: Node (aarch64-unknown-linux-gnu, napi-cross)"
     if: needs.changes.outputs.run-build-node-linux-arm64-gnu == 'true'
-    runs-on: ubuntu-latest
-    timeout-minutes: 60
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v7
-        id: checkout
-
-      - name: Setup Rust
-        uses: xberg-io/actions/setup-rust@v1
-        with:
-          target: aarch64-unknown-linux-gnu
-          cache-key-prefix: node-linux-arm64-gnu
-
-      - name: Setup Node.js workspace
-        uses: xberg-io/actions/setup-node-workspace@v1
-        with:
-          node-version: "24"
-
-      - name: Build native module (napi-cross, docker toolchain)
-        uses: xberg-io/actions/build-node-napi@v1
-        with:
-          crate-dir: crates/html-to-markdown-node
-          target: aarch64-unknown-linux-gnu
-          use-napi-cross: true
-          install-deps: "false"
-
-      - name: Verify the platform package holds a native module
-        shell: bash
-        working-directory: crates/html-to-markdown-node
-        run: |
-          set -euo pipefail
-          node_file=$(find npm -maxdepth 2 -name "*.node" -type f | head -1)
-          if [ -z "${node_file}" ]; then
-            echo "::error::No .node file found under npm/ for aarch64-unknown-linux-gnu"
-            find npm -maxdepth 2 -type f
-            exit 1
-          fi
-          file "${node_file}"
-          echo "Verified: $(basename "$(dirname "${node_file}")") contains $(basename "${node_file}")"
-
-      - name: Cleanup Rust cache
-        if: always() && steps.checkout.outcome == 'success'
-        uses: xberg-io/actions/cleanup-rust-cache@v1
-
+    uses: ./.github/workflows/ci-e2e-delegated.yaml
+    with:
+      task: build-node-linux-arm64-gnu
+    secrets: inherit
   build-ruby:
     needs: [changes]
     name: "Build: Ruby (${{ matrix.os }}, ruby-${{ matrix.ruby }})"
@@ -588,51 +390,51 @@ jobs:
         os: [ubuntu-latest, macos-latest, windows-latest]
         ruby: ["3.2", "3.3"]
     steps:
-      - name: Checkout
-        uses: actions/checkout@v7
-        id: checkout
-
-      - name: Setup Rust
-        uses: xberg-io/actions/setup-rust@v1
-        with:
-          cache-key-prefix: ruby-${{ matrix.os }}-${{ matrix.ruby }}
-
-      - name: Setup Ruby (Unix)
-        if: runner.os != 'Windows'
-        uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: ${{ matrix.ruby }}
-          bundler: "4.0.3"
-          bundler-cache: false
-          working-directory: packages/ruby
-
-      - name: Setup Ruby (Windows)
-        if: runner.os == 'Windows'
-        uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: ${{ matrix.ruby }}
-          bundler: "4.0.3"
-          bundler-cache: false
-          working-directory: packages/ruby
-          windows-toolchain: UCRT64
-
-      - name: Build CLI binary
-        uses: xberg-io/actions/build-rust-cli@v1
-        with:
-          package-name: html-to-markdown-cli
-          binary-name: html-to-markdown
-
+      - { "name": "Checkout", "uses": "actions/checkout@v7", "id": "checkout" }
+      - {
+          "name": "Setup Rust",
+          "uses": "xberg-io/actions/setup-rust@v1",
+          "with": { "cache-key-prefix": "ruby-${{ matrix.os }}-${{ matrix.ruby }}" },
+        }
+      - {
+          "name": "Setup Ruby (Unix)",
+          "if": "runner.os != 'Windows'",
+          "uses": "ruby/setup-ruby@v1",
+          "with": {
+            "ruby-version": "${{ matrix.ruby }}",
+            "bundler": "4.0.3",
+            "bundler-cache": false,
+            "working-directory": "packages/ruby",
+          },
+        }
+      - {
+          "name": "Setup Ruby (Windows)",
+          "if": "runner.os == 'Windows'",
+          "uses": "ruby/setup-ruby@v1",
+          "with": {
+            "ruby-version": "${{ matrix.ruby }}",
+            "bundler": "4.0.3",
+            "bundler-cache": false,
+            "working-directory": "packages/ruby",
+            "windows-toolchain": "UCRT64",
+          },
+        }
+      - {
+          "name": "Build CLI binary",
+          "uses": "xberg-io/actions/build-rust-cli@v1",
+          "with": { "package-name": "html-to-markdown-cli", "binary-name": "html-to-markdown" },
+        }
       - name: Build Ruby extension
         uses: xberg-io/actions/build-ruby-gem@v1
         with:
           # Non-release e2e CI builds the gem against the local workspace path-dep;
           # skip the registry rewrite that hard-fails until core is on crates.io. ~keep
           rewrite-native-deps: "false"
-
-      - name: Cleanup Rust cache
-        if: always() && steps.checkout.outcome == 'success'
-        uses: xberg-io/actions/cleanup-rust-cache@v1
-
+      - {
+          "name": "Cleanup Rust cache",
+          "if": "always() && steps.checkout.outcome == 'success'",
+          "uses": "xberg-io/actions/cleanup-rust-cache@v1",
+        }
   # ~keep Publish builds the PHP extension across linux-x86_64, linux-arm64,
   # macos-arm64, and windows-x86_64 for every supported PHP version (16 legs
   # total), but until now only ubuntu/php8.4 was ever exercised before tag
@@ -654,34 +456,29 @@ jobs:
           - { os: macos-latest, label: macos-arm64 }
           - { os: windows-latest, label: windows-x86_64 }
     steps:
-      - name: Checkout
-        uses: actions/checkout@v7
-        id: checkout
-
-      - name: Setup PHP
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: "8.4"
-          extensions: ctype, dom, json, libxml, mbstring, tokenizer, xml, xmlwriter
-          tools: composer:2.9.8
-          coverage: none
-
-      - name: Setup Rust
-        uses: xberg-io/actions/setup-rust@v1
-        with:
-          cache-key-prefix: php-${{ matrix.platform.label }}
-
-      - name: Capture php-config path
-        run: scripts/ci/php/set-php-config.sh
-        shell: bash
-
-      - name: Install root Composer dependencies
-        uses: ramsey/composer-install@v4
-        with:
-          dependency-versions: locked
-        env:
-          COMPOSER_AUTH: '{"github-oauth":{"github.com":"${{ secrets.GITHUB_TOKEN }}"}}'
-
+      - { "name": "Checkout", "uses": "actions/checkout@v7", "id": "checkout" }
+      - {
+          "name": "Setup PHP",
+          "uses": "shivammathur/setup-php@v2",
+          "with": {
+            "php-version": "8.4",
+            "extensions": "ctype, dom, json, libxml, mbstring, tokenizer, xml, xmlwriter",
+            "tools": "composer:2.9.8",
+            "coverage": "none",
+          },
+        }
+      - {
+          "name": "Setup Rust",
+          "uses": "xberg-io/actions/setup-rust@v1",
+          "with": { "cache-key-prefix": "php-${{ matrix.platform.label }}" },
+        }
+      - { "name": "Capture php-config path", "run": "scripts/ci/php/set-php-config.sh", "shell": "bash" }
+      - {
+          "name": "Install root Composer dependencies",
+          "uses": "ramsey/composer-install@v4",
+          "with": { "dependency-versions": "locked" },
+          "env": { "COMPOSER_AUTH": "{\"github-oauth\":{\"github.com\":\"${{ secrets.GITHUB_TOKEN }}\"}}" },
+        }
       - name: Build PHP extension
         id: build-php-extension
         uses: xberg-io/actions/build-php-extension@v1
@@ -690,18 +487,20 @@ jobs:
           rewrite-native-deps: "false"
           crate-name: html-to-markdown-php
           lib-name: html_to_markdown_php
-
-      - name: Upload PHP extension artifact
-        uses: actions/upload-artifact@v7
-        with:
-          name: php-extension-${{ matrix.platform.label }}
-          path: ${{ steps.build-php-extension.outputs.extension-path }}
-          retention-days: 7
-
-      - name: Cleanup Rust cache
-        if: always() && steps.checkout.outcome == 'success'
-        uses: xberg-io/actions/cleanup-rust-cache@v1
-
+      - {
+          "name": "Upload PHP extension artifact",
+          "uses": "actions/upload-artifact@v7",
+          "with": {
+            "name": "php-extension-${{ matrix.platform.label }}",
+            "path": "${{ steps.build-php-extension.outputs.extension-path }}",
+            "retention-days": 7,
+          },
+        }
+      - {
+          "name": "Cleanup Rust cache",
+          "if": "always() && steps.checkout.outcome == 'success'",
+          "uses": "xberg-io/actions/cleanup-rust-cache@v1",
+        }
   build-csharp:
     needs: [changes]
     name: "Build: C# (${{ matrix.os }})"
@@ -713,115 +512,60 @@ jobs:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
     steps:
-      - name: Checkout
-        uses: actions/checkout@v7
-        id: checkout
-
-      - name: Install Task
-        uses: xberg-io/actions/install-task@v1
-
-      - name: Setup Rust
-        uses: xberg-io/actions/setup-rust@v1
-        with:
-          cache-key-prefix: csharp-${{ matrix.os }}
-
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v6
-        with:
-          dotnet-version: "10.0.x"
-
-      - name: Build FFI library (Unix)
-        if: runner.os != 'Windows'
-        run: cargo build --release --locked -p html-to-markdown-ffi
-        shell: bash
-
-      - name: Build FFI library (Windows)
-        if: runner.os == 'Windows'
-        run: cargo build --locked -p html-to-markdown-ffi
-        shell: bash
-
+      - { "name": "Checkout", "uses": "actions/checkout@v7", "id": "checkout" }
+      - { "name": "Install Task", "uses": "xberg-io/actions/install-task@v1" }
+      - {
+          "name": "Setup Rust",
+          "uses": "xberg-io/actions/setup-rust@v1",
+          "with": { "cache-key-prefix": "csharp-${{ matrix.os }}" },
+        }
+      - { "name": "Setup .NET", "uses": "actions/setup-dotnet@v6", "with": { "dotnet-version": "10.0.x" } }
+      - {
+          "name": "Build FFI library (Unix)",
+          "if": "runner.os != 'Windows'",
+          "run": "cargo build --release --locked -p html-to-markdown-ffi",
+          "shell": "bash",
+        }
+      - {
+          "name": "Build FFI library (Windows)",
+          "if": "runner.os == 'Windows'",
+          "run": "cargo build --locked -p html-to-markdown-ffi",
+          "shell": "bash",
+        }
       - name: Restore C# dependencies
         run: dotnet restore packages/csharp/
         shell: bash
-
       - name: Build C# package
         run: dotnet build packages/csharp/ -c Release
         shell: bash
-
-      - name: Cleanup Rust cache
-        if: always() && steps.checkout.outcome == 'success'
-        uses: xberg-io/actions/cleanup-rust-cache@v1
-
+      - {
+          "name": "Cleanup Rust cache",
+          "if": "always() && steps.checkout.outcome == 'success'",
+          "uses": "xberg-io/actions/cleanup-rust-cache@v1",
+        }
   build-java:
     needs: [changes]
     name: "Build: Java (${{ matrix.os }})"
     if: needs.changes.outputs.run-build-java == 'true'
-    runs-on: ${{ matrix.os }}
-    timeout-minutes: 60
     strategy:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
         java: ["25"]
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v7
-        id: checkout
-
-      - name: Setup Rust
-        uses: xberg-io/actions/setup-rust@v1
-        with:
-          cache-key-prefix: java-${{ matrix.os }}
-
-      - name: Test Java Panama FFI bindings
-        uses: xberg-io/actions/test-java-ffi@v1
-        with:
-          ffi-crate-name: html-to-markdown-ffi
-          ffi-lib-name: html_to_markdown_ffi
-          java-version: ${{ matrix.java }}
-
-      - name: Cleanup Rust cache
-        if: always() && steps.checkout.outcome == 'success'
-        uses: xberg-io/actions/cleanup-rust-cache@v1
-
+    uses: ./.github/workflows/ci-e2e-delegated.yaml
+    with:
+      task: build-java
+      os: ${{ matrix.os }}
+      java: ${{ matrix.java }}
+    secrets: inherit
   build-wasm:
     needs: [changes]
     name: "Build: WASM"
     if: needs.changes.outputs.run-build-wasm == 'true'
-    runs-on: ubuntu-latest
-    timeout-minutes: 120
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v7
-        id: checkout
-
-      - name: Setup Rust
-        uses: xberg-io/actions/setup-rust@v1
-        with:
-          target: wasm32-unknown-unknown
-          use-sccache: false
-          cache-key-prefix: wasm
-
-      - name: Ensure wasm target installed
-        run: scripts/common/ensure-wasm-target.sh
-        shell: bash
-
-      - name: Install wasm-pack
-        run: scripts/common/install-wasm-pack.sh
-        shell: bash
-
-      - name: Setup Node workspace
-        uses: xberg-io/actions/setup-node-workspace@v1
-
-      - name: Build WASM (all targets)
-        uses: xberg-io/actions/build-wasm-package@v1
-        with:
-          crate-dir: crates/html-to-markdown-wasm
-
-      - name: Cleanup Rust cache
-        if: always() && steps.checkout.outcome == 'success'
-        uses: xberg-io/actions/cleanup-rust-cache@v1
-
+    uses: ./.github/workflows/ci-e2e-delegated.yaml
+    with:
+      task: build-wasm
+    secrets: inherit
   test-python:
     needs: [build-python, changes]
     name: "Test: Python (${{ matrix.os }}, py-${{ matrix.python }})"
@@ -834,27 +578,19 @@ jobs:
         os: [ubuntu-latest, windows-latest, macos-latest]
         python: ["3.10", "3.12", "3.14"]
     steps:
-      - name: Checkout
-        uses: actions/checkout@v7
-
-      - name: Install Task
-        uses: xberg-io/actions/install-task@v1
-
-      - name: Install uv
-        uses: astral-sh/setup-uv@v10.1.0
-        with:
-          enable-cache: true
-
-      - name: Set up Python
-        uses: actions/setup-python@v7
-        with:
-          python-version: ${{ matrix.python }}
-
-      - name: Setup Rust
-        uses: xberg-io/actions/setup-rust@v1
-        with:
-          components: rustfmt, clippy, llvm-tools-preview
-
+      - { "name": "Checkout", "uses": "actions/checkout@v7" }
+      - { "name": "Install Task", "uses": "xberg-io/actions/install-task@v1" }
+      - { "name": "Install uv", "uses": "astral-sh/setup-uv@v10.1.0", "with": { "enable-cache": true } }
+      - {
+          "name": "Set up Python",
+          "uses": "actions/setup-python@v7",
+          "with": { "python-version": "${{ matrix.python }}" },
+        }
+      - {
+          "name": "Setup Rust",
+          "uses": "xberg-io/actions/setup-rust@v1",
+          "with": { "components": "rustfmt, clippy, llvm-tools-preview" },
+        }
       - name: Install Python Dependencies
         uses: nick-fields/retry@v4
         with:
@@ -868,24 +604,14 @@ jobs:
             fi
             uv sync --all-extras --no-install-project --no-install-workspace
           shell: bash
-
       - name: Build Python Bindings
         run: |
           uv pip install maturin
           cd packages/python && uv run maturin develop --release
         shell: bash
-
-      - name: Build CLI binary
-        run: cargo build --release --locked -p html-to-markdown-cli
-        shell: bash
-
-      - name: Install alef
-        uses: xberg-io/actions/install-alef@v1
-
-      - name: Run E2E tests
-        run: alef test --e2e --lang python
-        shell: bash
-
+      - { "name": "Build CLI binary", "run": "cargo build --release --locked -p html-to-markdown-cli", "shell": "bash" }
+      - { "name": "Install alef", "uses": "xberg-io/actions/install-alef@v1" }
+      - { "name": "Run E2E tests", "run": "alef test --e2e --lang python", "shell": "bash" }
   test-node:
     needs: [build-node, changes]
     name: "Test: Node (${{ matrix.os }}, ${{ matrix.runtime }})"
@@ -901,201 +627,69 @@ jobs:
           - os: windows-latest
             runtime: bun
     steps:
-      - name: Checkout
-        uses: actions/checkout@v7
-
-      - name: Install Task
-        uses: xberg-io/actions/install-task@v1
-
-      - name: Setup Rust
-        uses: xberg-io/actions/setup-rust@v1
-
-      - name: Setup Node.js workspace
-        if: matrix.runtime == 'node'
-        uses: xberg-io/actions/setup-node-workspace@v1
-
-      - name: Setup Bun
-        if: matrix.runtime == 'bun'
-        uses: oven-sh/setup-bun@v2
-        with:
-          bun-version: latest
-
-      - name: Build NAPI-RS Bindings (Node.js)
-        if: matrix.runtime == 'node'
-        uses: xberg-io/actions/build-node-napi@v1
-        with:
-          crate-dir: crates/html-to-markdown-node
-
-      - name: Install workspace dependencies (Bun)
-        if: matrix.runtime == 'bun'
-        run: bun install
-        shell: bash
-
-      - name: Build NAPI-RS Bindings (Bun)
-        if: matrix.runtime == 'bun'
-        working-directory: crates/html-to-markdown-node
-        run: bun run build
-        shell: bash
-
-      - name: Install alef
-        if: matrix.runtime == 'node'
-        uses: xberg-io/actions/install-alef@v1
-
-      - name: Run E2E tests (Node.js only)
-        if: matrix.runtime == 'node'
-        run: alef test --e2e --lang node
-        shell: bash
-
+      - { "name": "Checkout", "uses": "actions/checkout@v7" }
+      - { "name": "Install Task", "uses": "xberg-io/actions/install-task@v1" }
+      - { "name": "Setup Rust", "uses": "xberg-io/actions/setup-rust@v1" }
+      - {
+          "name": "Setup Node.js workspace",
+          "if": "matrix.runtime == 'node'",
+          "uses": "xberg-io/actions/setup-node-workspace@v1",
+        }
+      - {
+          "name": "Setup Bun",
+          "if": "matrix.runtime == 'bun'",
+          "uses": "oven-sh/setup-bun@v2",
+          "with": { "bun-version": "latest" },
+        }
+      - {
+          "name": "Build NAPI-RS Bindings (Node.js)",
+          "if": "matrix.runtime == 'node'",
+          "uses": "xberg-io/actions/build-node-napi@v1",
+          "with": { "crate-dir": "crates/html-to-markdown-node" },
+        }
+      - {
+          "name": "Install workspace dependencies (Bun)",
+          "if": "matrix.runtime == 'bun'",
+          "run": "bun install",
+          "shell": "bash",
+        }
+      - {
+          "name": "Build NAPI-RS Bindings (Bun)",
+          "if": "matrix.runtime == 'bun'",
+          "working-directory": "crates/html-to-markdown-node",
+          "run": "bun run build",
+          "shell": "bash",
+        }
+      - { "name": "Install alef", "if": "matrix.runtime == 'node'", "uses": "xberg-io/actions/install-alef@v1" }
+      - {
+          "name": "Run E2E tests (Node.js only)",
+          "if": "matrix.runtime == 'node'",
+          "run": "alef test --e2e --lang node",
+          "shell": "bash",
+        }
   test-ruby:
     needs: [build-ruby, changes]
     name: "Test: Ruby (${{ matrix.os }}, ruby-${{ matrix.ruby }})"
     if: always() && !cancelled() && needs.changes.outputs.run-test-ruby == 'true'
-    runs-on: ${{ matrix.os }}
-    timeout-minutes: 60
     strategy:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
         ruby: ["3.2", "3.3"]
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v7
-
-      - name: Setup Rust
-        uses: xberg-io/actions/setup-rust@v1
-
-      - name: Setup Ruby (Unix)
-        if: runner.os != 'Windows'
-        uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: ${{ matrix.ruby }}
-          bundler: "4.0.3"
-          bundler-cache: false
-          working-directory: packages/ruby
-
-      - name: Setup Ruby (Windows)
-        if: runner.os == 'Windows'
-        uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: ${{ matrix.ruby }}
-          bundler: "4.0.3"
-          bundler-cache: false
-          working-directory: packages/ruby
-          windows-toolchain: UCRT64
-
-      - name: Build CLI binary
-        uses: xberg-io/actions/build-rust-cli@v1
-        with:
-          package-name: html-to-markdown-cli
-          binary-name: html-to-markdown
-
-      - name: Build Ruby extension
-        uses: xberg-io/actions/build-ruby-gem@v1
-        with:
-          # Non-release e2e CI builds the gem against the local workspace path-dep;
-          # skip the registry rewrite that hard-fails until core is on crates.io. ~keep
-          rewrite-native-deps: "false"
-
-      - name: Run Rubocop (Ubuntu/ruby-3.3 only)
-        if: runner.os != 'Windows' && matrix.os == 'ubuntu-latest' && matrix.ruby == '3.3'
-        run: ./scripts/ci/ruby/run-rubocop.sh
-        shell: bash
-
-      - name: Validate RBS signatures (Ubuntu/ruby-3.3 only)
-        if: runner.os != 'Windows' && matrix.os == 'ubuntu-latest' && matrix.ruby == '3.3'
-        run: ./scripts/ci/ruby/run-rbs-validate.sh
-        shell: bash
-
-      - name: Run Steep type checking (Ubuntu/ruby-3.3 only)
-        if: runner.os != 'Windows' && matrix.os == 'ubuntu-latest' && matrix.ruby == '3.3'
-        working-directory: packages/ruby
-        run: ../../scripts/ci/ruby/run-steep.sh
-        shell: bash
-
-      - name: Run Ruby specs (Unix)
-        if: runner.os != 'Windows'
-        working-directory: packages/ruby
-        run: ../../scripts/ci/ruby/run-rspec-unix.sh
-        shell: bash
-
-      - name: Run Ruby specs (Windows)
-        if: runner.os == 'Windows'
-        working-directory: packages/ruby
-        shell: pwsh
-        run: ../../scripts/ci/ruby/run-rspec-windows.ps1
-
-      - name: Install Task
-        if: runner.os != 'Windows'
-        uses: xberg-io/actions/install-task@v1
-
-      - name: Install alef
-        if: runner.os != 'Windows'
-        uses: xberg-io/actions/install-alef@v1
-
-      - name: Run E2E tests (Unix only)
-        if: runner.os != 'Windows'
-        run: alef test --e2e --lang ruby
-        shell: bash
-
+    uses: ./.github/workflows/ci-e2e-delegated.yaml
+    with:
+      task: test-ruby
+      os: ${{ matrix.os }}
+      ruby: ${{ matrix.ruby }}
+    secrets: inherit
   test-php:
     needs: [build-php, changes]
     name: "Test: PHP"
     if: always() && !cancelled() && needs.changes.outputs.run-test-php == 'true'
-    runs-on: ubuntu-latest
-    timeout-minutes: 60
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v7
-
-      - name: Setup PHP
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: "8.4"
-          extensions: ctype, dom, json, libxml, mbstring, tokenizer, xml, xmlwriter
-          tools: composer:2.9.8
-          coverage: none
-
-      - name: Setup Rust
-        uses: xberg-io/actions/setup-rust@v1
-
-      - name: Capture php-config path
-        run: scripts/ci/php/set-php-config.sh
-        shell: bash
-
-      - name: Install root Composer dependencies
-        uses: ramsey/composer-install@v4
-        with:
-          dependency-versions: locked
-        env:
-          COMPOSER_AUTH: '{"github-oauth":{"github.com":"${{ secrets.GITHUB_TOKEN }}"}}'
-
-      - name: Build PHP extension
-        id: build-php-extension
-        uses: xberg-io/actions/build-php-extension@v1
-        with:
-          # Keep unreleased core dependencies in the local workspace with its committed lockfile. ~keep
-          rewrite-native-deps: "false"
-          crate-name: html-to-markdown-php
-          lib-name: html_to_markdown_php
-
-      - name: Run PHP tests
-        run: scripts/ci/php/run-php-tests.sh
-        shell: bash
-        env:
-          EXTENSION_PATH: ${{ steps.build-php-extension.outputs.extension-path }}
-
-      - name: Install Task
-        uses: xberg-io/actions/install-task@v1
-
-      - name: Install alef
-        uses: xberg-io/actions/install-alef@v1
-
-      - name: Run E2E tests
-        run: alef test --e2e --lang php
-        shell: bash
-        env:
-          EXTENSION_PATH: ${{ steps.build-php-extension.outputs.extension-path }}
-
+    uses: ./.github/workflows/ci-e2e-delegated.yaml
+    with:
+      task: test-php
+    secrets: inherit
   test-csharp:
     needs: [build-csharp, build-ffi, changes]
     name: "Test: C# (${{ matrix.os }})"
@@ -1107,116 +701,58 @@ jobs:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
     steps:
-      - name: Checkout
-        uses: actions/checkout@v7
-
-      - name: Install Task
-        uses: xberg-io/actions/install-task@v1
-
-      - name: Setup Rust
-        uses: xberg-io/actions/setup-rust@v1
-        with:
-          cache-key-prefix: csharp-test-${{ matrix.os }}
-
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v6
-        with:
-          dotnet-version: "10.0.x"
-
-      - name: Build FFI library (Unix)
-        if: runner.os != 'Windows'
-        run: cargo build --release --locked -p html-to-markdown-ffi
-        shell: bash
-
-      - name: Build FFI library (Windows)
-        if: runner.os == 'Windows'
-        run: cargo build --locked -p html-to-markdown-ffi
-        shell: bash
-
+      - { "name": "Checkout", "uses": "actions/checkout@v7" }
+      - { "name": "Install Task", "uses": "xberg-io/actions/install-task@v1" }
+      - {
+          "name": "Setup Rust",
+          "uses": "xberg-io/actions/setup-rust@v1",
+          "with": { "cache-key-prefix": "csharp-test-${{ matrix.os }}" },
+        }
+      - { "name": "Setup .NET", "uses": "actions/setup-dotnet@v6", "with": { "dotnet-version": "10.0.x" } }
+      - {
+          "name": "Build FFI library (Unix)",
+          "if": "runner.os != 'Windows'",
+          "run": "cargo build --release --locked -p html-to-markdown-ffi",
+          "shell": "bash",
+        }
+      - {
+          "name": "Build FFI library (Windows)",
+          "if": "runner.os == 'Windows'",
+          "run": "cargo build --locked -p html-to-markdown-ffi",
+          "shell": "bash",
+        }
       - name: Restore C# dependencies
         run: dotnet restore packages/csharp/
         shell: bash
-
       - name: Build C# package
         run: dotnet build packages/csharp/ -c Release
         shell: bash
-
-      - name: Install alef
-        uses: xberg-io/actions/install-alef@v1
-
-      - name: Run E2E tests (Unix)
-        if: runner.os != 'Windows'
-        run: alef test --e2e --lang csharp
-        shell: bash
-        env:
-          LD_LIBRARY_PATH: ${{ github.workspace }}/target/release:${{ github.workspace }}/target/debug
-          DYLD_LIBRARY_PATH: ${{ github.workspace }}/target/release:${{ github.workspace }}/target/debug
-
+      - { "name": "Install alef", "uses": "xberg-io/actions/install-alef@v1" }
+      - {
+          "name": "Run E2E tests (Unix)",
+          "if": "runner.os != 'Windows'",
+          "run": "alef test --e2e --lang csharp",
+          "shell": "bash",
+          "env": {
+            "LD_LIBRARY_PATH": "${{ github.workspace }}/target/release:${{ github.workspace }}/target/debug",
+            "DYLD_LIBRARY_PATH": "${{ github.workspace }}/target/release:${{ github.workspace }}/target/debug",
+          },
+        }
       - name: Run E2E tests (Windows)
         if: runner.os == 'Windows'
         run: |
           export PATH="${{ github.workspace }}/target/release:${{ github.workspace }}/target/debug:$PATH"
           alef test --e2e --lang csharp
         shell: bash
-
-      - name: Cleanup Rust cache
-        if: always()
-        uses: xberg-io/actions/cleanup-rust-cache@v1
-
+      - { "name": "Cleanup Rust cache", "if": "always()", "uses": "xberg-io/actions/cleanup-rust-cache@v1" }
   test-go:
     needs: [changes]
     name: "Test: Go"
     if: needs.changes.outputs.run-test-go == 'true'
-    runs-on: ubuntu-latest
-    timeout-minutes: 60
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v7
-
-      - name: Setup Rust
-        uses: xberg-io/actions/setup-rust@v1
-
-      - name: Setup Go
-        uses: actions/setup-go@v7
-        with:
-          go-version: ${{ env.GO_VERSION }}
-          check-latest: true
-
-      - name: Build FFI library
-        run: cargo build --release --locked -p html-to-markdown-ffi
-        shell: bash
-
-      - name: Detect Go modules
-        id: set-modules
-        shell: bash
-        run: scripts/ci/go/detect-go-modules.sh
-
-      - name: Install golangci-lint
-        if: steps.set-modules.outputs.modules != '[]'
-        env:
-          GOTOOLCHAIN: ${{ env.GO_TOOLCHAIN }}
-        run: scripts/ci/go/install-golangci-lint.sh
-        shell: bash
-
-      - name: Run golangci-lint (all modules)
-        if: steps.set-modules.outputs.modules != '[]'
-        shell: bash
-        run: |
-          for module in $(echo '${{ steps.set-modules.outputs.modules }}' | jq -r '.[]'); do
-            echo "=== Linting $module ==="
-            (cd "$module" && "${{ github.workspace }}/scripts/ci/go/run-golangci-lint.sh")
-          done
-
-      - name: Install Task
-        uses: xberg-io/actions/install-task@v1
-
-      - name: Install alef
-        uses: xberg-io/actions/install-alef@v1
-
-      - name: Run E2E tests
-        run: alef test --e2e --lang go
-        shell: bash
-
+    uses: ./.github/workflows/ci-e2e-delegated.yaml
+    with:
+      task: test-go
+    secrets: inherit
   test-java:
     needs: [build-java, changes]
     name: "Test: Java (${{ matrix.os }})"
@@ -1229,121 +765,41 @@ jobs:
         os: [ubuntu-latest, windows-latest, macos-latest]
         java: ["25"]
     steps:
-      - name: Checkout
-        uses: actions/checkout@v7
-
-      - name: Setup Rust
-        uses: xberg-io/actions/setup-rust@v1
-
-      - name: Test Java Panama FFI bindings
-        uses: xberg-io/actions/test-java-ffi@v1
-        with:
-          ffi-crate-name: html-to-markdown-ffi
-          ffi-lib-name: html_to_markdown_ffi
-          java-version: ${{ matrix.java }}
-
-      - name: Install Task
-        uses: xberg-io/actions/install-task@v1
-
-      - name: Install alef
-        if: matrix.os != 'windows-latest'
-        uses: xberg-io/actions/install-alef@v1
-
-      - name: Run E2E tests (Linux + macOS)
-        if: matrix.os != 'windows-latest'
-        run: alef test --e2e --lang java
-        shell: bash
-
+      - { "name": "Checkout", "uses": "actions/checkout@v7" }
+      - { "name": "Setup Rust", "uses": "xberg-io/actions/setup-rust@v1" }
+      - {
+          "name": "Test Java Panama FFI bindings",
+          "uses": "xberg-io/actions/test-java-ffi@v1",
+          "with": {
+            "ffi-crate-name": "html-to-markdown-ffi",
+            "ffi-lib-name": "html_to_markdown_ffi",
+            "java-version": "${{ matrix.java }}",
+          },
+        }
+      - { "name": "Install Task", "uses": "xberg-io/actions/install-task@v1" }
+      - { "name": "Install alef", "if": "matrix.os != 'windows-latest'", "uses": "xberg-io/actions/install-alef@v1" }
+      - {
+          "name": "Run E2E tests (Linux + macOS)",
+          "if": "matrix.os != 'windows-latest'",
+          "run": "alef test --e2e --lang java",
+          "shell": "bash",
+        }
   test-elixir:
     needs: [changes]
     name: "Test: Elixir"
     if: needs.changes.outputs.run-test-elixir == 'true'
-    runs-on: ubuntu-latest
-    timeout-minutes: 60
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v7
-
-      - name: Setup Elixir
-        uses: erlef/setup-beam@v1
-        with:
-          elixir-version: "1.19"
-          otp-version: "28.1"
-
-      - name: Setup Rust
-        uses: xberg-io/actions/setup-rust@v1
-
-      - name: Install Hex/Rebar
-        run: scripts/ci/elixir/install-hex-rebar.sh
-        shell: bash
-
-      - name: Install dependencies
-        working-directory: packages/elixir
-        run: ../../scripts/ci/elixir/install-deps.sh
-        shell: bash
-
-      - name: Run tests
-        working-directory: packages/elixir
-        run: ../../scripts/ci/elixir/run-tests.sh
-        shell: bash
-
-      - name: Credo lint
-        working-directory: packages/elixir
-        run: ../../scripts/ci/elixir/run-credo.sh
-        shell: bash
-
-      - name: Install Task
-        uses: xberg-io/actions/install-task@v1
-
-      - name: Install alef
-        uses: xberg-io/actions/install-alef@v1
-
-      - name: Run E2E tests
-        run: alef test --e2e --lang elixir
-        shell: bash
-
+    uses: ./.github/workflows/ci-e2e-delegated.yaml
+    with:
+      task: test-elixir
+    secrets: inherit
   test-r:
     needs: [changes]
     name: "Test: R"
     if: always() && !cancelled() && needs.changes.outputs.run-test-r == 'true'
-    runs-on: ubuntu-latest
-    timeout-minutes: 60
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v7
-
-      - name: Setup R
-        uses: xberg-io/actions/setup-r@v1
-        with:
-          install-deps-script: scripts/ci/r/install-deps.sh
-
-      - name: Install Task
-        uses: xberg-io/actions/install-task@v1
-
-      - name: Verify R reference pages are fresh
-        run: task r:docs:verify
-        shell: bash
-
-      - name: Setup Rust
-        uses: xberg-io/actions/setup-rust@v1
-
-      - name: Run tests
-        working-directory: packages/r
-        run: ../../scripts/ci/r/run-tests.sh
-        shell: bash
-
-      - name: Run lintr
-        working-directory: packages/r
-        run: ../../scripts/ci/r/run-lintr.sh
-        shell: bash
-
-      - name: Install alef
-        uses: xberg-io/actions/install-alef@v1
-
-      - name: Run E2E tests
-        run: alef test --e2e --lang r
-        shell: bash
-
+    uses: ./.github/workflows/ci-e2e-delegated.yaml
+    with:
+      task: test-r
+    secrets: inherit
   test-c-ffi:
     needs: [build-ffi, changes]
     name: "Test: C FFI (${{ matrix.runner }})"
@@ -1358,28 +814,27 @@ jobs:
           - ubuntu-24.04-arm
           - macos-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v7
-
-      - name: Setup Rust
-        uses: xberg-io/actions/setup-rust@v1
-        with:
-          cache-key-prefix: c-ffi-${{ matrix.runner }}
-          use-sccache: false
-
-      - name: Build html-to-markdown-ffi
-        shell: bash
-        run: cargo build --release --locked -p html-to-markdown-ffi
-        env:
-          ALEF_EXPORT_GENERATED_HEADERS: "1"
-
-      - name: Run C e2e tests
-        shell: bash
-        env:
-          LD_LIBRARY_PATH: ${{ github.workspace }}/target/release
-          DYLD_LIBRARY_PATH: ${{ github.workspace }}/target/release
-        run: cd e2e/c && make test
-
+      - { "name": "Checkout", "uses": "actions/checkout@v7" }
+      - {
+          "name": "Setup Rust",
+          "uses": "xberg-io/actions/setup-rust@v1",
+          "with": { "cache-key-prefix": "c-ffi-${{ matrix.runner }}", "use-sccache": false },
+        }
+      - {
+          "name": "Build html-to-markdown-ffi",
+          "shell": "bash",
+          "run": "cargo build --release --locked -p html-to-markdown-ffi",
+          "env": { "ALEF_EXPORT_GENERATED_HEADERS": "1" },
+        }
+      - {
+          "name": "Run C e2e tests",
+          "shell": "bash",
+          "env": {
+            "LD_LIBRARY_PATH": "${{ github.workspace }}/target/release",
+            "DYLD_LIBRARY_PATH": "${{ github.workspace }}/target/release",
+          },
+          "run": "cd e2e/c && make test",
+        }
       - name: Verify header is fresh
         shell: bash
         run: |
@@ -1396,297 +851,62 @@ jobs:
             exit 1
           }
           echo "Headers verified fresh: $HEADER $GO_HEADER"
-
   test-c-ffi-windows:
     needs: [build-ffi, changes]
     name: "Test: C FFI (windows-latest)"
     if: always() && !cancelled() && needs.changes.outputs.run-test-c-ffi-windows == 'true'
-    runs-on: windows-latest
-    timeout-minutes: 60
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v7
-
-      - name: Setup Rust
-        uses: xberg-io/actions/setup-rust@v1
-        with:
-          cache-key-prefix: c-ffi-windows
-          use-sccache: false
-
-      - name: Build html-to-markdown-ffi
-        shell: bash
-        run: cargo build --locked -p html-to-markdown-ffi
-        env:
-          ALEF_EXPORT_GENERATED_HEADERS: "1"
-
-      - name: Verify header is fresh
-        shell: bash
-        run: |
-          HEADER="crates/html-to-markdown-ffi/include/html_to_markdown.h"
-          GO_HEADER="packages/go/include/html_to_markdown.h"
-          for file in "$HEADER" "$GO_HEADER"; do
-            test -f "$file" || {
-              echo "::error::$file is missing after the build. Run 'ALEF_EXPORT_GENERATED_HEADERS=1 cargo build -p html-to-markdown-ffi' and commit the result."
-              exit 1
-            }
-          done
-          git diff --exit-code -- "$HEADER" "$GO_HEADER" || {
-            echo "::error::$HEADER or $GO_HEADER is stale: cbindgen regenerated a different header than the one committed. Run 'ALEF_EXPORT_GENERATED_HEADERS=1 cargo build -p html-to-markdown-ffi' and commit the result."
-            exit 1
-          }
-          echo "Headers verified fresh on Windows: $HEADER $GO_HEADER"
-
+    uses: ./.github/workflows/ci-e2e-delegated.yaml
+    with:
+      task: test-c-ffi-windows
+    secrets: inherit
   test-wasm:
     needs: [build-wasm, changes]
     name: "Test: WASM"
     if: always() && !cancelled() && needs.changes.outputs.run-test-wasm == 'true'
-    runs-on: ubuntu-latest
-    timeout-minutes: 120
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v7
-
-      - name: Setup Rust
-        uses: xberg-io/actions/setup-rust@v1
-        with:
-          target: wasm32-unknown-unknown
-          use-sccache: false
-
-      - name: Ensure wasm target installed
-        run: scripts/common/ensure-wasm-target.sh
-        shell: bash
-
-      - name: Install wasm-pack
-        run: scripts/common/install-wasm-pack.sh
-        shell: bash
-
-      - name: Setup Node workspace
-        uses: xberg-io/actions/setup-node-workspace@v1
-
-      - name: Build WASM (all targets)
-        uses: xberg-io/actions/build-wasm-package@v1
-        with:
-          crate-dir: crates/html-to-markdown-wasm
-
-      - name: Test WASM bundle
-        working-directory: crates/html-to-markdown-wasm
-        run: ../../scripts/ci/wasm/test-wasm-bundle.sh
-        shell: bash
-
-      - name: Run Rust WASM tests
-        working-directory: crates/html-to-markdown-wasm
-        run: ../../scripts/ci/wasm/test-wasm-rust.sh
-        shell: bash
-
-      - name: Install alef
-        uses: xberg-io/actions/install-alef@v1
-
-      - name: Run E2E tests
-        run: alef test --e2e --lang wasm
-        shell: bash
-
+    uses: ./.github/workflows/ci-e2e-delegated.yaml
+    with:
+      task: test-wasm
+    secrets: inherit
   build-kotlin-android:
     needs: [changes]
     name: "Build: Kotlin Android"
     if: needs.changes.outputs.run-build-kotlin-android == 'true'
-    runs-on: ubuntu-latest
-    timeout-minutes: 60
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v7
-        id: checkout
-
-      - name: Setup Rust
-        uses: xberg-io/actions/setup-rust@v1
-        with:
-          targets: aarch64-linux-android,x86_64-linux-android
-          cache-key-prefix: kotlin-android
-
-      # Google removed the legacy `tools` SDK package, but setup-android's `packages` input
-      # still defaults to `tools platform-tools`, so a bare invocation now dies on
-      # `Warning: Failed to find package 'tools'` -> sdkmanager exit 1, which took out all four
-      # kotlin-android-natives legs of the 3.13.0 release. Request platform-tools explicitly. ~keep
-      - name: Setup Android SDK/NDK
-        uses: android-actions/setup-android@v4
-        with:
-          packages: platform-tools
-
-      # ~keep Bundle the JNI crate (libhtm_jni.so) that the Kotlin bridge loads via
-      # System.loadLibrary("htm_jni") — NOT the plain C-FFI crate, whose lib*_ffi.so
-      # lacks the JNI entry points (html-to-markdown#446). This mirrors the exact
-      # crate/lib pair the publish workflow's kotlin-android-natives job builds, so a
-      # regression in the JNI crate surfaces here instead of only at publish time.
-      - name: Build Android native libraries
-        uses: xberg-io/actions/build-android-natives@v1
-        with:
-          crate-name: html-to-markdown-rs-jni
-          lib-name: htm_jni
-          abis: arm64-v8a,x86_64
-
-      - name: Cleanup Rust cache
-        if: always() && steps.checkout.outcome == 'success'
-        uses: xberg-io/actions/cleanup-rust-cache@v1
-
-  # ~keep Kotlin/Android ships to Maven Central but was never compiled or tested in
-  # CI (html-to-markdown audit #38) — build-kotlin-android above only cross-compiles
-  # the native .so, it never invokes Gradle/Kotlin compilation. `gradle test` here
-  # compiles the Kotlin facade against the host JVM and runs the e2e fixture suite
-  # via a host-platform JNI build (see packages/kotlin-android/build.gradle.kts'
-  # buildHostJni/copyHostJni tasks) — no Android emulator required.
+    uses: ./.github/workflows/ci-e2e-delegated.yaml
+    with:
+      task: build-kotlin-android
+    secrets: inherit
   test-kotlin-android:
     needs: [changes]
     name: "Test: Kotlin Android (host JVM)"
     if: needs.changes.outputs.run-test-kotlin-android == 'true'
-    runs-on: ubuntu-latest
-    timeout-minutes: 60
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v7
-        id: checkout
-
-      - name: Setup Rust
-        uses: xberg-io/actions/setup-rust@v1
-        with:
-          cache-key-prefix: kotlin-android-test
-
-      # Google removed the legacy `tools` SDK package, but setup-android's `packages` input
-      # still defaults to `tools platform-tools`, so a bare invocation now dies on
-      # `Warning: Failed to find package 'tools'` -> sdkmanager exit 1, which took out all four
-      # kotlin-android-natives legs of the 3.13.0 release. Request platform-tools explicitly. ~keep
-      - name: Setup Android SDK/NDK
-        uses: android-actions/setup-android@v4
-        with:
-          packages: platform-tools
-
-      - name: Setup JDK
-        uses: actions/setup-java@v6
-        with:
-          distribution: temurin
-          java-version: "17"
-
-      - name: Install Task
-        uses: xberg-io/actions/install-task@v1
-
-      - name: Install alef
-        uses: xberg-io/actions/install-alef@v1
-
-      - name: Compile and test Kotlin Android binding (host JVM)
-        run: alef test --e2e --lang kotlin_android
-        shell: bash
-
-      - name: Cleanup Rust cache
-        if: always() && steps.checkout.outcome == 'success'
-        uses: xberg-io/actions/cleanup-rust-cache@v1
-
+    uses: ./.github/workflows/ci-e2e-delegated.yaml
+    with:
+      task: test-kotlin-android
+    secrets: inherit
   test-swift:
     needs: [changes]
     name: "Test: Swift"
     if: needs.changes.outputs.run-test-swift == 'true'
-    runs-on: macos-latest
-    timeout-minutes: 60
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v7
-
-      - name: Install Task
-        uses: xberg-io/actions/install-task@v1
-
-      - name: Setup Rust
-        uses: xberg-io/actions/setup-rust@v1
-        with:
-          cache-key-prefix: swift
-
-      - name: Setup Swift
-        uses: xberg-io/actions/setup-swift@v1
-        with:
-          version: "6.0"
-
-      - name: Setup PHP
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: "8.3"
-
-      - name: Install alef
-        uses: xberg-io/actions/install-alef@v1
-
-      - name: Run E2E tests
-        run: alef test --e2e --lang swift
-        shell: bash
-
-      - name: Cleanup Rust cache
-        if: always()
-        uses: xberg-io/actions/cleanup-rust-cache@v1
-
+    uses: ./.github/workflows/ci-e2e-delegated.yaml
+    with:
+      task: test-swift
+    secrets: inherit
   test-dart:
     needs: [changes]
     name: "Test: Dart"
     if: needs.changes.outputs.run-test-dart == 'true'
-    runs-on: ubuntu-latest
-    timeout-minutes: 60
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v7
-
-      - name: Install Task
-        uses: xberg-io/actions/install-task@v1
-
-      - name: Setup Rust
-        uses: xberg-io/actions/setup-rust@v1
-        with:
-          cache-key-prefix: dart
-
-      - name: Setup Dart
-        uses: dart-lang/setup-dart@v1
-
-      - name: Install alef
-        uses: xberg-io/actions/install-alef@v1
-
-      - name: Run E2E tests
-        run: alef test --e2e --lang dart
-        shell: bash
-
-      - name: Cleanup Rust cache
-        if: always()
-        uses: xberg-io/actions/cleanup-rust-cache@v1
-
+    uses: ./.github/workflows/ci-e2e-delegated.yaml
+    with:
+      task: test-dart
+    secrets: inherit
   test-zig:
     needs: [changes]
     name: "Test: Zig"
     if: needs.changes.outputs.run-test-zig == 'true'
-    runs-on: ubuntu-latest
-    timeout-minutes: 60
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v7
-
-      - name: Install Task
-        uses: xberg-io/actions/install-task@v1
-
-      - name: Setup Rust
-        uses: xberg-io/actions/setup-rust@v1
-        with:
-          cache-key-prefix: zig
-
-      - name: Setup Zig
-        uses: xberg-io/actions/setup-zig@v1
-        with:
-          version: "0.16.0"
-
-      - name: Install alef
-        uses: xberg-io/actions/install-alef@v1
-
-      - name: Run E2E tests
-        run: alef test --e2e --lang zig
-        shell: bash
-
-      - name: Cleanup Rust cache
-        if: always()
-        uses: xberg-io/actions/cleanup-rust-cache@v1
-
-  # ~keep The run's own conclusion is green whether a leg passed, was filtered out, or was skipped
-  # ~keep for another reason, so nothing else in this workflow says which legs ran. This job fails
-  # ~keep unless every leg succeeded or was skipped because its `run-<job id>` output is false. It
-  # ~keep must list every other job in `needs`; scripts/tests/test_e2e_result.py fails otherwise.
+    uses: ./.github/workflows/ci-e2e-delegated.yaml
+    with:
+      task: test-zig
+    secrets: inherit
   e2e-result:
     name: "E2E result"
     needs:
@@ -1723,14 +943,14 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - name: Checkout
-        uses: actions/checkout@v7
-        with:
-          sparse-checkout: scripts/check_e2e_result.py
-          sparse-checkout-cone-mode: false
-
-      - name: Check every leg ran or was filtered out
-        env:
-          NEEDS: ${{ toJSON(needs) }}
-        run: python3 scripts/check_e2e_result.py verdict
-        shell: bash
+      - {
+          "name": "Checkout",
+          "uses": "actions/checkout@v7",
+          "with": { "sparse-checkout": "scripts/check_e2e_result.py", "sparse-checkout-cone-mode": false },
+        }
+      - {
+          "name": "Check every leg ran or was filtered out",
+          "env": { "NEEDS": "${{ toJSON(needs) }}" },
+          "run": "python3 scripts/check_e2e_result.py verdict",
+          "shell": "bash",
+        }
