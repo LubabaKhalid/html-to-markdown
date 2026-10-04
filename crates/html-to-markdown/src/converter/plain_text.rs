@@ -338,14 +338,20 @@ fn dispatch_plain_tag(
     match tag_name {
         "br" => buf.push('\n'),
         "hr" => ensure_blank_line(buf),
-        "pre" => walk_plain_pre(tag, parser, buf, list_ctx, &child_state),
+        "pre" => walk_plain_pre(tag, parser, buf, list_ctx, state),
         "img" => emit_plain_image(tag, buf, state.options),
         "table" => {
             ensure_blank_line(buf);
             walk_table(tag, parser, buf, &child_state);
             ensure_blank_line(buf);
         }
-        "ul" => walk_plain_list(tag, parser, buf, ListContext::Unordered, &child_state),
+        "ul" => {
+            let list_state = WalkState {
+                in_pre: false,
+                ..child_state
+            };
+            walk_plain_list(tag, parser, buf, ListContext::Unordered, &list_state);
+        }
         "ol" => {
             let start = tag
                 .attributes()
@@ -353,12 +359,16 @@ fn dispatch_plain_tag(
                 .flatten()
                 .and_then(|value| value.as_utf8_str().parse::<u32>().ok())
                 .unwrap_or(1);
+            let list_state = WalkState {
+                in_pre: false,
+                ..child_state
+            };
             walk_plain_list(
                 tag,
                 parser,
                 buf,
                 ListContext::Ordered { next_index: start },
-                &child_state,
+                &list_state,
             );
         }
         "li" => walk_plain_list_item(tag, parser, buf, list_ctx, state),
@@ -429,6 +439,7 @@ fn walk_plain_list_item(
     }
     let item_state = WalkState {
         item_marker_end: Some(buf.len()),
+        in_pre: false,
         ..state.descend()
     };
     walk_children(tag, parser, buf, list_ctx, &item_state);
