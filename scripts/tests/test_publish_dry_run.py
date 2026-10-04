@@ -59,6 +59,7 @@ def test_release_report_accepts_already_finalized_release_and_scoop_manifest() -
     report = next(step for step in steps if step.get("name") == "Verify every enabled publish target succeeded")
     script = report["run"]
 
+    assert report["env"]["VERSION"] == "${{ needs.prepare.outputs.version }}"
     assert 'release_is_draft="$(gh release view' in script
     assert 'if [[ "${RESULT_FINALIZE}" != "success" && "${release_is_draft}" != "false" ]]' in script
     assert "repos/xberg-io/scoop-bucket/contents/bucket/html-to-markdown.json" in script

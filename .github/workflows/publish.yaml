@@ -3565,7 +3565,6 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           TAG: ${{ needs.prepare.outputs.tag }}
-          VERSION: ${{ needs.prepare.outputs.version }}
           PROMOTED: ${{ needs.promote-release.outputs.promoted }}
         run: |
           set -euo pipefail
@@ -3626,6 +3625,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           TAG: ${{ needs.prepare.outputs.tag }}
+          VERSION: ${{ needs.prepare.outputs.version }}
           FORCE_REPUBLISH: ${{ needs.prepare.outputs.force_republish }}
           RESULT_PREPARE: ${{ needs.prepare.result }}
           RESULT_VALIDATE: ${{ needs.validate-versions.result }}
