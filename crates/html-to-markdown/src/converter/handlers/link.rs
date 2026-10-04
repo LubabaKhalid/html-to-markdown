@@ -320,6 +320,7 @@ fn apply_label_fallbacks(data: &LinkData<'_>, label: &mut String, handler: &Hand
     }
 }
 
+#[cfg_attr(not(feature = "visitor"), allow(unused_variables))]
 fn emit_link(
     tag: &tl::HTMLTag<'_>,
     data: &LinkData<'_>,

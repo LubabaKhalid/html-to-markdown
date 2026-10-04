@@ -3,7 +3,7 @@
 //! Contains helper functions for loose list detection, indentation calculation,
 //! list spacing, and list child processing.
 
-use crate::converter::list::ListContext;
+use super::{ListContext, is_list_item};
 use crate::converter::main_helpers::{tag_name_eq, trim_trailing_whitespace};
 use crate::converter::utility::content::normalized_tag_name;
 use crate::options::{ConversionOptions, ListIndentType, OutputFormat};
@@ -806,28 +806,6 @@ pub const fn calculate_list_nesting_depth(ctx: &Context) -> usize {
     } else {
         ctx.list_depth
     }
-}
-
-/// Check if a node is a list item element.
-pub fn is_list_item(node_handle: tl::NodeHandle, parser: &tl::Parser, dom_ctx: &DomContext) -> bool {
-    if let Some(info) = dom_ctx.tag_info(node_handle.get_inner(), parser) {
-        return info.name == "li";
-    }
-    matches!(
-        node_handle.get(parser),
-        Some(tl::Node::Tag(tag)) if tag_name_eq(tag.name().as_utf8_str(), "li")
-    )
-}
-
-/// ~keep Whether a list node has at least one direct list-item child.
-pub(super) fn has_list_item_child(node_handle: tl::NodeHandle, parser: &tl::Parser, dom_ctx: &DomContext) -> bool {
-    let Some(tl::Node::Tag(tag)) = node_handle.get(parser) else {
-        return false;
-    };
-    tag.children()
-        .top()
-        .iter()
-        .any(|child| is_list_item(*child, parser, dom_ctx))
 }
 
 #[derive(Clone, Copy)]

@@ -301,7 +301,7 @@ fn image_collector(collectors: &Tier2Collectors) -> Option<ImageCollectorHandle>
 }
 
 #[cfg(not(feature = "inline-images"))]
-fn image_collector(_: &Tier2Collectors) -> Option<()> {
+const fn image_collector(_: &Tier2Collectors) -> Option<()> {
     None
 }
 

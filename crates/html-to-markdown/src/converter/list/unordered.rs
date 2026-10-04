@@ -19,21 +19,12 @@ use tl;
 /// and processes list items with proper indentation.
 #[allow(clippy::too_many_arguments)]
 pub fn handle_ul(node_handle: &tl::NodeHandle, parser: &tl::Parser, output: &mut String, context: ListContext<'_>) {
-    let ListContext {
-        options,
-        ctx,
-        depth,
-        dom_ctx,
-    } = context;
-    if !super::utils::has_list_item_child(*node_handle, parser, dom_ctx) {
-        crate::converter::block::div::handle(
-            node_handle,
-            parser,
-            output,
-            crate::converter::block::container::HandlerContext::new(options, ctx, depth, dom_ctx),
-        );
+    if super::render_itemless_list_as_div(node_handle, parser, output, context) {
         return;
     }
+    let ListContext {
+        options, ctx, dom_ctx, ..
+    } = context;
     let separator_comment = preceding_same_type_list_separator_comment(*node_handle, parser, dom_ctx, "ul");
     add_list_leading_separator(output, ctx, options);
     if let Some(comment) = separator_comment {

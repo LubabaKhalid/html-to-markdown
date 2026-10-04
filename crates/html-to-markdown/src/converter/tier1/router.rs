@@ -275,7 +275,7 @@ fn destination_formatting_differs(options: &ConversionOptions) -> bool {
         || options.inline_data_media != InlineDataMedia::Keep
 }
 
-fn feature_options_require_tier2(options: &ConversionOptions) -> bool {
+const fn feature_options_require_tier2(options: &ConversionOptions) -> bool {
     let _ = options;
     // ~keep Tier-1 does not fire visitor callbacks.
     #[cfg(feature = "visitor")]

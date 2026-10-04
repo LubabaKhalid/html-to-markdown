@@ -726,6 +726,7 @@ fn convert_node(node_handle: &tl::NodeHandle, parser: &tl::Parser, output: &mut 
     }
 }
 
+#[cfg_attr(not(feature = "visitor"), allow(clippy::needless_return))]
 fn convert_tag(
     node_handle: &tl::NodeHandle,
     tag: &tl::HTMLTag<'_>,

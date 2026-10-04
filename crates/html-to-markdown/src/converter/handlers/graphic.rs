@@ -96,6 +96,7 @@ fn graphic_metadata(tag: &tl::HTMLTag<'_>) -> GraphicMetadataPayload {
     (attributes, width, height)
 }
 
+#[cfg_attr(not(feature = "visitor"), allow(unused_variables))]
 fn render_graphic(tag: &tl::HTMLTag<'_>, data: &GraphicData<'_>, handler: &HandlerContext<'_>) -> Option<String> {
     // ~keep #492: byte-identical twin of `handlers/image.rs`'s `keep_as_markdown` -- see
     // ~keep that file's comment for why `|| ctx.link_allow_inline_images` is purely additive

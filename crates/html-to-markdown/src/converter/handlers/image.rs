@@ -135,6 +135,7 @@ fn collect_inline_image(tag: &tl::HTMLTag<'_>, data: &ImageData<'_>, context: &C
     );
 }
 
+#[cfg_attr(not(feature = "visitor"), allow(unused_variables))]
 fn render_image(
     tag: &tl::HTMLTag<'_>,
     data: &ImageData<'_>,

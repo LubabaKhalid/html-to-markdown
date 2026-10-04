@@ -21,6 +21,49 @@ pub struct ListContext<'a> {
     pub dom_ctx: &'a super::DomContext,
 }
 
+fn is_list_item(node_handle: tl::NodeHandle, parser: &tl::Parser, dom_ctx: &super::DomContext) -> bool {
+    if let Some(info) = dom_ctx.tag_info(node_handle.get_inner(), parser) {
+        return info.name == "li";
+    }
+    matches!(
+        node_handle.get(parser),
+        Some(tl::Node::Tag(tag)) if crate::converter::main_helpers::tag_name_eq(tag.name().as_utf8_str(), "li")
+    )
+}
+
+fn has_list_item_child(node_handle: tl::NodeHandle, parser: &tl::Parser, dom_ctx: &super::DomContext) -> bool {
+    let Some(tl::Node::Tag(tag)) = node_handle.get(parser) else {
+        return false;
+    };
+    tag.children()
+        .top()
+        .iter()
+        .any(|child| is_list_item(*child, parser, dom_ctx))
+}
+
+pub(super) fn render_itemless_list_as_div(
+    node_handle: &tl::NodeHandle,
+    parser: &tl::Parser,
+    output: &mut String,
+    context: ListContext<'_>,
+) -> bool {
+    if has_list_item_child(*node_handle, parser, context.dom_ctx) {
+        return false;
+    }
+    crate::converter::block::div::handle(
+        node_handle,
+        parser,
+        output,
+        crate::converter::block::container::HandlerContext::new(
+            context.options,
+            context.ctx,
+            context.depth,
+            context.dom_ctx,
+        ),
+    );
+    true
+}
+
 #[cfg(feature = "visitor")]
 pub(super) enum ListStartResult {
     Continue(Option<String>),
