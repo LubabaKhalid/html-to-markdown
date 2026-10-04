@@ -7,6 +7,7 @@
 //! - Empty element filtering
 //! - Visitor callbacks for custom paragraph processing
 
+use crate::converter::block::container::HandlerContext;
 use crate::converter::main_helpers::is_ascii_whitespace_only;
 use crate::options::{ConversionOptions, NewlineStyle};
 use tl::{NodeHandle, Parser};
@@ -18,16 +19,15 @@ type DomContext = crate::converter::DomContext;
 ///
 /// Processes children with proper context, manages spacing,
 /// and handles special cases for table cells and list items.
-pub fn handle(
-    node_handle: &NodeHandle,
-    parser: &Parser,
-    output: &mut String,
-    options: &ConversionOptions,
-    ctx: &Context,
-    depth: usize,
-    dom_ctx: &DomContext,
-) {
+pub fn handle(node_handle: &NodeHandle, parser: &Parser, output: &mut String, handler: HandlerContext<'_>) {
     use crate::converter::walk_node;
+
+    let HandlerContext {
+        options,
+        ctx,
+        depth,
+        dom_ctx,
+    } = handler;
 
     let content_start_pos = output.len();
 

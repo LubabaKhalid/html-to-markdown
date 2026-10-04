@@ -3,6 +3,7 @@
 //! Converts HTML horizontal rule tags to Markdown horizontal rules (---)
 //! with appropriate spacing handling based on context.
 
+use crate::converter::block::container::HandlerContext;
 use crate::converter::main_helpers::trim_trailing_whitespace;
 use crate::converter::utility::siblings::get_previous_sibling_tag;
 #[cfg(feature = "visitor")]
@@ -17,15 +18,13 @@ type DomContext = crate::converter::DomContext;
 /// Converts to Markdown horizontal rule (---) with appropriate blank line
 /// spacing based on context and previous siblings.
 #[cfg_attr(not(feature = "visitor"), allow(unused_variables))]
-pub fn handle(
-    node_handle: &NodeHandle,
-    parser: &Parser,
-    output: &mut String,
-    options: &crate::options::ConversionOptions,
-    ctx: &Context,
-    depth: usize,
-    dom_ctx: &DomContext,
-) {
+pub fn handle(node_handle: &NodeHandle, parser: &Parser, output: &mut String, handler: HandlerContext<'_>) {
+    let HandlerContext {
+        options,
+        ctx,
+        depth,
+        dom_ctx,
+    } = handler;
     #[cfg(feature = "visitor")]
     if let Some(ref visitor_handle) = ctx.visitor {
         use crate::visitor::{NodeContext, NodeType, VisitResult};

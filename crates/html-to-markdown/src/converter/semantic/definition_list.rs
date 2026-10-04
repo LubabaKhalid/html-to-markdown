@@ -224,7 +224,12 @@ pub fn handle_menu(
         bullets: "-".to_string(),
         ..options.clone()
     };
-    crate::converter::block::div::handle(node_handle, parser, output, &menu_options, ctx, depth, dom_ctx);
+    crate::converter::block::div::handle(
+        node_handle,
+        parser,
+        output,
+        crate::converter::block::container::HandlerContext::new(&menu_options, ctx, depth, dom_ctx),
+    );
 }
 
 /// Dispatcher for definition list and related elements.

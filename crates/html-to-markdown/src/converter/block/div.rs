@@ -6,6 +6,7 @@
 //! - List continuations: Uses list indentation
 //! - Block context: Adds surrounding newlines for proper block separation
 
+use crate::converter::block::container::HandlerContext;
 use crate::converter::main_helpers::{strip_trailing_backslash_breaks, trim_trailing_whitespace};
 use crate::options::{ConversionOptions, NewlineStyle};
 use tl::{NodeHandle, Parser};
@@ -24,16 +25,15 @@ type DomContext = crate::converter::DomContext;
 /// # Note
 /// This function references `walk_node` and helper functions from converter.rs
 /// which must be accessible (pub(crate)) for this module to work correctly.
-pub fn handle(
-    node_handle: &NodeHandle,
-    parser: &Parser,
-    output: &mut String,
-    options: &ConversionOptions,
-    ctx: &Context,
-    depth: usize,
-    dom_ctx: &DomContext,
-) {
+pub fn handle(node_handle: &NodeHandle, parser: &Parser, output: &mut String, handler: HandlerContext<'_>) {
     use crate::converter::walk_node;
+
+    let HandlerContext {
+        options,
+        ctx,
+        depth,
+        dom_ctx,
+    } = handler;
 
     let Some(node) = node_handle.get(parser) else { return };
 

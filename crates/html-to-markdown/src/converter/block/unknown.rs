@@ -7,6 +7,7 @@
 //! - Preserves code blocks (indented or fenced) while removing empty content
 //! - Manages trailing whitespace intelligently
 
+use crate::converter::block::container::HandlerContext;
 use crate::options::ConversionOptions;
 #[cfg(feature = "visitor")]
 use std::borrow::Cow;
@@ -34,16 +35,15 @@ type DomContext = crate::converter::DomContext;
 /// Code blocks (identified by markdown formatting) are always preserved,
 /// even if they appear "empty" according to `trim()`.
 #[cfg_attr(not(feature = "visitor"), allow(unused_variables))]
-pub fn handle(
-    node_handle: &NodeHandle,
-    parser: &Parser,
-    output: &mut String,
-    options: &ConversionOptions,
-    ctx: &Context,
-    depth: usize,
-    dom_ctx: &DomContext,
-) {
+pub fn handle(node_handle: &NodeHandle, parser: &Parser, output: &mut String, handler: HandlerContext<'_>) {
     use crate::converter::walk_node;
+
+    let HandlerContext {
+        options,
+        ctx,
+        depth,
+        dom_ctx,
+    } = handler;
 
     let Some(node) = node_handle.get(parser) else { return };
 

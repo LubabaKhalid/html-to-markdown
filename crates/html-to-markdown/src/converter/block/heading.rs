@@ -6,6 +6,7 @@
 //! - Metadata collection (headers, IDs)
 //! - Visitor callbacks for custom heading processing
 
+use crate::converter::block::container::HandlerContext;
 use crate::options::{ConversionOptions, HeadingStyle, OutputFormat};
 use std::borrow::Cow;
 use tl::{NodeHandle, Parser};
@@ -26,12 +27,16 @@ pub fn handle(
     node_handle: &NodeHandle,
     parser: &Parser,
     output: &mut String,
-    options: &ConversionOptions,
-    ctx: &Context,
-    depth: usize,
-    dom_ctx: &DomContext,
+    handler: HandlerContext<'_>,
 ) {
     use crate::converter::walk_node;
+
+    let HandlerContext {
+        options,
+        ctx,
+        depth,
+        dom_ctx,
+    } = handler;
 
     let level = tag_name.chars().last().and_then(|c| c.to_digit(10)).unwrap_or(1) as usize;
 
@@ -81,18 +86,7 @@ pub fn handle(
         let normalized = normalize_heading_text(trimmed);
 
         #[cfg(feature = "visitor")]
-        let heading_output = visitor_heading_output(
-            node_handle,
-            parser,
-            tag_name,
-            level,
-            &normalized,
-            output,
-            options,
-            ctx,
-            depth,
-            dom_ctx,
-        );
+        let heading_output = visitor_heading_output(node_handle, parser, tag_name, level, &normalized, handler);
 
         #[cfg(not(feature = "visitor"))]
         let heading_output = {
@@ -365,13 +359,16 @@ fn visitor_heading_output(
     tag_name: &str,
     level: usize,
     normalized: &str,
-    _output: &mut String,
-    options: &ConversionOptions,
-    ctx: &Context,
-    depth: usize,
-    dom_ctx: &DomContext,
+    handler: HandlerContext<'_>,
 ) -> Option<String> {
     use crate::visitor::{NodeContext, NodeType, VisitResult};
+
+    let HandlerContext {
+        options,
+        ctx,
+        depth,
+        dom_ctx,
+    } = handler;
 
     if let Some(ref visitor_handle) = ctx.visitor {
         if let Some(node) = node_handle.get(parser) {

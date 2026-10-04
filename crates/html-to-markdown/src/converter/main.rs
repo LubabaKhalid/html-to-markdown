@@ -819,10 +819,7 @@ fn convert_node(
                         node_handle,
                         parser,
                         output,
-                        options,
-                        ctx,
-                        depth,
-                        dom_ctx,
+                        crate::converter::block::container::HandlerContext::new(options, ctx, depth, dom_ctx),
                     );
                 }
 
@@ -831,10 +828,7 @@ fn convert_node(
                         node_handle,
                         parser,
                         output,
-                        options,
-                        ctx,
-                        depth,
-                        dom_ctx,
+                        crate::converter::block::container::HandlerContext::new(options, ctx, depth, dom_ctx),
                     );
                 }
 
@@ -864,45 +858,33 @@ fn convert_node(
                         node_handle,
                         parser,
                         output,
-                        options,
-                        ctx,
-                        depth,
-                        dom_ctx,
+                        crate::converter::block::container::HandlerContext::new(options, ctx, depth, dom_ctx),
                     );
                 }
 
                 "wbr" | "thead" | "tbody" | "tfoot" | "tr" | "th" | "td" | "source" => {
-                    crate::converter::block::container::handle_noop(
-                        node_handle,
-                        parser,
-                        output,
-                        options,
-                        ctx,
-                        depth,
-                        dom_ctx,
-                    );
+                    crate::converter::block::container::handle_noop();
                 }
 
                 "br" => crate::converter::block::line_break::handle(
                     node_handle,
                     parser,
                     output,
-                    options,
-                    ctx,
-                    depth,
-                    dom_ctx,
+                    crate::converter::block::container::HandlerContext::new(options, ctx, depth, dom_ctx),
                 ),
                 "hr" => crate::converter::block::horizontal_rule::handle(
                     node_handle,
                     parser,
                     output,
-                    options,
-                    ctx,
-                    depth,
-                    dom_ctx,
+                    crate::converter::block::container::HandlerContext::new(options, ctx, depth, dom_ctx),
                 ),
                 "div" => {
-                    crate::converter::block::div::handle(node_handle, parser, output, options, ctx, depth, dom_ctx);
+                    crate::converter::block::div::handle(
+                        node_handle,
+                        parser,
+                        output,
+                        crate::converter::block::container::HandlerContext::new(options, ctx, depth, dom_ctx),
+                    );
                 }
 
                 // ~keep `<address>`/`<search>`/`<hgroup>`/`<center>`/`<dialog>` are content-bearing block
@@ -916,7 +898,12 @@ fn convert_node(
                 // ~keep has no table-cell/list-item special-casing -- keeps both tiers in
                 // ~keep agreement. See `tests/tier1_address_block_separator_test.rs`.
                 "address" | "search" | "hgroup" | "center" | "dialog" => {
-                    crate::converter::block::div::handle(node_handle, parser, output, options, ctx, depth, dom_ctx);
+                    crate::converter::block::div::handle(
+                        node_handle,
+                        parser,
+                        output,
+                        crate::converter::block::container::HandlerContext::new(options, ctx, depth, dom_ctx),
+                    );
                 }
                 "caption" => crate::converter::block::table::handle_caption(
                     node_handle,
@@ -1075,15 +1062,17 @@ fn convert_node(
                         node_handle,
                         parser,
                         output,
-                        options,
-                        ctx,
-                        depth,
-                        dom_ctx,
+                        crate::converter::block::container::HandlerContext::new(options, ctx, depth, dom_ctx),
                     );
                 }
 
                 _ => {
-                    crate::converter::block::unknown::handle(node_handle, parser, output, options, ctx, depth, dom_ctx);
+                    crate::converter::block::unknown::handle(
+                        node_handle,
+                        parser,
+                        output,
+                        crate::converter::block::container::HandlerContext::new(options, ctx, depth, dom_ctx),
+                    );
                 }
             }
 

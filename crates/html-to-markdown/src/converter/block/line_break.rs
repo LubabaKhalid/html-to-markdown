@@ -3,6 +3,7 @@
 //! Converts HTML line break tags to Markdown line breaks using the configured
 //! newline style (spaces, backslash, or plain newline).
 
+use crate::converter::block::container::HandlerContext;
 use crate::converter::main_helpers::{emit_table_cell_break, hard_break_marker, trim_trailing_whitespace};
 use crate::options::ConversionOptions;
 #[cfg(feature = "visitor")]
@@ -21,15 +22,13 @@ fn is_paragraph_block_output(output: &String, ctx: &Context) -> bool {
 /// Converts to appropriate Markdown line break syntax based on the configured
 /// newline style and current context (e.g., in headings).
 #[cfg_attr(not(feature = "visitor"), allow(unused_variables))]
-pub fn handle(
-    node_handle: &NodeHandle,
-    parser: &Parser,
-    output: &mut String,
-    options: &ConversionOptions,
-    ctx: &Context,
-    depth: usize,
-    dom_ctx: &DomContext,
-) {
+pub fn handle(node_handle: &NodeHandle, parser: &Parser, output: &mut String, handler: HandlerContext<'_>) {
+    let HandlerContext {
+        options,
+        ctx,
+        depth,
+        dom_ctx,
+    } = handler;
     #[cfg(feature = "visitor")]
     if let Some(ref visitor_handle) = ctx.visitor {
         use crate::visitor::EMPTY_ATTRS;

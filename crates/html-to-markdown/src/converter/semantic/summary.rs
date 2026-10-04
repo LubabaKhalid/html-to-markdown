@@ -79,7 +79,12 @@ pub fn handle_details(
             }
         }
 
-        crate::converter::block::div::handle(node_handle, parser, output, options, ctx, depth, dom_ctx);
+        crate::converter::block::div::handle(
+            node_handle,
+            parser,
+            output,
+            crate::converter::block::container::HandlerContext::new(options, ctx, depth, dom_ctx),
+        );
     }
 }
 
