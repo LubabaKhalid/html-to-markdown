@@ -115,6 +115,11 @@ jobs:
       - name: Install alef
         uses: xberg-io/actions/install-alef@v1
 
+      # ~keep `alef verify` compares formatter-owned generated files after a real Poly pass.
+      # Without Poly it cannot validate those bytes and can report formatted Markdown as raw drift.
+      - name: Install poly
+        uses: Goldziher/poly@v0
+
       # ~keep Enforcement is the DEFAULT: `alef verify` returns a failure status on drift, and
       # `--report-only` is the opt-out — never add it here. The `--exit-code` flag this step
       # used to pass is a hidden deprecated no-op as of alef 0.76.0 (absent from `verify --help`),
