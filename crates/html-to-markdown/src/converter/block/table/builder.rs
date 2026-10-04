@@ -6,7 +6,7 @@
 use std::borrow::Cow;
 
 use super::cell::{collect_table_cells, get_colspan};
-use super::cells::{CellTextCache, RowEnv, append_layout_row, collect_row_cell_widths, convert_table_row};
+use super::cells::{CellTextCache, RowEnv, RowRender, append_layout_row, collect_row_cell_widths, convert_table_row};
 use super::scanner::{TableScan, scan_table};
 use super::utils::{is_tag_name, normalized_tag_name};
 use crate::converter::block::container::HandlerContext;
@@ -466,21 +466,25 @@ pub fn handle_table(
                                             if matches!(row_tag_name.as_ref(), "tr" | "row") {
                                                 let row_emitted = convert_table_row(
                                                     row_handle,
-                                                    parser,
                                                     output,
-                                                    options,
-                                                    ctx,
-                                                    row_index,
-                                                    table_scan.has_span,
-                                                    &mut rowspan_tracker,
-                                                    total_cols,
-                                                    total_cols,
-                                                    dom_ctx,
-                                                    depth + 1,
-                                                    is_header_section,
-                                                    &col_widths,
-                                                    &mut cell_cache,
-                                                    &mut deferred_tables,
+                                                    RowEnv {
+                                                        parser,
+                                                        options,
+                                                        ctx,
+                                                        dom_ctx,
+                                                    },
+                                                    &mut RowRender {
+                                                        row_index,
+                                                        has_span: table_scan.has_span,
+                                                        rowspan_tracker: &mut rowspan_tracker,
+                                                        total_cols,
+                                                        header_cols: total_cols,
+                                                        depth: depth + 1,
+                                                        is_header: is_header_section,
+                                                        col_widths: &col_widths,
+                                                        cell_cache: &mut cell_cache,
+                                                        deferred_tables: &mut deferred_tables,
+                                                    },
                                                 );
                                                 // ~keep Only advance the row counter for a row
                                                 // ~keep that actually emitted output -- a
@@ -498,21 +502,25 @@ pub fn handle_table(
                             "tr" | "row" => {
                                 let row_emitted = convert_table_row(
                                     child_handle,
-                                    parser,
                                     output,
-                                    options,
-                                    ctx,
-                                    row_index,
-                                    table_scan.has_span,
-                                    &mut rowspan_tracker,
-                                    total_cols,
-                                    total_cols,
-                                    dom_ctx,
-                                    depth + 1,
-                                    row_index == 0,
-                                    &col_widths,
-                                    &mut cell_cache,
-                                    &mut deferred_tables,
+                                    RowEnv {
+                                        parser,
+                                        options,
+                                        ctx,
+                                        dom_ctx,
+                                    },
+                                    &mut RowRender {
+                                        row_index,
+                                        has_span: table_scan.has_span,
+                                        rowspan_tracker: &mut rowspan_tracker,
+                                        total_cols,
+                                        header_cols: total_cols,
+                                        depth: depth + 1,
+                                        is_header: row_index == 0,
+                                        col_widths: &col_widths,
+                                        cell_cache: &mut cell_cache,
+                                        deferred_tables: &mut deferred_tables,
+                                    },
                                 );
                                 // ~keep Only advance the row counter for a row that actually
                                 // ~keep emitted output -- a cell-less row (issue #489) must
