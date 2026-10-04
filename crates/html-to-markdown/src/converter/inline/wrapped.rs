@@ -213,6 +213,13 @@ fn move_leading_hard_breaks<'a>(
         return content;
     }
 
+    // ~keep The bare newline is an internal sentinel from a break at the start of a detached
+    // ~keep wrapper. It becomes a hard break only when real paragraph content precedes the
+    // ~keep wrapper; hoisting it into the paragraph's own empty block buffer recreates the
+    // ~keep leading break that issue #572 drops before unwrapped text.
+    let drop_at_paragraph_start = ctx.in_paragraph
+        && output.len() == ctx.block_content_start
+        && std::ptr::from_ref::<String>(output) as usize == ctx.block_output_ptr;
     let mut remaining = content;
     let mut moved = false;
     loop {
@@ -223,23 +230,27 @@ fn move_leading_hard_breaks<'a>(
         else {
             break;
         };
-        let starts_on_empty_line = output.ends_with('\n');
-        crate::converter::list::utils::indent_list_item_line_start(output, ctx, options);
-        let marker = if marker == "\n" {
-            crate::converter::main_helpers::hard_break_marker(options)
-        } else {
-            marker
-        };
-        output.push_str(if marker == "  \n" && starts_on_empty_line {
-            "\\\n"
-        } else {
-            marker
-        });
+        if !drop_at_paragraph_start {
+            let starts_on_empty_line = output.ends_with('\n');
+            crate::converter::list::utils::indent_list_item_line_start(output, ctx, options);
+            let marker = if marker == "\n" {
+                crate::converter::main_helpers::hard_break_marker(options)
+            } else {
+                marker
+            };
+            output.push_str(if marker == "  \n" && starts_on_empty_line {
+                "\\\n"
+            } else {
+                marker
+            });
+        }
         remaining = rest;
         moved = true;
     }
-    if moved {
+    if moved && !drop_at_paragraph_start {
         crate::converter::list::utils::indent_list_item_line_start(output, ctx, options);
+    }
+    if moved {
         remaining = remaining.trim_start_matches([' ', '\t']);
     }
     remaining

@@ -28,8 +28,27 @@ fn should_drop_a_leading_break_before_a_span_in_a_paragraph() {
 }
 
 #[test]
-fn should_keep_a_break_inside_an_inline_wrapper_after_paragraph_text() {
-    assert_all_tiers("<p>A<em><br>B</em></p>", "A  \n*B*\n");
+fn should_drop_a_leading_break_inside_inline_wrappers_at_paragraph_start() {
+    for (html, expected) in [
+        ("<p><em><br>B</em></p>", "*B*\n"),
+        ("<p><strong><br>B</strong></p>", "**B**\n"),
+        ("<p><mark><br>B</mark></p>", "==B==\n"),
+        ("<p><sub><br>B</sub></p>", "B\n"),
+    ] {
+        assert_all_tiers(html, expected);
+    }
+}
+
+#[test]
+fn should_keep_a_break_inside_inline_wrappers_after_paragraph_text() {
+    for (html, expected) in [
+        ("<p>A<em><br>B</em></p>", "A  \n*B*\n"),
+        ("<p>A<strong><br>B</strong></p>", "A  \n**B**\n"),
+        ("<p>A<mark><br>B</mark></p>", "A  \n==B==\n"),
+        ("<p>A<sub><br>B</sub></p>", "A  \nB\n"),
+    ] {
+        assert_all_tiers(html, expected);
+    }
 }
 
 #[test]

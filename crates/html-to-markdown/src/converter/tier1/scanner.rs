@@ -1939,6 +1939,29 @@ fn open_table_cell(
     Ok(())
 }
 
+/// ~keep Whether the current break is the first content inside an inline buffer at paragraph start.
+fn inline_break_starts_paragraph(state: &Tier1State) -> bool {
+    let Some((paragraph_index, paragraph_start)) = state
+        .stack
+        .iter()
+        .enumerate()
+        .rev()
+        .find(|(_, frame)| matches!(frame.spec.kind, TagKind::Paragraph))
+        .map(|(index, frame)| (index, frame.content_start))
+    else {
+        return false;
+    };
+    let Some(frame) = state.stack[paragraph_index + 1..].iter().find(|frame| frame.own_buffer) else {
+        return false;
+    };
+    let marker_width = match frame.spec.kind {
+        TagKind::Strong | TagKind::Strikethrough | TagKind::Inserted => 2,
+        TagKind::Emphasis => 1,
+        _ => 0,
+    };
+    frame.content_start.saturating_sub(marker_width) == paragraph_start
+}
+
 /// Emit a void element (no closing tag).
 fn emit_void(
     state: &mut Tier1State,
@@ -2156,10 +2179,12 @@ fn emit_void(
                     .rev()
                     .find(|frame| matches!(frame.spec.kind, TagKind::Paragraph))
                     .map(|frame| frame.content_start);
+                let starts_in_inline_buffer = inline_break_starts_paragraph(state);
                 let dest = state.cell_or_output_mut();
                 // ~keep Match Tier-2: a paragraph-leading break has no preceding line and
-                // ~keep emits nothing, while a bare top-level break still opens a line (#572).
-                if paragraph_start != Some(dest.len()) {
+                // ~keep emits nothing, including inside a detached inline buffer. A bare
+                // ~keep top-level break still opens a line (#572).
+                if paragraph_start != Some(dest.len()) && !starts_in_inline_buffer {
                     crate::converter::main_helpers::trim_trailing_whitespace(dest);
                     dest.push_str(crate::converter::main_helpers::hard_break_marker(options));
                 }
