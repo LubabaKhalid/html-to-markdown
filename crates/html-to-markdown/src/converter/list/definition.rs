@@ -155,6 +155,62 @@ pub fn handle_dt(node_handle: &tl::NodeHandle, parser: &tl::Parser, output: &mut
     }
 }
 
+#[cfg(feature = "visitor")]
+fn visit_definition_description(
+    node_handle: &tl::NodeHandle,
+    tag: &tl::HTMLTag,
+    parser: &tl::Parser,
+    output: &mut String,
+    rendered: &str,
+    context: ListContext<'_>,
+) -> bool {
+    use crate::visitor::{NodeContext, NodeType, VisitResult};
+
+    let Some(ref visitor_handle) = context.ctx.visitor else {
+        return false;
+    };
+    let node_id = node_handle.get_inner();
+    let parent_tag = context.dom_ctx.parent_tag_name(node_id, parser);
+    let index_in_parent = context.dom_ctx.get_sibling_index(node_id).unwrap_or(0);
+    let node_ctx = NodeContext::with_lazy_attributes(
+        NodeType::DefinitionDescription,
+        Cow::Borrowed("dd"),
+        tag,
+        context.depth,
+        index_in_parent,
+        parent_tag.map(Cow::Borrowed),
+        false,
+    );
+    let visit_result = {
+        let mut visitor = visitor_handle.lock().expect("visitor mutex poisoned");
+        visitor.visit_definition_description(&node_ctx, rendered)
+    };
+    match visit_result {
+        VisitResult::Continue => false,
+        VisitResult::Skip => true,
+        VisitResult::Custom(custom) => {
+            output.push_str(&custom);
+            if !context.ctx.convert_as_inline && !custom.ends_with('\n') {
+                output.push_str("\n\n");
+            }
+            true
+        }
+        VisitResult::PreserveHtml => {
+            output.push_str(&crate::converter::utility::serialization::serialize_node(
+                node_handle,
+                parser,
+            ));
+            true
+        }
+        VisitResult::Error(err) => {
+            if context.ctx.visitor_error.borrow().is_none() {
+                *context.ctx.visitor_error.borrow_mut() = Some(err);
+            }
+            true
+        }
+    }
+}
+
 /// Handle definition description element (<dd>).
 ///
 /// Outputs the description as a plain block.
@@ -190,51 +246,8 @@ pub fn handle_dd(node_handle: &tl::NodeHandle, parser: &tl::Parser, output: &mut
     }
 
     #[cfg(feature = "visitor")]
-    if let Some(ref visitor_handle) = ctx.visitor {
-        use crate::visitor::{NodeContext, NodeType, VisitResult};
-
-        let node_id = node_handle.get_inner();
-        let parent_tag = dom_ctx.parent_tag_name(node_id, parser);
-        let index_in_parent = dom_ctx.get_sibling_index(node_id).unwrap_or(0);
-        let node_ctx = NodeContext::with_lazy_attributes(
-            NodeType::DefinitionDescription,
-            Cow::Borrowed("dd"),
-            tag,
-            depth,
-            index_in_parent,
-            parent_tag.map(Cow::Borrowed),
-            false,
-        );
-        let visit_result = {
-            let mut visitor = visitor_handle.lock().expect("visitor mutex poisoned");
-            visitor.visit_definition_description(&node_ctx, &trimmed)
-        };
-        match visit_result {
-            VisitResult::Continue => {}
-            VisitResult::Skip => return,
-            VisitResult::Custom(custom) => {
-                if ctx.convert_as_inline {
-                    output.push_str(&custom);
-                } else {
-                    output.push_str(&custom);
-                    if !custom.ends_with('\n') {
-                        output.push_str("\n\n");
-                    }
-                }
-                return;
-            }
-            VisitResult::PreserveHtml => {
-                use crate::converter::utility::serialization::serialize_node;
-                output.push_str(&serialize_node(node_handle, parser));
-                return;
-            }
-            VisitResult::Error(err) => {
-                if ctx.visitor_error.borrow().is_none() {
-                    *ctx.visitor_error.borrow_mut() = Some(err);
-                }
-                return;
-            }
-        }
+    if visit_definition_description(node_handle, tag, parser, output, &trimmed, context) {
+        return;
     }
 
     if ctx.convert_as_inline {
