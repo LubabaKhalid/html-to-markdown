@@ -1,4 +1,5 @@
 use super::preprocess_repaired_html;
+use crate::converter::DomContext;
 use crate::converter::main_helpers::repair_with_html5ever;
 use crate::converter::preprocessing_helpers::has_inline_block_misnest;
 use crate::converter::utility::caching::build_dom_context;
@@ -20,8 +21,12 @@ fn parse_html(input: &str) -> std::result::Result<tl::VDom<'_>, tl::ParseError> 
     tl::parse(input, tl::ParserOptions::default())
 }
 
+#[expect(
+    clippy::large_enum_variant,
+    reason = "boxing the hot Ready variant would allocate on every conversion; Retry is cold"
+)]
 pub(super) enum ParseOutcome<'a> {
-    Ready(tl::VDom<'a>),
+    Ready { dom: tl::VDom<'a>, dom_ctx: DomContext },
     Retry(String),
 }
 
@@ -41,13 +46,11 @@ pub(super) fn parse_for_conversion<'a>(
             return Err(ConversionError::ParseError("Failed to parse HTML".to_string()));
         }
     };
-    let has_misnest = !*attempted_misnest_repair && {
-        let parser = dom.parser();
-        let dom_ctx = build_dom_context(&dom, parser, input.len());
-        has_inline_block_misnest(&dom_ctx, parser)
-    };
+    let parser = dom.parser();
+    let dom_ctx = build_dom_context(&dom, parser, input.len());
+    let has_misnest = !*attempted_misnest_repair && has_inline_block_misnest(&dom_ctx, parser);
     if !has_misnest {
-        return Ok(ParseOutcome::Ready(dom));
+        return Ok(ParseOutcome::Ready { dom, dom_ctx });
     }
     *attempted_misnest_repair = true;
     let Some(repaired) = repair_with_html5ever(input) else {
@@ -55,7 +58,7 @@ pub(super) fn parse_for_conversion<'a>(
             target: "html_to_markdown::convert",
             "block-level element misnested under an inline ancestor; html5ever repair failed, proceeding with original structure"
         );
-        return Ok(ParseOutcome::Ready(dom));
+        return Ok(ParseOutcome::Ready { dom, dom_ctx });
     };
     tracing::warn!(
         target: "html_to_markdown::convert",
@@ -67,20 +70,23 @@ pub(super) fn parse_for_conversion<'a>(
 #[cfg(test)]
 mod tests {
     use super::{FORCE_INVALID_LENGTH, PARSE_CALLS};
+    use crate::converter::utility::caching::DOM_CONTEXT_BUILDS;
     use crate::{ConversionError, ConversionOptions, TierStrategy, convert};
 
     #[test]
-    fn should_parse_well_formed_tier2_input_once() {
+    fn should_parse_and_build_dom_context_once_for_well_formed_tier2_input() {
         let options = ConversionOptions {
             tier_strategy: TierStrategy::Tier2,
             ..ConversionOptions::default()
         };
         PARSE_CALLS.with(|calls| calls.set(0));
+        DOM_CONTEXT_BUILDS.with(|builds| builds.set(0));
 
         let result = convert("<p>Hello <strong>world</strong></p>", options).expect("convert HTML");
 
         assert_eq!(result.content.as_deref(), Some("Hello **world**\n"));
         PARSE_CALLS.with(|calls| assert_eq!(calls.get(), 1));
+        DOM_CONTEXT_BUILDS.with(|builds| assert_eq!(builds.get(), 1));
     }
 
     #[test]

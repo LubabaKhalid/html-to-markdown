@@ -21,7 +21,6 @@ use crate::converter::main_helpers::{
 };
 use crate::converter::plain_text::extract_plain_text;
 use crate::converter::preprocessing_helpers::{is_page_header, should_drop_for_preprocessing};
-use crate::converter::utility::caching::build_dom_context;
 use crate::converter::utility::content::{is_block_level_element, normalized_tag_name};
 use crate::converter::utility::preprocessing::{
     PRESERVED_MENU_ATTRIBUTE, normalize_bogus_comment_endings, normalize_menu_elements, normalize_split_closing_tags,
@@ -80,9 +79,9 @@ pub fn convert_html_impl(
     let preserve_menu = options.preserve_tags.iter().any(|tag| tag.eq_ignore_ascii_case("menu"));
     let mut preprocessed = prepare_html(html, preserve_menu);
     let mut attempted_misnest_repair = false;
-    let dom = loop {
+    let (dom, dom_ctx) = loop {
         let repaired = match parse_for_conversion(&preprocessed, preserve_menu, &mut attempted_misnest_repair)? {
-            ParseOutcome::Ready(dom) => break dom,
+            ParseOutcome::Ready { dom, dom_ctx } => break (dom, dom_ctx),
             ParseOutcome::Retry(repaired) => repaired,
         };
         preprocessed = repaired;
@@ -91,7 +90,6 @@ pub fn convert_html_impl(
     trace_parse_complete(&dom, preprocessed_len);
     let parser = dom.parser();
     let mut output = String::with_capacity(preprocessed_len.saturating_add(preprocessed_len / 4));
-    let dom_ctx = build_dom_context(&dom, parser, preprocessed_len);
     let is_plain_text = options.output_format == OutputFormat::Plain;
     let frontmatter = prepare_frontmatter(
         &dom,

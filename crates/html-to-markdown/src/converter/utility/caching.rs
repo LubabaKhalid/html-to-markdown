@@ -7,6 +7,11 @@ use crate::converter::DomContext;
 use crate::converter::main_helpers::is_inline_element;
 use crate::converter::utility::content::normalized_tag_name;
 
+#[cfg(test)]
+thread_local! {
+    pub(crate) static DOM_CONTEXT_BUILDS: std::cell::Cell<usize> = const { std::cell::Cell::new(0) };
+}
+
 fn inline_like_value(node_handle: tl::NodeHandle, parser: &tl::Parser) -> Option<bool> {
     match node_handle.get(parser) {
         Some(tl::Node::Tag(tag)) => {
@@ -64,6 +69,8 @@ fn cache_sibling_context(siblings: &[tl::NodeHandle], parser: &tl::Parser, ctx: 
 /// tag information for efficient DOM navigation during conversion.
 #[must_use]
 pub fn build_dom_context(dom: &tl::VDom, parser: &tl::Parser, _input_len: usize) -> DomContext {
+    #[cfg(test)]
+    DOM_CONTEXT_BUILDS.with(|builds| builds.set(builds.get() + 1));
     let mut ctx = DomContext {
         parent_map: Vec::new(),
         children_map: Vec::new(),
@@ -91,8 +98,7 @@ pub fn build_dom_context(dom: &tl::VDom, parser: &tl::Parser, _input_len: usize)
         ctx.sibling_index_map[id as usize] = Some(index);
         record_node_hierarchy(*child_handle, None, parser, &mut ctx);
     }
-    let root_children = ctx.root_children.clone();
-    cache_sibling_context(&root_children, parser, &mut ctx);
+    cache_sibling_context(dom.children(), parser, &mut ctx);
 
     ctx
 }
