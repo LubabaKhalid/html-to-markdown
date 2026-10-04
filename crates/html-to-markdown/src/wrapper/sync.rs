@@ -1,7 +1,7 @@
 //! Synchronous text wrapping for Markdown output.
 
 use super::utils::{
-    is_heading, is_list_like, is_non_interrupting_ordered_item, is_numbered_list, joins_into_a_block,
+    hard_break, is_heading, is_list_like, is_non_interrupting_ordered_item, is_numbered_list, joins_into_a_block,
     parse_blockquote_line, parse_list_item, push_paragraph_line, wrap_blockquote_paragraph, wrap_indented_line,
     wrap_list_item,
 };
@@ -290,7 +290,15 @@ pub fn wrap_markdown(markdown: &str, options: &ConversionOptions) -> String {
             }
             paragraph.flush(&mut result, width);
             if content.is_empty() {
-                result.push_str(&wrap_list_item(&indent, &marker, &content, width));
+                let mut item = wrap_list_item(&indent, &marker, &content, width);
+                // ~keep Parsing trims an empty item's trailing whitespace, but an explicit
+                // ~keep two-space break still separates it from the escaped line after it (#679).
+                if let Some(spaces) = hard_break(line) {
+                    let _ = item.pop();
+                    item.push_str(spaces);
+                    item.push('\n');
+                }
+                result.push_str(&item);
             } else if opens_block(&content) {
                 // ~keep Text that starts a heading, a fence, a quote or a rule is not a paragraph:
                 // ~keep reflowed, a heading loses its words to the next line and a fence its code.
@@ -425,6 +433,12 @@ mod tests {
         assert_eq!(wrap_at_20("- a\n1990. b\n"), "- a\n1990. b\n");
         assert_eq!(wrap_at_20("1. a\n  2. b\n"), "1. a\n  2. b\n");
         assert_eq!(wrap_at_20("1. a\n\n   p\n  2. b\n"), "1. a\n\n   p\n\n  2. b\n");
+    }
+
+    #[test]
+    fn wrap_markdown_keeps_a_break_after_an_empty_ordered_item() {
+        let markdown = "- a  \n  ===\n  2) ---  \n  1990.  \n  \\>\n";
+        assert_eq!(wrap_at_20(markdown), "- a  \n  ===\n  2) ---  \n  1990.  \n  \\>\n\n");
     }
 
     #[test]
