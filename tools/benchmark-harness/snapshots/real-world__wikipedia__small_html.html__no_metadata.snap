@@ -431,16 +431,16 @@ XHTML is a separate language that began as a reformulation of HTML 4.01 using [X
 standard.[[59]](#cite_note-60)
 
 - XHTML 1.0 was published as a W3C Recommendation on January 26, 2000,[[60]](#cite_note-61) and was later revised and republished on August 1, 2002. It offers the same
-three variations as HTML 4.0 and 4.01, reformulated in XML, with minor
-restrictions.
+  three variations as HTML 4.0 and 4.01, reformulated in XML, with minor
+  restrictions.
 - XHTML 1.1[[61]](#cite_note-62) was published as a W3C Recommendation on May 31, 2001. It is based on XHTML
-1.0 Strict, but includes minor changes, can be customized, and is reformulated
-using modules in the W3C recommendation "Modularization of XHTML", which was
-published on April 10, 2001.[[62]](#cite_note-63)
+  1.0 Strict, but includes minor changes, can be customized, and is reformulated
+  using modules in the W3C recommendation "Modularization of XHTML", which was
+  published on April 10, 2001.[[62]](#cite_note-63)
 - XHTML 2.0 was a working draft. Work on it was abandoned in 2009 in favor of
-work on [HTML5](/wiki/HTML5 "HTML5") and [XHTML5](/wiki/XHTML#XHTML5 "XHTML").[[63]](#cite_note-64)[[64]](#cite_note-65)[[65]](#cite_note-66) XHTML 2.0 was incompatible with XHTML 1.x and, therefore, would be more
-accurately characterized as an XHTML-inspired new language than an update to
-XHTML 1.x.
+  work on [HTML5](/wiki/HTML5 "HTML5") and [XHTML5](/wiki/XHTML#XHTML5 "XHTML").[[63]](#cite_note-64)[[64]](#cite_note-65)[[65]](#cite_note-66) XHTML 2.0 was incompatible with XHTML 1.x and, therefore, would be more
+  accurately characterized as an XHTML-inspired new language than an update to
+  XHTML 1.x.
 
 ### Transition of HTML publication to WHATWG
 
@@ -650,31 +650,31 @@ affect the element simply by their presence in the start tag of the element,[[7]
 There are several common attributes that may appear in many elements :
 
 - The `id` attribute provides a document-wide unique identifier for
-an element. This is used to identify the element so that stylesheets can alter
-its presentational properties, and scripts may alter, animate or delete its
-contents or presentation. Appended to the URL of the page, it provides a
-globally unique identifier for the element, typically a sub-section of the
-page. For example, the ID "Attributes" in `https://en.wikipedia.org/wiki/HTML#Attributes`.
+  an element. This is used to identify the element so that stylesheets can alter
+  its presentational properties, and scripts may alter, animate or delete its
+  contents or presentation. Appended to the URL of the page, it provides a
+  globally unique identifier for the element, typically a sub-section of the
+  page. For example, the ID "Attributes" in `https://en.wikipedia.org/wiki/HTML#Attributes`.
 - The `class` attribute provides a way of classifying similar
-elements. This can be used for [semantic](/wiki/Semantics "Semantics") or presentation
-purposes. For example, an HTML document might semantically use the designation `<class="notation">` to indicate that all elements with this class value are subordinate to the
-main text of the document. In presentation, such elements might be gathered
-together and presented as footnotes on a page instead of appearing in the
-place where they occur in the HTML source. Class attributes are used
-semantically in [microformats](/wiki/Microformat "Microformat"). Multiple
-class values may be specified; for example `<class="notation`  
+  elements. This can be used for [semantic](/wiki/Semantics "Semantics") or presentation
+  purposes. For example, an HTML document might semantically use the designation `<class="notation">` to indicate that all elements with this class value are subordinate to the
+  main text of the document. In presentation, such elements might be gathered
+  together and presented as footnotes on a page instead of appearing in the
+  place where they occur in the HTML source. Class attributes are used
+  semantically in [microformats](/wiki/Microformat "Microformat"). Multiple
+  class values may be specified; for example `<class="notation`  
 `                        important">` puts the element into both the `notation` and the `important` classes.
 - An author may use the `style` attribute to assign presentational
-properties to a particular element. It is considered better practice to use an
-element's `id` or `class` attributes to select the
-element from within a [stylesheet](/wiki/Cascading_Style_Sheets "Cascading Style Sheets"), though sometimes this can be too cumbersome for a simple, specific, or ad
-hoc styling.
+  properties to a particular element. It is considered better practice to use an
+  element's `id` or `class` attributes to select the
+  element from within a [stylesheet](/wiki/Cascading_Style_Sheets "Cascading Style Sheets"), though sometimes this can be too cumbersome for a simple, specific, or ad
+  hoc styling.
 - The `title` attribute is used to attach a subtextual explanation to
-an element. In most [browsers](/wiki/Web_browser "Web browser") this attribute is
-displayed as a [tooltip](/wiki/Tooltip "Tooltip").
+  an element. In most [browsers](/wiki/Web_browser "Web browser") this attribute is
+  displayed as a [tooltip](/wiki/Tooltip "Tooltip").
 - The `lang` attribute identifies the natural language of the
-element's contents, which may be different from that of the rest of the
-document. For example, in an English-language document:
+  element's contents, which may be different from that of the rest of the
+  document. For example, in an English-language document:
 
   ```
   <p>Oh well, <span lang="fr">c'est la vie</span>, as they say in France.</p>
@@ -936,7 +936,7 @@ requires the following steps:
 
 1. **The language for an element should be specified with a `lang` attribute rather than the XHTML `xml:lang` attribute.** XHTML uses XML's built-in language-defining functionality attribute.
 2. **Remove the XML namespace (`xmlns=URI`).** HTML has no
-facilities for namespaces.
+   facilities for namespaces.
 3. **Change the document type declaration** from XHTML 1.0 to HTML 4.01. (see [DTD section](#Document_type_declaration) for further explanation).
 4. If present, **remove the XML declaration.** (Typically this is: `<?xml version="1.0" encoding="utf-8"?>`).
 5. **Ensure that the document's MIME type is set to `text/html`.** For both HTML and XHTML, this comes from the HTTP `Content-Type` header sent by the server.
@@ -956,11 +956,11 @@ The W3C recommends several conventions to ensure an easy migration between HTML
 and XHTML (see [HTML Compatibility Guidelines](https://www.w3.org/TR/xhtml1/#guidelines)). The following steps can be applied to XHTML 1.0 documents only:
 
 - Include both `xml:lang` and `lang` attributes on any
-elements assigning language.
+  elements assigning language.
 - Use the empty-element syntax only for elements specified as empty in HTML.
 - Remove the closing slash in empty-element tags: for example `<br>` instead of `<br/>`.
 - Include explicit close tags for elements that permit content but are left
-empty (for example, , not `<div`  
+  empty (for example, , not `<div`  
 `                        />`).
 - Omit the XML declaration.
 
@@ -991,7 +991,7 @@ not included in the Strict version:
   * Inline elements and plain text are allowed directly in: `body`, `blockquote`, `form`, `noscript` and `noframes`
 - **Presentation related elements**
   * underline (`u`) (Deprecated. can confuse a visitor with a
-hyperlink.)
+    hyperlink.)
   * strike-through (`s`)
   * `center` (Deprecated. use CSS instead.)
   * `font` (Deprecated. use CSS instead.)
@@ -999,14 +999,14 @@ hyperlink.)
 - **Presentation related attributes**
   * `background` (Deprecated. use CSS instead.) and `bgcolor` (Deprecated. use CSS instead.) attributes for `body` (required element according to the W3C.) element.
   * `align` (Deprecated. use CSS instead.) attribute on `div`, `form`, paragraph (`p`) and
-heading (`h1`...`h6`) elements
+    heading (`h1`...`h6`) elements
   * `align` (Deprecated. use CSS instead.), `noshade` (Deprecated. use CSS instead.), `size` (Deprecated. use CSS instead.) and `width` (Deprecated. use CSS instead.) attributes on `hr` element
   * `align` (Deprecated. use CSS instead.), `border`, `vspace` and `hspace` attributes on `img` and `object` (caution: the `object` element is only supported in Internet Explorer (from
-the major browsers)) elements
+    the major browsers)) elements
   * `align` (Deprecated. use CSS instead.) attribute on `legend` and `caption` elements
   * `align` (Deprecated. use CSS instead.) and `bgcolor` (Deprecated. use CSS instead.) on `table` element
   * `nowrap` (Obsolete), `bgcolor` (Deprecated. use CSS
-instead.), `width`, `height` on `td` and `th` elements
+    instead.), `width`, `height` on `td` and `th` elements
   * `bgcolor` (Deprecated. use CSS instead.) attribute on `tr` element
   * `clear` (Obsolete) attribute on `br` element
   * `compact` attribute on `dl`, `dir` and `menu` elements
@@ -1015,13 +1015,13 @@ instead.), `width`, `height` on `td` and `th` elements
   * `width` attribute on `pre` element
 - **Additional elements in Transitional specification**
   * `menu` (Deprecated. use CSS instead.) list (no substitute,
-though the unordered list, is recommended)
+    though the unordered list, is recommended)
   * `dir` (Deprecated. use CSS instead.) list (no substitute,
-though the unordered list is recommended)
+    though the unordered list is recommended)
   * `isindex` (Deprecated.) (element requires server-side support
-and is typically added to documents server-side, `form` and `input` elements can be used as a substitute)
+    and is typically added to documents server-side, `form` and `input` elements can be used as a substitute)
   * `applet` (Deprecated. use the `object` element
-instead.)
+    instead.)
 - **The `language` (Obsolete) attribute on script element** (redundant with the `type` attribute).
 - **Frame related entities**
   * `iframe`
@@ -1084,13 +1084,13 @@ WYSIWYG editors remain a controversial topic because of their perceived flaws
 such as:
 
 - Relying mainly on the layout as opposed to meaning, often using markup that
-does not convey the intended meaning but simply copies the layout.[[99]](#cite_note-100)
+  does not convey the intended meaning but simply copies the layout.[[99]](#cite_note-100)
 - Often producing extremely verbose and redundant code that fails to make use of
-the cascading nature of HTML and [CSS](/wiki/CSS "CSS").
+  the cascading nature of HTML and [CSS](/wiki/CSS "CSS").
 - Often producing ungrammatical markup, called [tag soup](/wiki/Tag_soup "Tag soup") or semantically
-incorrect markup (such as `<em>` for italics).
+  incorrect markup (such as `<em>` for italics).
 - As a great deal of the information in HTML documents is not in the layout, the
-model has been criticized for its "what you see is all you get"-nature.[[100]](#cite_note-101)
+  model has been criticized for its "what you see is all you get"-nature.[[100]](#cite_note-101)
 
 ## See also
 
@@ -1117,8 +1117,8 @@ model has been criticized for its "what you see is all you get"-nature.[[100]](#
 
 1. **[↑](#cite_ref-1)** ["W3C Html"](https://www.w3.org/html/).
 2. **[↑](#cite_ref-2)** [Hermans, Felienne](/wiki/Felienne_Hermans "Felienne Hermans"); Schlesinger, Ari (2024-10-17). "A Case for Feminism in Programming
-Language Design". *Proceedings of the 2024 ACM SIGPLAN International Symposium on New
-Ideas, New Paradigms, and Reflections on Programming and Software*. ACM. pp. 205–222\. [doi](/wiki/Doi_(identifier) "Doi (identifier)"):[10.1145/3689492.3689809](https://doi.org/10.1145%2F3689492.3689809). [ISBN](/wiki/ISBN_(identifier) "ISBN (identifier)") [979-8-4007-1215-9](/wiki/Special:BookSources/979-8-4007-1215-9 "Special:BookSources/979-8-4007-1215-9").
+   Language Design". *Proceedings of the 2024 ACM SIGPLAN International Symposium on New
+   Ideas, New Paradigms, and Reflections on Programming and Software*. ACM. pp. 205–222\. [doi](/wiki/Doi_(identifier) "Doi (identifier)"):[10.1145/3689492.3689809](https://doi.org/10.1145%2F3689492.3689809). [ISBN](/wiki/ISBN_(identifier) "ISBN (identifier)") [979-8-4007-1215-9](/wiki/Special:BookSources/979-8-4007-1215-9 "Special:BookSources/979-8-4007-1215-9").
 3. **[↑](#cite_ref-deprecated_4-0)** ["HTML 4.0 Specification — W3C Recommendation — Conformance: requirements and recommendations"](https://www.w3.org/TR/REC-html40-971218/conform.html#deprecated). World Wide Web Consortium. December 18, 1997. [Archived](https://web.archive.org/web/20150705040855/http://www.w3.org/TR/REC-html40-971218/conform.html) from the original on July 5, 2015. Retrieved July 6, 2015.
 4. **[↑](#cite_ref-5)** Tim Berners-Lee, "[Information Management: A Proposal](https://www.w3.org/History/1989/proposal.html)". CERN (March 1989, May 1990). W3C.
 5. **[↑](#cite_ref-6)** Berners-Lee, Tim. ["Intended Uses"](https://www.w3.org/DesignIssues/Uses.html). *W3C*.
@@ -1127,18 +1127,18 @@ Ideas, New Paradigms, and Reflections on Programming and Software*. ACM. pp. 205
 8. **[↑](#cite_ref-9)** Berners-Lee, Tim (October 29, 1991). ["Re: status. Re: X11 BROWSER for WWW"](http://lists.w3.org/Archives/Public/www-talk/1991SepOct/0003.html). World Wide Web Consortium. [Archived](https://web.archive.org/web/20070524045009/http://lists.w3.org/Archives/Public/www-talk/1991SepOct/0003.html) from the original on May 24, 2007. Retrieved April 8, 2007.
 9. **[↑](#cite_ref-10)** ["Index of the HTML 4 elements"](https://www.w3.org/TR/1999/REC-html401-19991224/index/elements). World Wide Web Consortium. December 24, 1999. [Archived](https://web.archive.org/web/20070505172415/https://www.w3.org/TR/1999/REC-html401-19991224/index/elements) from the original on May 5, 2007. Retrieved April 8, 2007.
 10. **[↑](#cite_ref-11)** Berners-Lee, Tim (December 9, 1991). ["Re: SGML/HTML docs, X Browser"](http://lists.w3.org/Archives/Public/www-talk/1991NovDec/0020.html). *w3*. [Archived](https://web.archive.org/web/20071222060359/http://lists.w3.org/Archives/Public/www-talk/1991NovDec/0020.html) from the original on December 22, 2007. Retrieved June 16, 2007. "SGML is very general. HTML is a specific application of the SGML
-basic syntax applied to hypertext documents with simple structure."
+    basic syntax applied to hypertext documents with simple structure."
 11. **[↑](#cite_ref-12)** Berners-Lee, Tim; Connolly, Daniel (June 1993). ["Hypertext Markup Language (HTML): A Representation of Textual Information and MetaInformation for Retrieval and Interchange"](https://www.w3.org/MarkUp/draft-ietf-iiir-html-01.txt). *w3*. [Archived](https://web.archive.org/web/20170103041713/https://www.w3.org/MarkUp/draft-ietf-iiir-html-01.txt) from the original on January 3, 2017. Retrieved January 4, 2017.
 12. **[↑](#cite_ref-html+_13-0)** [Raggett, Dave](/wiki/Dave_Raggett "Dave Raggett"). ["A Review of the HTML+ Document Format"](http://www.w3.org/MarkUp/htmlplus_paper/htmlplus.html). *w3*. [Archived](https://web.archive.org/web/20000229205146/http://www.w3.org/MarkUp/htmlplus_paper/htmlplus.html) from the original on February 29, 2000. Retrieved May 22, 2020. "The hypertext markup language HTML was developed as a simple
-non-proprietary delivery format for global hypertext. HTML+ is a set
-of modular extensions to HTML and has been developed in response to a
-growing understanding of the needs of information providers. These
-extensions include text flow around floating figures, fill-out forms,
-tables, and mathematical equations."
+    non-proprietary delivery format for global hypertext. HTML+ is a set
+    of modular extensions to HTML and has been developed in response to a
+    growing understanding of the needs of information providers. These
+    extensions include text flow around floating figures, fill-out forms,
+    tables, and mathematical equations."
 13. **[↑](#cite_ref-14)** [Berners-Lee, Tim](/wiki/Tim_Berners-Lee "Tim Berners-Lee"); [Connolly, Daniel W.](/wiki/Daniel_Connolly_(computer_scientist) "Daniel Connolly (computer scientist)") (November 1995). [*Hypertext Markup Language - 2.0*](https://www.rfc-editor.org/rfc/rfc1866). Network Working Group. [doi](/wiki/Doi_(identifier) "Doi (identifier)"):[10.17487/RFC1866](https://doi.org/10.17487%2FRFC1866). [RFC](/wiki/Request_for_Comments "Request for Comments") [1866](https://datatracker.ietf.org/doc/html/rfc1866). *Historic.* Obsoleted by RFC [2854](https://www.rfc-editor.org/rfc/rfc2854). "This document thus defines an HTML 2.0 (to distinguish it from the
-previous informal specifications). Future (generally upwardly
-compatible) versions of HTML with new features will be released with
-higher version numbers."
+    previous informal specifications). Future (generally upwardly
+    compatible) versions of HTML with new features will be released with
+    higher version numbers."
 14. ^ [***a***](#cite_ref-raggett_15-0) [***b***](#cite_ref-raggett_15-1) [***c***](#cite_ref-raggett_15-2) [***d***](#cite_ref-raggett_15-3) [***e***](#cite_ref-raggett_15-4) [***f***](#cite_ref-raggett_15-5) Raggett, Dave (1998). [*Raggett on HTML 4*](https://web.archive.org/web/20070809234115/https://www.w3.org/People/Raggett/book4/ch02.html). Archived from [the original](https://www.w3.org/People/Raggett/book4/ch02.html) on August 9, 2007. Retrieved July 9, 2007.
 15. **[↑](#cite_ref-16)** ["HTML5 – Hypertext Markup Language – 5.0"](https://www.w3.org/2014/10/html5-rec.html.en). Internet Engineering Task Force. 28 October 2014. [Archived](https://web.archive.org/web/20141028233921/https://www.w3.org/2014/10/html5-rec.html.en) from the original on October 28, 2014. Retrieved November 25, 2014. "This document recommends HTML 5.0 after completion."
 16. **[↑](#cite_ref-17)** ["HTML 3.2 Reference Specification"](https://www.w3.org/TR/REC-html32). World Wide Web Consortium. January 14, 1997. Retrieved November 16, 2008.
@@ -1212,35 +1212,35 @@ higher version numbers."
 84. **[↑](#cite_ref-85)** ["HTML 4 Frameset Document Type Definition"](https://www.w3.org/TR/html401/sgml/framesetdtd.html). *W3C*. Retrieved 2021-12-25.
 85. **[↑](#cite_ref-86)** Berners-Lee, Tim; Fischetti, Mark (2000). [*Weaving the Web: The Original Design and Ultimate Destiny of the World Wide Web by Its Inventor*](https://archive.org/details/weavingweborigin00bern_0). San Francisco: Harper. [ISBN](/wiki/ISBN_(identifier) "ISBN (identifier)") [978-0-06-251587-2](/wiki/Special:BookSources/978-0-06-251587-2 "Special:BookSources/978-0-06-251587-2").
 86. **[↑](#cite_ref-87)** Raggett, Dave (2002). ["Adding a touch of style"](https://www.w3.org/MarkUp/Guide/Style.html). W3C. Retrieved October 2, 2009. This article notes that presentational HTML markup may be useful when
-targeting browsers "before Netscape 4.0 and Internet Explorer 4.0". See
-the [list of web browsers](/wiki/List_of_web_browsers "List of web browsers") to confirm that these were both released in 1997.
+    targeting browsers "before Netscape 4.0 and Internet Explorer 4.0". See
+    the [list of web browsers](/wiki/List_of_web_browsers "List of web browsers") to confirm that these were both released in 1997.
 87. **[↑](#cite_ref-88)** Berners-Lee, Tim; Hendler, James; Lassila, Ora (May 1, 2001). ["The Semantic Web"](http://www.scientificamerican.com/article.cfm?id=the-semantic-web). *Scientific American*. Retrieved October 2, 2009.
 88. **[↑](#cite_ref-Semantic_Web_Revisted_89-0)** Nigel Shadbolt, Wendy Hall and Tim Berners-Lee (2006). ["The Semantic Web Revisited"](https://web.archive.org/web/20130320130521/http://eprints.soton.ac.uk/262614/1/Semantic_Web_Revisted.pdf) (PDF). IEEE Intelligent Systems.
-Archived from [the original](http://eprints.ecs.soton.ac.uk/12614/1/Semantic_Web_Revisted.pdf) (PDF) on March 20, 2013. Retrieved October 2, 2009.
+    Archived from [the original](http://eprints.ecs.soton.ac.uk/12614/1/Semantic_Web_Revisted.pdf) (PDF) on March 20, 2013. Retrieved October 2, 2009.
 89. **[↑](#cite_ref-90)** ["HTML: The Living Standard"](https://html.spec.whatwg.org/dev/introduction.html#restrictions-on-content-models-and-on-attribute-values). *WHATWG*. Retrieved 27 September 2018.
 90. **[↑](#cite_ref-91)** ["XHTML 1.0 The Extensible HyperText Markup Language (Second Edition)"](https://www.w3.org/TR/xhtml1/#media). World Wide Web Consortium. 2002 [2000]. Retrieved December 7, 2008. "XHTML Documents which follow the guidelines set forth in Appendix C,
-"HTML Compatibility Guidelines" may be labeled with the Internet Media
-Type "text/html" [RFC2854], as they are compatible with most HTML
-browsers. Those documents, and any other document conforming to this
-specification, may also be labeled with the Internet Media Type
-"application/xhtml+xml" as defined in [RFC3236]."
+    "HTML Compatibility Guidelines" may be labeled with the Internet Media
+    Type "text/html" [RFC2854], as they are compatible with most HTML
+    browsers. Those documents, and any other document conforming to this
+    specification, may also be labeled with the Internet Media Type
+    "application/xhtml+xml" as defined in [RFC3236]."
 91. **[↑](#cite_ref-92)** [S. Bradner](/wiki/Scott_Bradner "Scott Bradner") (March 1997). [*Key words for use in RFCs to Indicate Requirement Levels*](https://www.rfc-editor.org/rfc/rfc2119). [IETF](/wiki/Internet_Engineering_Task_Force "Internet Engineering Task Force") Network Working Group. [doi](/wiki/Doi_(identifier) "Doi (identifier)"):[10.17487/RFC2119](https://doi.org/10.17487%2FRFC2119). BCP 14. [RFC](/wiki/Request_for_Comments "Request for Comments") [2119](https://datatracker.ietf.org/doc/html/rfc2119). *Best Current Practice 14.* Updated by RFC [8174](https://www.rfc-editor.org/rfc/rfc8174). "3. SHOULD This word, or the adjective "RECOMMENDED", mean that there
-may exist valid reasons in particular circumstances to ignore a
-particular item, but the full implications must be understood and
-carefully weighed before choosing a different course."
+    may exist valid reasons in particular circumstances to ignore a
+    particular item, but the full implications must be understood and
+    carefully weighed before choosing a different course."
 92. **[↑](#cite_ref-93)** ["XHTML 1.1 – Module-based XHTML — Second Edition"](https://www.w3.org/TR/xhtml11/conformance.html#strict). World Wide Web Consortium. 2007. Retrieved December 7, 2008. "XHTML 1.1 documents SHOULD be labeled with the Internet Media Type
-text/html as defined in [RFC2854] or application/xhtml+xml as defined
-in [RFC3236]."
+    text/html as defined in [RFC2854] or application/xhtml+xml as defined
+    in [RFC3236]."
 93. **[↑](#cite_ref-94)** ["Naming Files, Paths, and Namespaces"](https://msdn.microsoft.com/en-us/library/windows/desktop/aa365247%28v=vs.85%29.aspx?f=255&MSPPError=-2147217396). Microsoft. Retrieved 16 March 2015.
 94. **[↑](#cite_ref-95)** [HTML Design Constraints](https://www.w3.org/History/19921103-hypertext/hypertext/WWW/MarkUp/HTMLConstraints.html), W3C Archives
 95. **[↑](#cite_ref-96)** [WWW: BTB – HTML](http://ei.cs.vt.edu/~wwwbtb/book/chap13/who.html), Pris Sears
 96. **[↑](#cite_ref-97)** [*HTML Standard - The br Element*](https://html.spec.whatwg.org/multipage/text-level-semantics.html#the-br-element), WHATWG
 97. **[↑](#cite_ref-98)** Sauer, C.: WYSIWIKI – Questioning WYSIWYG in the Internet Age. In:
-Wikimania (2006)
+    Wikimania (2006)
 98. **[↑](#cite_ref-99)** Spiesser, J., Kitchen, L.: Optimization of HTML automatically generated
-by WYSIWYG programs. In: 13th International Conference on World Wide Web,
-pp. 355–364. WWW '04. ACM, New York, NY (New York, NY, U.S., May 17–20,
-2004)
+    by WYSIWYG programs. In: 13th International Conference on World Wide Web,
+    pp. 355–364. WWW '04. ACM, New York, NY (New York, NY, U.S., May 17–20,
+    2004)
 99. **[↑](#cite_ref-100)** [XHTML Reference: blockquote](http://xhtml.com/en/xhtml/reference/blockquote/) [Archived](https://web.archive.org/web/20100325160356/http://xhtml.com/en/xhtml/reference/blockquote/) 2010-03-25 at the [Wayback Machine](/wiki/Wayback_Machine "Wayback Machine"). Xhtml.com. Retrieved on 2012-02-16.
 100. **[↑](#cite_ref-101)** [Doug Engelbart's INVISIBLE REVOLUTION](http://www.invisiblerevolution.net/). Invisiblerevolution.net. Retrieved on 2012-02-16.
 

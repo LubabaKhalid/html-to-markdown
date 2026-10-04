@@ -1136,22 +1136,22 @@ Wikibooks has a book on the topic of: ***[Rust for the Novice Programmer](https:
 
 1. **[↑](#cite_ref-3)** Including build tools, host tools, and standard library support for [x86-64](/wiki/X86-64 "X86-64"), [ARM](/wiki/ARM_architecture_family "ARM architecture family"), [MIPS](/wiki/MIPS_architecture "MIPS architecture"), [RISC-V](/wiki/RISC-V "RISC-V"), [WebAssembly](/wiki/WebAssembly "WebAssembly"), [i686](/wiki/P6_(microarchitecture) "P6 (microarchitecture)"), [AArch64](/wiki/AArch64 "AArch64"), [PowerPC](/wiki/PowerPC "PowerPC"), and [s390x](/wiki/Linux_on_IBM_Z "Linux on IBM Z").[[2]](#cite_note-CrossPlatform-2)
 2. **[↑](#cite_ref-4)** Including [Windows](/wiki/Windows "Windows"), [Linux](/wiki/Linux "Linux"), [macOS](/wiki/MacOS "MacOS"), [FreeBSD](/wiki/FreeBSD "FreeBSD"), [NetBSD](/wiki/NetBSD "NetBSD"), and [Illumos](/wiki/Illumos "Illumos"). Host build tools on [Android](/wiki/Android_(operating_system) "Android (operating system)"), [iOS](/wiki/IOS "IOS"), [Haiku](/wiki/Haiku_(operating_system) "Haiku (operating system)"), [Redox](/wiki/Redox_(operating_system) "Redox (operating system)"), and [Fuchsia](/wiki/Fuchsia_(operating_system) "Fuchsia (operating system)") are not officially shipped; these operating systems are supported as
-targets.[[2]](#cite_note-CrossPlatform-2)
+   targets.[[2]](#cite_note-CrossPlatform-2)
 3. **[↑](#cite_ref-7)** Third-party dependencies, e.g., [LLVM](/wiki/LLVM "LLVM") or [MSVC](/wiki/MSVC "MSVC"), are
-subject to their own licenses.[[3]](#cite_note-5)[[4]](#cite_note-licenses-6)
+   subject to their own licenses.[[3]](#cite_note-5)[[4]](#cite_note-licenses-6)
 4. **[↑](#cite_ref-10)** NIL is cited as an influence for Rust in multiple sources; this likely
-refers to Network Implementation Language developed by Robert Strom and
-others at [IBM](/wiki/IBM "IBM"), which pioneered [typestate analysis](/wiki/Typestate_analysis "Typestate analysis"),[[5]](#cite_note-Strom1983-8)[[6]](#cite_note-9) not to be confused with [New Implementation of LISP](/wiki/NIL_(programming_language) "NIL (programming language)").
+   refers to Network Implementation Language developed by Robert Strom and
+   others at [IBM](/wiki/IBM "IBM"), which pioneered [typestate analysis](/wiki/Typestate_analysis "Typestate analysis"),[[5]](#cite_note-Strom1983-8)[[6]](#cite_note-9) not to be confused with [New Implementation of LISP](/wiki/NIL_(programming_language) "NIL (programming language)").
 5. **[↑](#cite_ref-23)** See previous footnote on the referent of NIL.
 6. **[↑](#cite_ref-27)** The list of Rust compiler versions (referred to as a bootstrapping
-chain) has history going back to 2012.[[21]](#cite_note-Nelson2022RustConf-26)
+   chain) has history going back to 2012.[[21]](#cite_note-Nelson2022RustConf-26)
 7. **[↑](#cite_ref-36)** Energy compared to C was 3% more for Rust and 34% more for C++; time
-was 4% more and 56% more, respectively.
+   was 4% more and 56% more, respectively.
 8. **[↑](#cite_ref-140)** wrapping `no_mangle` with `unsafe` as well as prefacing the `extern "C"` block with `unsafe` are required in the 2024 edition or later.[[132]](#cite_note-139)
 9. **[↑](#cite_ref-200)** That is, among respondents who have done "extensive development work
-[with Rust] in over the past year" (14.8%), Rust had the largest
-percentage who also expressed interest to "work in [Rust] over the next
-year" (72.4%).[[190]](#cite_note-SO-2025-survey-198)
+   [with Rust] in over the past year" (14.8%), Rust had the largest
+   percentage who also expressed interest to "work in [Rust] over the next
+   year" (72.4%).[[190]](#cite_note-SO-2025-survey-198)
 
 ## References
 
@@ -1162,10 +1162,10 @@ year" (72.4%).[[190]](#cite_note-SO-2025-survey-198)
 [[edit](/w/index.php?title=Rust_(programming_language)&action=edit&section=51 "Edit section: Book sources")]
 
 - Gjengset, Jon (2021). *Rust for Rustaceans* (1st ed.). No
-Starch Press. [ISBN](/wiki/ISBN_(identifier) "ISBN (identifier)") [9781718501850](/wiki/Special:BookSources/9781718501850 "Special:BookSources/9781718501850"). [OCLC](/wiki/OCLC_(identifier) "OCLC (identifier)") [1277511986](https://search.worldcat.org/oclc/1277511986).
+  Starch Press. [ISBN](/wiki/ISBN_(identifier) "ISBN (identifier)") [9781718501850](/wiki/Special:BookSources/9781718501850 "Special:BookSources/9781718501850"). [OCLC](/wiki/OCLC_(identifier) "OCLC (identifier)") [1277511986](https://search.worldcat.org/oclc/1277511986).
 - Klabnik, Steve; Nichols, Carol (2019-08-12). [*The Rust Programming Language (Covers Rust 2018)*](https://books.google.com/books?id=0Vv6DwAAQBAJ). No Starch Press. [ISBN](/wiki/ISBN_(identifier) "ISBN (identifier)") [978-1-7185-0044-0](/wiki/Special:BookSources/978-1-7185-0044-0 "Special:BookSources/978-1-7185-0044-0").
 - Blandy, Jim; Orendorff, Jason; Tindall, Leonora F. S. (2021). *Programming Rust: Fast, Safe Systems Development* (2nd ed.).
-O'Reilly Media. [ISBN](/wiki/ISBN_(identifier) "ISBN (identifier)") [978-1-4920-5254-8](/wiki/Special:BookSources/978-1-4920-5254-8 "Special:BookSources/978-1-4920-5254-8"). [OCLC](/wiki/OCLC_(identifier) "OCLC (identifier)") [1289839504](https://search.worldcat.org/oclc/1289839504).
+  O'Reilly Media. [ISBN](/wiki/ISBN_(identifier) "ISBN (identifier)") [978-1-4920-5254-8](/wiki/Special:BookSources/978-1-4920-5254-8 "Special:BookSources/978-1-4920-5254-8"). [OCLC](/wiki/OCLC_(identifier) "OCLC (identifier)") [1289839504](https://search.worldcat.org/oclc/1289839504).
 - McNamara, Tim (2021). *Rust in Action*. Manning Publications. [ISBN](/wiki/ISBN_(identifier) "ISBN (identifier)") [978-1-6172-9455-6](/wiki/Special:BookSources/978-1-6172-9455-6 "Special:BookSources/978-1-6172-9455-6"). [OCLC](/wiki/OCLC_(identifier) "OCLC (identifier)") [1153044639](https://search.worldcat.org/oclc/1153044639).
 - Klabnik, Steve; Nichols, Carol (2023). *The Rust programming language* (2nd ed.). No Starch Press. [ISBN](/wiki/ISBN_(identifier) "ISBN (identifier)") [978-1-7185-0310-6](/wiki/Special:BookSources/978-1-7185-0310-6 "Special:BookSources/978-1-7185-0310-6"). [OCLC](/wiki/OCLC_(identifier) "OCLC (identifier)") [1363816350](https://search.worldcat.org/oclc/1363816350).
 
@@ -1178,15 +1178,15 @@ O'Reilly Media. [ISBN](/wiki/ISBN_(identifier) "ISBN (identifier)") [978-1-4920
 3. **[↑](#cite_ref-5)** ["Copyright"](https://github.com/rust-lang/rust/blob/master/COPYRIGHT). *[GitHub](/wiki/GitHub "GitHub")*. The Rust Programming Language. 2022-10-19. [Archived](https://web.archive.org/web/20230722190056/http://github.com/rust-lang/rust/blob/master/COPYRIGHT) from the original on 2023-07-22. Retrieved 2022-10-19.
 4. **[↑](#cite_ref-licenses_6-0)** ["Licenses"](https://www.rust-lang.org/policies/licenses). *The Rust Programming Language*. [Archived](https://web.archive.org/web/20250223193908/https://www.rust-lang.org/policies/licenses) from the original on 2025-02-23. Retrieved 2025-03-07.
 5. **[↑](#cite_ref-Strom1983_8-0)** Strom, Robert E. (1983). "Mechanisms for compile-time enforcement of
-security". *Proceedings of the 10th ACM SIGACT-SIGPLAN symposium on Principles
-of programming languages - POPL '83*. pp. 276–284\. [doi](/wiki/Doi_(identifier) "Doi (identifier)"):[10.1145/567067.567093](https://doi.org/10.1145%2F567067.567093). [ISBN](/wiki/ISBN_(identifier) "ISBN (identifier)") [0897910907](/wiki/Special:BookSources/0897910907 "Special:BookSources/0897910907"). [S2CID](/wiki/S2CID_(identifier) "S2CID (identifier)") [6630704](https://api.semanticscholar.org/CorpusID:6630704).
+   security". *Proceedings of the 10th ACM SIGACT-SIGPLAN symposium on Principles
+   of programming languages - POPL '83*. pp. 276–284\. [doi](/wiki/Doi_(identifier) "Doi (identifier)"):[10.1145/567067.567093](https://doi.org/10.1145%2F567067.567093). [ISBN](/wiki/ISBN_(identifier) "ISBN (identifier)") [0897910907](/wiki/Special:BookSources/0897910907 "Special:BookSources/0897910907"). [S2CID](/wiki/S2CID_(identifier) "S2CID (identifier)") [6630704](https://api.semanticscholar.org/CorpusID:6630704).
 6. **[↑](#cite_ref-9)** Strom, Robert E.; Yemini, Shaula (1986). ["Typestate: A programming language concept for enhancing software reliability"](https://www.cs.cmu.edu/~aldrich/papers/classic/tse12-typestate.pdf) (PDF). *IEEE Transactions on Software Engineering*. **12**. IEEE: 157–171. [doi](/wiki/Doi_(identifier) "Doi (identifier)"):[10.1109/tse.1986.6312929](https://doi.org/10.1109%2Ftse.1986.6312929). [S2CID](/wiki/S2CID_(identifier) "S2CID (identifier)") [15575346](https://api.semanticscholar.org/CorpusID:15575346).
 7. **[↑](#cite_ref-11)** ["Uniqueness Types"](https://blog.rust-lang.org/2016/08/10/Shape-of-errors-to-come.html). *Rust Blog*. [Archived](https://web.archive.org/web/20160915133745/https://blog.rust-lang.org/2016/08/10/Shape-of-errors-to-come.html) from the original on 2016-09-15. Retrieved 2016-10-08. "Those of you familiar with the Elm style may recognize that the
-updated --explain messages draw heavy
-inspiration from the Elm approach."
+   updated --explain messages draw heavy
+   inspiration from the Elm approach."
 8. **[↑](#cite_ref-influences_12-0)** ["Influences"](https://doc.rust-lang.org/reference/influences.html). *The Rust Reference*. [Archived](https://web.archive.org/web/20231126231034/https://doc.rust-lang.org/reference/influences.html) from the original on 2023-11-26. Retrieved 2023-12-31.
 9. **[↑](#cite_ref-13)** ["Uniqueness Types"](http://docs.idris-lang.org/en/latest/reference/uniqueness-types.html). *Idris 1.3.3 documentation*. [Archived](https://web.archive.org/web/20181121072557/http://docs.idris-lang.org/en/latest/reference/uniqueness-types.html) from the original on 2018-11-21. Retrieved 2022-07-14. "They are inspired by ... ownership types and borrowed pointers in
-the Rust programming language."
+   the Rust programming language."
 10. **[↑](#cite_ref-Project_Verona_14-0)** Tung, Liam. ["Microsoft opens up Rust-inspired Project Verona programming language on GitHub"](https://www.zdnet.com/article/microsoft-opens-up-rust-inspired-project-verona-programming-language-on-github/). *[ZDNET](/wiki/ZDNET "ZDNET")*. [Archived](https://web.archive.org/web/20200117143852/https://www.zdnet.com/article/microsoft-opens-up-rust-inspired-project-verona-programming-language-on-github/) from the original on 2020-01-17. Retrieved 2020-01-17.
 11. **[↑](#cite_ref-Jaloyan_15-0)** Jaloyan, Georges-Axel (2017-10-19). "Safe Pointers in SPARK 2014". [arXiv](/wiki/ArXiv_(identifier) "ArXiv (identifier)"):[1710.07047](https://arxiv.org/abs/1710.07047) [[cs.PL](https://arxiv.org/archive/cs.PL)].
 12. **[↑](#cite_ref-Lattner_16-0)** Lattner, Chris. ["Chris Lattner's Homepage"](http://nondot.org/sabre/). *Nondot*. [Archived](https://web.archive.org/web/20181225175312/http://nondot.org/sabre/) from the original on 2018-12-25. Retrieved 2019-05-14.
@@ -1195,9 +1195,9 @@ the Rust programming language."
 15. ^ [***a***](#cite_ref-MITTechReview_19-0) [***b***](#cite_ref-MITTechReview_19-1) [***c***](#cite_ref-MITTechReview_19-2) [***d***](#cite_ref-MITTechReview_19-3) [***e***](#cite_ref-MITTechReview_19-4) [***f***](#cite_ref-MITTechReview_19-5) [***g***](#cite_ref-MITTechReview_19-6) [***h***](#cite_ref-MITTechReview_19-7) [***i***](#cite_ref-MITTechReview_19-8) [***j***](#cite_ref-MITTechReview_19-9) [***k***](#cite_ref-MITTechReview_19-10) [***l***](#cite_ref-MITTechReview_19-11) [***m***](#cite_ref-MITTechReview_19-12) [***n***](#cite_ref-MITTechReview_19-13) [***o***](#cite_ref-MITTechReview_19-14) [***p***](#cite_ref-MITTechReview_19-15) [***q***](#cite_ref-MITTechReview_19-16) [***r***](#cite_ref-MITTechReview_19-17) [***s***](#cite_ref-MITTechReview_19-18) [***t***](#cite_ref-MITTechReview_19-19) Thompson, Clive (2023-02-14). ["How Rust went from a side project to the world's most-loved programming language"](https://www.technologyreview.com/2023/02/14/1067869/rust-worlds-fastest-growing-programming-language/). *MIT Technology Review*. [Archived](https://web.archive.org/web/20240919102849/https://www.technologyreview.com/2023/02/14/1067869/rust-worlds-fastest-growing-programming-language/) from the original on 2024-09-19. Retrieved 2023-02-23.
 16. **[↑](#cite_ref-20)** ["Rust logo"](https://bugzilla.mozilla.org/show_bug.cgi?id=680521). *[Bugzilla](/wiki/Bugzilla "Bugzilla")*. [Archived](https://web.archive.org/web/20240202045212/https://bugzilla.mozilla.org/show_bug.cgi?id=680521) from the original on 2024-02-02. Retrieved 2024-02-02.
 17. ^ [***a***](#cite_ref-Klabnik2016ACMHistory_21-0) [***b***](#cite_ref-Klabnik2016ACMHistory_21-1) [***c***](#cite_ref-Klabnik2016ACMHistory_21-2) [***d***](#cite_ref-Klabnik2016ACMHistory_21-3) [***e***](#cite_ref-Klabnik2016ACMHistory_21-4) [***f***](#cite_ref-Klabnik2016ACMHistory_21-5) [***g***](#cite_ref-Klabnik2016ACMHistory_21-6) [***h***](#cite_ref-Klabnik2016ACMHistory_21-7) [***i***](#cite_ref-Klabnik2016ACMHistory_21-8) [***j***](#cite_ref-Klabnik2016ACMHistory_21-9) [***k***](#cite_ref-Klabnik2016ACMHistory_21-10) [***l***](#cite_ref-Klabnik2016ACMHistory_21-11) [***m***](#cite_ref-Klabnik2016ACMHistory_21-12) [***n***](#cite_ref-Klabnik2016ACMHistory_21-13) [***o***](#cite_ref-Klabnik2016ACMHistory_21-14) [***p***](#cite_ref-Klabnik2016ACMHistory_21-15) [***q***](#cite_ref-Klabnik2016ACMHistory_21-16) [***r***](#cite_ref-Klabnik2016ACMHistory_21-17) [***s***](#cite_ref-Klabnik2016ACMHistory_21-18) [***t***](#cite_ref-Klabnik2016ACMHistory_21-19) [***u***](#cite_ref-Klabnik2016ACMHistory_21-20) Klabnik, Steve (2016-06-02). ["The History of Rust"](https://dl.acm.org/doi/10.1145/2959689.2960081). *Applicative 2016*. New York, NY, USA: Association for
-Computing Machinery. p. 80. [doi](/wiki/Doi_(identifier) "Doi (identifier)"):[10.1145/2959689.2960081](https://doi.org/10.1145%2F2959689.2960081). [ISBN](/wiki/ISBN_(identifier) "ISBN (identifier)") [978-1-4503-4464-7](/wiki/Special:BookSources/978-1-4503-4464-7 "Special:BookSources/978-1-4503-4464-7").
+    Computing Machinery. p. 80. [doi](/wiki/Doi_(identifier) "Doi (identifier)"):[10.1145/2959689.2960081](https://doi.org/10.1145%2F2959689.2960081). [ISBN](/wiki/ISBN_(identifier) "ISBN (identifier)") [978-1-4503-4464-7](/wiki/Special:BookSources/978-1-4503-4464-7 "Special:BookSources/978-1-4503-4464-7").
 18. ^ [***a***](#cite_ref-Hoare2010_22-0) [***b***](#cite_ref-Hoare2010_22-1) [***c***](#cite_ref-Hoare2010_22-2) Hoare, Graydon (July 2010). [*Project Servo: Technology from the past come to save the future from itself*](https://archive.today/20211226213836/http://venge.net/graydon/talks/intro-talk-2.pdf) (PDF). Mozilla Annual Summit. Archived
-from [the original](http://venge.net/graydon/talks/intro-talk-2.pdf) (PDF) on 2021-12-26. Retrieved 2024-10-29.
+    from [the original](http://venge.net/graydon/talks/intro-talk-2.pdf) (PDF) on 2021-12-26. Retrieved 2024-10-29.
 19. **[↑](#cite_ref-OCamlCompiler_24-0)** Hoare, Graydon (November 2016). ["Rust Prehistory (Archive of the original Rust OCaml compiler source code)"](https://github.com/graydon/rust-prehistory/tree/master). *[GitHub](/wiki/GitHub "GitHub")*. Retrieved 2024-10-29.
 20. **[↑](#cite_ref-Rust0.1_25-0)** ["0.1 first supported public release Milestone · rust-lang/rust"](https://github.com/rust-lang/rust/milestone/3?closed=1). *[GitHub](/wiki/GitHub "GitHub")*. Retrieved 2024-10-29.
 21. **[↑](#cite_ref-Nelson2022RustConf_26-0)** Nelson, Jynn (2022-08-05). [*RustConf 2022 - Bootstrapping: The once and future compiler*](https://www.youtube.com/watch?v=oUIjG-y4zaA). Portland, Oregon: Rust Team. Retrieved 2024-10-29 – via YouTube.
@@ -1209,8 +1209,8 @@ from [the original](http://venge.net/graydon/talks/intro-talk-2.pdf) (PDF) on 20
 27. **[↑](#cite_ref-33)** ["Firefox 45.0, See All New Features, Updates and Fixes"](https://www.mozilla.org/en-US/firefox/45.0/releasenotes/). *Mozilla*. [Archived](https://web.archive.org/web/20160317215950/https://www.mozilla.org/en-US/firefox/45.0/releasenotes/) from the original on 2016-03-17. Retrieved 2024-10-31.
 28. **[↑](#cite_ref-34)** Lardinois, Frederic (2017-09-29). ["It's time to give Firefox another chance"](https://techcrunch.com/2017/09/29/its-time-to-give-firefox-another-chance/). *[TechCrunch](/wiki/TechCrunch "TechCrunch")*. [Archived](https://web.archive.org/web/20230815025149/https://techcrunch.com/2017/09/29/its-time-to-give-firefox-another-chance/) from the original on 2023-08-15. Retrieved 2023-08-15.
 29. **[↑](#cite_ref-2017PortugalEnergyStudy_35-0)** Pereira, Rui; Couto, Marco; Ribeiro, Francisco; Rua, Rui; Cunha,
-Jácome; Fernandes, João Paulo; Saraiva, João (2017-10-23). ["Energy efficiency across programming languages: How do energy, time, and memory relate?"](https://dl.acm.org/doi/10.1145/3136014.3136031). [*Proceedings of the 10th ACM SIGPLAN International Conference on Software Language Engineering*](http://repositorio.inesctec.pt/handle/123456789/5492). SLE 2017. New York, NY, USA: Association for Computing Machinery.
-pp. 256–267\. [doi](/wiki/Doi_(identifier) "Doi (identifier)"):[10.1145/3136014.3136031](https://doi.org/10.1145%2F3136014.3136031). [hdl](/wiki/Hdl_(identifier) "Hdl (identifier)"):[1822/65359](https://hdl.handle.net/1822%2F65359). [ISBN](/wiki/ISBN_(identifier) "ISBN (identifier)") [978-1-4503-5525-4](/wiki/Special:BookSources/978-1-4503-5525-4 "Special:BookSources/978-1-4503-5525-4").
+    Jácome; Fernandes, João Paulo; Saraiva, João (2017-10-23). ["Energy efficiency across programming languages: How do energy, time, and memory relate?"](https://dl.acm.org/doi/10.1145/3136014.3136031). [*Proceedings of the 10th ACM SIGPLAN International Conference on Software Language Engineering*](http://repositorio.inesctec.pt/handle/123456789/5492). SLE 2017. New York, NY, USA: Association for Computing Machinery.
+    pp. 256–267\. [doi](/wiki/Doi_(identifier) "Doi (identifier)"):[10.1145/3136014.3136031](https://doi.org/10.1145%2F3136014.3136031). [hdl](/wiki/Hdl_(identifier) "Hdl (identifier)"):[1822/65359](https://hdl.handle.net/1822%2F65359). [ISBN](/wiki/ISBN_(identifier) "ISBN (identifier)") [978-1-4503-5525-4](/wiki/Special:BookSources/978-1-4503-5525-4 "Special:BookSources/978-1-4503-5525-4").
 30. **[↑](#cite_ref-37)** Cimpanu, Catalin (2020-08-11). ["Mozilla lays off 250 employees while it refocuses on commercial products"](https://www.zdnet.com/article/mozilla-lays-off-250-employees-while-it-refocuses-on-commercial-products/). *[ZDNET](/wiki/ZDNET "ZDNET")*. [Archived](https://web.archive.org/web/20220318025804/https://www.zdnet.com/article/mozilla-lays-off-250-employees-while-it-refocuses-on-commercial-products/) from the original on 2022-03-18. Retrieved 2020-12-02.
 31. **[↑](#cite_ref-38)** Cooper, Daniel (2020-08-11). ["Mozilla lays off 250 employees due to the pandemic"](https://www.engadget.com/mozilla-firefox-250-employees-layoffs-151324924.html). *[Engadget](/wiki/Engadget "Engadget")*. [Archived](https://web.archive.org/web/20201213020220/https://www.engadget.com/mozilla-firefox-250-employees-layoffs-151324924.html) from the original on 2020-12-13. Retrieved 2020-12-02.
 32. **[↑](#cite_ref-39)** Tung, Liam (2020-08-21). ["Programming language Rust: Mozilla job cuts have hit us badly but here's how we'll survive"](https://www.zdnet.com/article/programming-language-rust-mozilla-job-cuts-have-hit-us-badly-but-heres-how-well-survive/). *[ZDNET](/wiki/ZDNET "ZDNET")*. [Archived](https://web.archive.org/web/20220421083509/https://www.zdnet.com/article/programming-language-rust-mozilla-job-cuts-have-hit-us-badly-but-heres-how-well-survive/) from the original on 2022-04-21. Retrieved 2022-04-21.
@@ -1224,208 +1224,208 @@ pp. 256–267\. [doi](/wiki/Doi_(identifier) "Doi (identifier)"):[10.1145/313601
 40. **[↑](#cite_ref-WhiteHouse1_47-0)** Gross, Grant (2024-02-27). ["White House urges developers to dump C and C++"](https://www.infoworld.com/article/2336216/white-house-urges-developers-to-dump-c-and-c.html). *[InfoWorld](/wiki/InfoWorld "InfoWorld")*. Retrieved 2025-01-26.
 41. **[↑](#cite_ref-WhiteHouse2_48-0)** Warminsky, Joe (2024-02-27). ["After decades of memory-related software bugs, White House calls on industry to act"](https://therecord.media/memory-related-software-bugs-white-house-code-report-oncd). *The Record*. Retrieved 2025-01-26.
 42. **[↑](#cite_ref-WhiteHouseFullReport_49-0)** ["Press Release: Future Software Should Be Memory Safe"](https://web.archive.org/web/20250118013136/https://www.whitehouse.gov/oncd/briefing-room/2024/02/26/press-release-technical-report/). [The White House](/wiki/White_House "White House").
-2024-02-26. Archived from [the original](https://www.whitehouse.gov/oncd/briefing-room/2024/02/26/press-release-technical-report/) on 2025-01-18. Retrieved 2025-01-26.
+    2024-02-26. Archived from [the original](https://www.whitehouse.gov/oncd/briefing-room/2024/02/26/press-release-technical-report/) on 2025-01-18. Retrieved 2025-01-26.
 43. **[↑](#cite_ref-WhiteHouse3_50-0)** Jack, Bobby (2024-02-29). ["The White House Wants Memory-Safe Programming, but What Is That?"](https://www.makeuseof.com/memory-safe-programming-white-house-wants/). *MakeUseOf*. Retrieved 2025-01-26.
 44. **[↑](#cite_ref-WhiteHouse4_51-0)** Donovan, Ryan (2024-12-30). ["In Rust we trust? White House Office urges memory safety"](https://stackoverflow.blog/2024/12/30/in-rust-we-trust-white-house-office-urges-memory-safety/). *[The Stack Overflow Blog](/wiki/Stack_Overflow "Stack Overflow")*. Retrieved 2025-01-26.
 45. **[↑](#cite_ref-52)** Proven, Liam (2019-11-27). ["Rebecca Rumbul named new CEO of The Rust Foundation"](https://www.theregister.com/2021/11/19/rust_foundation_ceo/). *[The Register](/wiki/The_Register "The Register")*. [Archived](https://web.archive.org/web/20220714110957/https://www.theregister.com/2021/11/19/rust_foundation_ceo/) from the original on 2022-07-14. Retrieved 2022-07-14. "Both are curly bracket languages, with C-like syntax that makes
-them unintimidating for C programmers."
+    them unintimidating for C programmers."
 46. ^ [***a***](#cite_ref-:4_53-0) [***b***](#cite_ref-:4_53-1) [***c***](#cite_ref-:4_53-2) Vigliarolo, Brandon (2021-02-10). ["The Rust programming language now has its own independent foundation"](https://web.archive.org/web/20230320172900/https://www.techrepublic.com/article/the-rust-programming-language-now-has-its-own-independent-foundation/). *[TechRepublic](/wiki/TechRepublic "TechRepublic")*. Archived from [the original](https://www.techrepublic.com/article/the-rust-programming-language-now-has-its-own-independent-foundation/) on 2023-03-20. Retrieved 2022-07-14.
 47. **[↑](#cite_ref-FOOTNOTEKlabnikNichols2019263_54-0)** [Klabnik & Nichols 2019](#CITEREFKlabnikNichols2019),
-p. 263.
+    p. 263.
 48. **[↑](#cite_ref-FOOTNOTEKlabnikNichols20195–6_55-0)** [Klabnik & Nichols 2019](#CITEREFKlabnikNichols2019),
-pp. 5–6.
+    pp. 5–6.
 49. **[↑](#cite_ref-FOOTNOTEKlabnikNichols202332_56-0)** [Klabnik & Nichols 2023](#CITEREFKlabnikNichols2023),
-p. 32.
+    p. 32.
 50. **[↑](#cite_ref-FOOTNOTEKlabnikNichols202332–33_57-0)** [Klabnik & Nichols 2023](#CITEREFKlabnikNichols2023),
-pp. 32–33.
+    pp. 32–33.
 51. **[↑](#cite_ref-FOOTNOTEKlabnikNichols202349–50_58-0)** [Klabnik & Nichols 2023](#CITEREFKlabnikNichols2023),
-pp. 49–50.
+    pp. 49–50.
 52. **[↑](#cite_ref-FOOTNOTEKlabnikNichols202334–36_59-0)** [Klabnik & Nichols 2023](#CITEREFKlabnikNichols2023),
-pp. 34–36.
+    pp. 34–36.
 53. **[↑](#cite_ref-FOOTNOTEKlabnikNichols20236,_47,_53_60-0)** [Klabnik & Nichols 2023](#CITEREFKlabnikNichols2023),
-pp. 6, 47, 53.
+    pp. 6, 47, 53.
 54. **[↑](#cite_ref-FOOTNOTEKlabnikNichols202347–48_61-0)** [Klabnik & Nichols 2023](#CITEREFKlabnikNichols2023),
-pp. 47–48.
+    pp. 47–48.
 55. ^ [***a***](#cite_ref-FOOTNOTEKlabnikNichols202350–53_62-0) [***b***](#cite_ref-FOOTNOTEKlabnikNichols202350–53_62-1) [Klabnik & Nichols 2023](#CITEREFKlabnikNichols2023),
-pp. 50–53.
+    pp. 50–53.
 56. **[↑](#cite_ref-FOOTNOTEKlabnikNichols202356_63-0)** [Klabnik & Nichols 2023](#CITEREFKlabnikNichols2023),
-p. 56.
+    p. 56.
 57. **[↑](#cite_ref-FOOTNOTEKlabnikNichols202357–58_64-0)** [Klabnik & Nichols 2023](#CITEREFKlabnikNichols2023),
-pp. 57–58.
+    pp. 57–58.
 58. **[↑](#cite_ref-FOOTNOTEKlabnikNichols202354–56_65-0)** [Klabnik & Nichols 2023](#CITEREFKlabnikNichols2023),
-pp. 54–56.
+    pp. 54–56.
 59. **[↑](#cite_ref-FOOTNOTEKlabnikNichols2019104–109_66-0)** [Klabnik & Nichols 2019](#CITEREFKlabnikNichols2019),
-pp. 104–109.
+    pp. 104–109.
 60. **[↑](#cite_ref-FOOTNOTEKlabnikNichols201924_67-0)** [Klabnik & Nichols 2019](#CITEREFKlabnikNichols2019),
-pp. 24.
+    pp. 24.
 61. **[↑](#cite_ref-FOOTNOTEKlabnikNichols201936–38_68-0)** [Klabnik & Nichols 2019](#CITEREFKlabnikNichols2019),
-pp. 36–38.
+    pp. 36–38.
 62. **[↑](#cite_ref-69)** ["isize"](https://doc.rust-lang.org/stable/std/primitive.isize.html). *doc.rust-lang.org*. Retrieved 2025-09-28.
 63. **[↑](#cite_ref-70)** ["usize"](https://doc.rust-lang.org/stable/std/primitive.usize.html). *doc.rust-lang.org*. Retrieved 2025-09-28.
 64. **[↑](#cite_ref-FOOTNOTEKlabnikNichols202336–38_71-0)** [Klabnik & Nichols 2023](#CITEREFKlabnikNichols2023),
-pp. 36–38.
+    pp. 36–38.
 65. **[↑](#cite_ref-FOOTNOTEKlabnikNichols2023502_72-0)** [Klabnik & Nichols 2023](#CITEREFKlabnikNichols2023),
-p. 502.
+    p. 502.
 66. **[↑](#cite_ref-73)** ["Primitive Type char"](https://doc.rust-lang.org/std/primitive.char.html). *The Rust Standard Library documentation*. Retrieved 2025-09-07.
 67. **[↑](#cite_ref-74)** ["Glossary of Unicode Terms"](https://www.unicode.org/glossary/). *[Unicode Consortium](/wiki/Unicode_Consortium "Unicode Consortium")*. [Archived](https://web.archive.org/web/20180924092749/http://www.unicode.org/glossary/) from the original on 2018-09-24. Retrieved 2024-07-30.
 68. **[↑](#cite_ref-FOOTNOTEKlabnikNichols201938–40_75-0)** [Klabnik & Nichols 2019](#CITEREFKlabnikNichols2019),
-pp. 38–40.
+    pp. 38–40.
 69. **[↑](#cite_ref-FOOTNOTEKlabnikNichols202340–42_76-0)** [Klabnik & Nichols 2023](#CITEREFKlabnikNichols2023),
-pp. 40–42.
+    pp. 40–42.
 70. **[↑](#cite_ref-FOOTNOTEKlabnikNichols202342_77-0)** [Klabnik & Nichols 2023](#CITEREFKlabnikNichols2023),
-p. 42.
+    p. 42.
 71. **[↑](#cite_ref-FOOTNOTEKlabnikNichols201959–61_78-0)** [Klabnik & Nichols 2019](#CITEREFKlabnikNichols2019),
-pp. 59–61.
+    pp. 59–61.
 72. ^ [***a***](#cite_ref-FOOTNOTEKlabnikNichols201963–68_79-0) [***b***](#cite_ref-FOOTNOTEKlabnikNichols201963–68_79-1) [Klabnik & Nichols 2019](#CITEREFKlabnikNichols2019),
-pp. 63–68.
+    pp. 63–68.
 73. **[↑](#cite_ref-FOOTNOTEKlabnikNichols201974–75_80-0)** [Klabnik & Nichols 2019](#CITEREFKlabnikNichols2019),
-pp. 74–75.
+    pp. 74–75.
 74. **[↑](#cite_ref-FOOTNOTEKlabnikNichols202371–72_81-0)** [Klabnik & Nichols 2023](#CITEREFKlabnikNichols2023),
-pp. 71–72.
+    pp. 71–72.
 75. ^ [***a***](#cite_ref-BeyondSafety_82-0) [***b***](#cite_ref-BeyondSafety_82-1) Balasubramanian, Abhiram; Baranowski, Marek S.; Burtsev, Anton;
-Panda, Aurojit; Rakamarić, Zvonimir; Ryzhyk, Leonid (2017-05-07). ["System Programming in Rust"](https://doi.org/10.1145/3102980.3103006). *Proceedings of the 16th Workshop on Hot Topics in Operating
-Systems*. HotOS '17. New York, NY, US: Association for Computing Machinery.
-pp. 156–161\. [doi](/wiki/Doi_(identifier) "Doi (identifier)"):[10.1145/3102980.3103006](https://doi.org/10.1145%2F3102980.3103006). [ISBN](/wiki/ISBN_(identifier) "ISBN (identifier)") [978-1-4503-5068-6](/wiki/Special:BookSources/978-1-4503-5068-6 "Special:BookSources/978-1-4503-5068-6"). [S2CID](/wiki/S2CID_(identifier) "S2CID (identifier)") [24100599](https://api.semanticscholar.org/CorpusID:24100599). [Archived](https://web.archive.org/web/20220611034046/https://dl.acm.org/doi/10.1145/3102980.3103006) from the original on 2022-06-11. Retrieved 2022-06-01.
+    Panda, Aurojit; Rakamarić, Zvonimir; Ryzhyk, Leonid (2017-05-07). ["System Programming in Rust"](https://doi.org/10.1145/3102980.3103006). *Proceedings of the 16th Workshop on Hot Topics in Operating
+    Systems*. HotOS '17. New York, NY, US: Association for Computing Machinery.
+    pp. 156–161\. [doi](/wiki/Doi_(identifier) "Doi (identifier)"):[10.1145/3102980.3103006](https://doi.org/10.1145%2F3102980.3103006). [ISBN](/wiki/ISBN_(identifier) "ISBN (identifier)") [978-1-4503-5068-6](/wiki/Special:BookSources/978-1-4503-5068-6 "Special:BookSources/978-1-4503-5068-6"). [S2CID](/wiki/S2CID_(identifier) "S2CID (identifier)") [24100599](https://api.semanticscholar.org/CorpusID:24100599). [Archived](https://web.archive.org/web/20220611034046/https://dl.acm.org/doi/10.1145/3102980.3103006) from the original on 2022-06-11. Retrieved 2022-06-01.
 76. **[↑](#cite_ref-FOOTNOTEKlabnikNichols2023327–30_83-0)** [Klabnik & Nichols 2023](#CITEREFKlabnikNichols2023),
-pp. 327–30.
+    pp. 327–30.
 77. **[↑](#cite_ref-84)** ["Lifetimes"](https://doc.rust-lang.org/rust-by-example/scope/lifetime.html). *Rust by Example*. [Archived](https://web.archive.org/web/20241116192422/https://doc.rust-lang.org/rust-by-example/scope/lifetime.html) from the original on 2024-11-16. Retrieved 2024-10-29.
 78. **[↑](#cite_ref-85)** ["Explicit annotation"](https://doc.rust-lang.org/rust-by-example/scope/lifetime/explicit.html). *Rust by Example*. Retrieved 2024-10-29.
 79. ^ [***a***](#cite_ref-FOOTNOTEKlabnikNichols2019194_86-0) [***b***](#cite_ref-FOOTNOTEKlabnikNichols2019194_86-1) [Klabnik & Nichols 2019](#CITEREFKlabnikNichols2019),
-p. 194.
+    p. 194.
 80. **[↑](#cite_ref-FOOTNOTEKlabnikNichols201975,_134_87-0)** [Klabnik & Nichols 2019](#CITEREFKlabnikNichols2019),
-pp. 75, 134.
+    pp. 75, 134.
 81. **[↑](#cite_ref-88)** Shamrell-Harrington, Nell (2022-04-15). ["The Rust Borrow Checker – a Deep Dive"](https://www.infoq.com/presentations/rust-borrow-checker/). *InfoQ*. [Archived](https://web.archive.org/web/20220625140128/https://www.infoq.com/presentations/rust-borrow-checker/) from the original on 2022-06-25. Retrieved 2022-06-25.
 82. **[↑](#cite_ref-FOOTNOTEKlabnikNichols2019194–195_89-0)** [Klabnik & Nichols 2019](#CITEREFKlabnikNichols2019),
-pp. 194–195.
+    pp. 194–195.
 83. **[↑](#cite_ref-FOOTNOTEKlabnikNichols2023208–12_90-0)** [Klabnik & Nichols 2023](#CITEREFKlabnikNichols2023),
-pp. 208–12.
+    pp. 208–12.
 84. **[↑](#cite_ref-FOOTNOTEKlabnikNichols2023[httpsdocrust-langorgbookch04-02-references-and-borrowinghtml_4.2._References_and_Borrowing]_91-0)** [Klabnik & Nichols 2023](#CITEREFKlabnikNichols2023), [4.2. References and Borrowing](https://doc.rust-lang.org/book/ch04-02-references-and-borrowing.html).
 85. **[↑](#cite_ref-Pearce_92-0)** Pearce, David (2021-04-17). ["A Lightweight Formalism for Reference Lifetimes and Borrowing in Rust"](https://dl.acm.org/doi/10.1145/3443420). *ACM Transactions on Programming Languages and Systems*. **43**: 1–73. [doi](/wiki/Doi_(identifier) "Doi (identifier)"):[10.1145/3443420](https://doi.org/10.1145%2F3443420). [Archived](https://web.archive.org/web/20240415053627/https://dl.acm.org/doi/10.1145/3443420) from the original on 2024-04-15. Retrieved 2024-12-11.
 86. **[↑](#cite_ref-FOOTNOTEKlabnikNichols201983_93-0)** [Klabnik & Nichols 2019](#CITEREFKlabnikNichols2019),
-p. 83.
+    p. 83.
 87. **[↑](#cite_ref-FOOTNOTEKlabnikNichols201997_94-0)** [Klabnik & Nichols 2019](#CITEREFKlabnikNichols2019),
-p. 97.
+    p. 97.
 88. **[↑](#cite_ref-FOOTNOTEKlabnikNichols201998–101_95-0)** [Klabnik & Nichols 2019](#CITEREFKlabnikNichols2019),
-pp. 98–101.
+    pp. 98–101.
 89. **[↑](#cite_ref-FOOTNOTEKlabnikNichols2019438–440_96-0)** [Klabnik & Nichols 2019](#CITEREFKlabnikNichols2019),
-pp. 438–440.
+    pp. 438–440.
 90. **[↑](#cite_ref-FOOTNOTEKlabnikNichols201993_97-0)** [Klabnik & Nichols 2019](#CITEREFKlabnikNichols2019),
-pp. 93.
+    pp. 93.
 91. **[↑](#cite_ref-FOOTNOTEGjengset2021213–215_98-0)** [Gjengset 2021](#CITEREFGjengset2021),
-pp. 213–215.
+    pp. 213–215.
 92. **[↑](#cite_ref-FOOTNOTEKlabnikNichols2023108–110,_113–114,_116–117_99-0)** [Klabnik & Nichols 2023](#CITEREFKlabnikNichols2023),
-pp. 108–110, 113–114, 116–117.
+    pp. 108–110, 113–114, 116–117.
 93. **[↑](#cite_ref-Rust_error_handling_100-0)** ["Rust error handling is perfect actually"](https://bitfieldconsulting.com/posts/rust-errors-option-result). *Bitfield Consulting*. [Archived](https://web.archive.org/web/20250807061432/https://bitfieldconsulting.com/posts/rust-errors-option-result) from the original on 2025-08-07. Retrieved 2025-09-15.
 94. **[↑](#cite_ref-FOOTNOTEGjengset2021155-156_101-0)** [Gjengset 2021](#CITEREFGjengset2021),
-p. 155-156.
+    p. 155-156.
 95. **[↑](#cite_ref-FOOTNOTEKlabnikNichols2023421–423_102-0)** [Klabnik & Nichols 2023](#CITEREFKlabnikNichols2023),
-pp. 421–423.
+    pp. 421–423.
 96. **[↑](#cite_ref-FOOTNOTEKlabnikNichols2019418–427_103-0)** [Klabnik & Nichols 2019](#CITEREFKlabnikNichols2019),
-pp. 418–427.
+    pp. 418–427.
 97. **[↑](#cite_ref-104)** ["Casting"](https://doc.rust-lang.org/rust-by-example/types/cast.html). *Rust by Example*. Retrieved 2025-04-01.
 98. **[↑](#cite_ref-FOOTNOTEKlabnikNichols2023378_105-0)** [Klabnik & Nichols 2023](#CITEREFKlabnikNichols2023),
-p. 378.
+    p. 378.
 99. ^ [***a***](#cite_ref-FOOTNOTEKlabnikNichols2023192–198_106-0) [***b***](#cite_ref-FOOTNOTEKlabnikNichols2023192–198_106-1) [***c***](#cite_ref-FOOTNOTEKlabnikNichols2023192–198_106-2) [Klabnik & Nichols 2023](#CITEREFKlabnikNichols2023),
-pp. 192–198.
+    pp. 192–198.
 100. **[↑](#cite_ref-FOOTNOTEKlabnikNichols202398_107-0)** [Klabnik & Nichols 2023](#CITEREFKlabnikNichols2023),
-p. 98.
+     p. 98.
 101. **[↑](#cite_ref-FOOTNOTEKlabnikNichols2019171–172,_205_108-0)** [Klabnik & Nichols 2019](#CITEREFKlabnikNichols2019),
-pp. 171–172, 205.
+     pp. 171–172, 205.
 102. ^ [***a***](#cite_ref-FOOTNOTEKlabnikNichols2023191–192_109-0) [***b***](#cite_ref-FOOTNOTEKlabnikNichols2023191–192_109-1) [Klabnik & Nichols 2023](#CITEREFKlabnikNichols2023),
-pp. 191–192.
+     pp. 191–192.
 103. **[↑](#cite_ref-FOOTNOTEGjengset202125_110-0)** [Gjengset 2021](#CITEREFGjengset2021), p. 25.
 104. **[↑](#cite_ref-FOOTNOTEKlabnikNichols2023[httpsdocrust-langorgbookch18-02-trait-objectshtml_18.2._Using_Trait_Objects_That_Allow_for_Values_of_Different_Types]_111-0)** [Klabnik & Nichols 2023](#CITEREFKlabnikNichols2023), [18.2. Using Trait Objects That Allow for Values of Different Types](https://doc.rust-lang.org/book/ch18-02-trait-objects.html).
 105. **[↑](#cite_ref-FOOTNOTEKlabnikNichols2019441–442_112-0)** [Klabnik & Nichols 2019](#CITEREFKlabnikNichols2019),
-pp. 441–442.
+     pp. 441–442.
 106. **[↑](#cite_ref-FOOTNOTEKlabnikNichols2019379–380_113-0)** [Klabnik & Nichols 2019](#CITEREFKlabnikNichols2019),
-pp. 379–380.
+     pp. 379–380.
 107. **[↑](#cite_ref-cnet_114-0)** Rosenblatt, Seth (2013-04-03). ["Samsung joins Mozilla's quest for Rust"](http://reviews.cnet.com/8301-3514_7-57577639/samsung-joins-mozillas-quest-for-rust/). [CNET](/wiki/CNET "CNET"). [Archived](https://web.archive.org/web/20130404142333/http://reviews.cnet.com/8301-3514_7-57577639/samsung-joins-mozillas-quest-for-rust/) from the original on 2013-04-04. Retrieved 2013-04-05.
 108. **[↑](#cite_ref-lwn_115-0)** Brown, Neil (2013-04-17). ["A taste of Rust"](https://lwn.net/Articles/547145/). *[LWN.net](/wiki/LWN.net "LWN.net")*. [Archived](https://web.archive.org/web/20130426010754/http://lwn.net/Articles/547145/) from the original on 2013-04-26. Retrieved 2013-04-25.
 109. **[↑](#cite_ref-The_Rustonomicon_116-0)** ["Races"](https://doc.rust-lang.org/nomicon/races.html). *The Rustonomicon*. [Archived](https://web.archive.org/web/20170710194643/https://doc.rust-lang.org/nomicon/races.html) from the original on 2017-07-10. Retrieved 2017-07-03.
 110. **[↑](#cite_ref-Sensors_117-0)** Vandervelden, Thibaut; De Smet, Ruben; Deac, Diana; Steenhaut, Kris;
-Braeken, An (2024-09-07). ["Overview of Embedded Rust Operating Systems and Frameworks"](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC11398098). *Sensors*. **24** (17): 5818. [Bibcode](/wiki/Bibcode_(identifier) "Bibcode (identifier)"):[2024Senso..24.5818V](https://ui.adsabs.harvard.edu/abs/2024Senso..24.5818V). [doi](/wiki/Doi_(identifier) "Doi (identifier)"):[10.3390/s24175818](https://doi.org/10.3390%2Fs24175818). [PMC](/wiki/PMC_(identifier) "PMC (identifier)") [11398098](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC11398098). [PMID](/wiki/PMID_(identifier) "PMID (identifier)") [39275729](https://pubmed.ncbi.nlm.nih.gov/39275729).
+     Braeken, An (2024-09-07). ["Overview of Embedded Rust Operating Systems and Frameworks"](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC11398098). *Sensors*. **24** (17): 5818. [Bibcode](/wiki/Bibcode_(identifier) "Bibcode (identifier)"):[2024Senso..24.5818V](https://ui.adsabs.harvard.edu/abs/2024Senso..24.5818V). [doi](/wiki/Doi_(identifier) "Doi (identifier)"):[10.3390/s24175818](https://doi.org/10.3390%2Fs24175818). [PMC](/wiki/PMC_(identifier) "PMC (identifier)") [11398098](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC11398098). [PMID](/wiki/PMID_(identifier) "PMID (identifier)") [39275729](https://pubmed.ncbi.nlm.nih.gov/39275729).
 111. **[↑](#cite_ref-lang-faq_118-0)** ["The Rust Language FAQ"](https://web.archive.org/web/20150420104147/http://static.rust-lang.org/doc/master/complement-lang-faq.html). The Rust Programming Language. 2015. Archived from [the original](http://static.rust-lang.org/doc/master/complement-lang-faq.html) on 2015-04-20. Retrieved 2017-04-24.
 112. **[↑](#cite_ref-119)** ["RAII"](https://doc.rust-lang.org/rust-by-example/scope/raii.html). *Rust by Example*. [Archived](https://web.archive.org/web/20190421131142/https://doc.rust-lang.org/rust-by-example/scope/raii.html) from the original on 2019-04-21. Retrieved 2020-11-22.
 113. **[↑](#cite_ref-120)** ["Abstraction without overhead: traits in Rust"](https://blog.rust-lang.org/2015/05/11/traits.html). *Rust Blog*. [Archived](https://web.archive.org/web/20210923101530/https://blog.rust-lang.org/2015/05/11/traits.html) from the original on 2021-09-23. Retrieved 2021-10-19.
 114. **[↑](#cite_ref-121)** ["Box, stack and heap"](https://doc.rust-lang.org/stable/rust-by-example/std/box.html). *Rust by Example*. [Archived](https://web.archive.org/web/20220531114141/https://doc.rust-lang.org/stable/rust-by-example/std/box.html) from the original on 2022-05-31. Retrieved 2022-06-13.
 115. **[↑](#cite_ref-FOOTNOTEKlabnikNichols201970–75_122-0)** [Klabnik & Nichols 2019](#CITEREFKlabnikNichols2019),
-pp. 70–75.
+     pp. 70–75.
 116. **[↑](#cite_ref-FOOTNOTEKlabnikNichols2019323_123-0)** [Klabnik & Nichols 2019](#CITEREFKlabnikNichols2019),
-p. 323.
+     p. 323.
 117. **[↑](#cite_ref-FOOTNOTEKlabnikNichols2023420–429_124-0)** [Klabnik & Nichols 2023](#CITEREFKlabnikNichols2023),
-pp. 420–429.
+     pp. 420–429.
 118. **[↑](#cite_ref-FOOTNOTEMcNamara2021139,_376–379,_395_125-0)** [McNamara 2021](#CITEREFMcNamara2021), p. 139, 376–379,
-395.
+     395.
 119. ^ [***a***](#cite_ref-UnsafeRustUse_126-0) [***b***](#cite_ref-UnsafeRustUse_126-1) Astrauskas, Vytautas; Matheja, Christoph; Poli, Federico; Müller,
-Peter; Summers, Alexander J. (2020-11-13). ["How do programmers use unsafe rust?"](https://dl.acm.org/doi/10.1145/3428204). *Proceedings of the ACM on Programming Languages*. **4**: 1–27\. [doi](/wiki/Doi_(identifier) "Doi (identifier)"):[10.1145/3428204](https://doi.org/10.1145%2F3428204). [hdl](/wiki/Hdl_(identifier) "Hdl (identifier)"):[20.500.11850/465785](https://hdl.handle.net/20.500.11850%2F465785). [ISSN](/wiki/ISSN_(identifier) "ISSN (identifier)") [2475-1421](https://search.worldcat.org/issn/2475-1421).
+     Peter; Summers, Alexander J. (2020-11-13). ["How do programmers use unsafe rust?"](https://dl.acm.org/doi/10.1145/3428204). *Proceedings of the ACM on Programming Languages*. **4**: 1–27\. [doi](/wiki/Doi_(identifier) "Doi (identifier)"):[10.1145/3428204](https://doi.org/10.1145%2F3428204). [hdl](/wiki/Hdl_(identifier) "Hdl (identifier)"):[20.500.11850/465785](https://hdl.handle.net/20.500.11850%2F465785). [ISSN](/wiki/ISSN_(identifier) "ISSN (identifier)") [2475-1421](https://search.worldcat.org/issn/2475-1421).
 120. **[↑](#cite_ref-127)** Lattuada, Andrea; Hance, Travis; Cho, Chanhee; Brun, Matthias;
-Subasinghe, Isitha; Zhou, Yi; Howell, Jon; Parno, Bryan; Hawblitzel,
-Chris (2023-04-06). ["Verus: Verifying Rust Programs using Linear Ghost Types"](https://dl.acm.org/doi/10.1145/3586037). *Proceedings of the ACM on Programming Languages*. **7**:
-85:286–85:315. [doi](/wiki/Doi_(identifier) "Doi (identifier)"):[10.1145/3586037](https://doi.org/10.1145%2F3586037). [hdl](/wiki/Hdl_(identifier) "Hdl (identifier)"):[20.500.11850/610518](https://hdl.handle.net/20.500.11850%2F610518).
+     Subasinghe, Isitha; Zhou, Yi; Howell, Jon; Parno, Bryan; Hawblitzel,
+     Chris (2023-04-06). ["Verus: Verifying Rust Programs using Linear Ghost Types"](https://dl.acm.org/doi/10.1145/3586037). *Proceedings of the ACM on Programming Languages*. **7**:
+     85:286–85:315. [doi](/wiki/Doi_(identifier) "Doi (identifier)"):[10.1145/3586037](https://doi.org/10.1145%2F3586037). [hdl](/wiki/Hdl_(identifier) "Hdl (identifier)"):[20.500.11850/610518](https://hdl.handle.net/20.500.11850%2F610518).
 121. **[↑](#cite_ref-128)** Milano, Mae; Turcotti, Julia; Myers, Andrew C. (2022-06-09). "A
-flexible type system for fearless concurrency". *Proceedings of the 43rd ACM SIGPLAN International Conference on
-Programming Language Design and Implementation*. New York, NY, USA: Association for Computing Machinery.
-pp. 458–473\. [doi](/wiki/Doi_(identifier) "Doi (identifier)"):[10.1145/3519939.3523443](https://doi.org/10.1145%2F3519939.3523443). [ISBN](/wiki/ISBN_(identifier) "ISBN (identifier)") [978-1-4503-9265-5](/wiki/Special:BookSources/978-1-4503-9265-5 "Special:BookSources/978-1-4503-9265-5").
+     flexible type system for fearless concurrency". *Proceedings of the 43rd ACM SIGPLAN International Conference on
+     Programming Language Design and Implementation*. New York, NY, USA: Association for Computing Machinery.
+     pp. 458–473\. [doi](/wiki/Doi_(identifier) "Doi (identifier)"):[10.1145/3519939.3523443](https://doi.org/10.1145%2F3519939.3523443). [ISBN](/wiki/ISBN_(identifier) "ISBN (identifier)") [978-1-4503-9265-5](/wiki/Special:BookSources/978-1-4503-9265-5 "Special:BookSources/978-1-4503-9265-5").
 122. **[↑](#cite_ref-129)** ["Introduction - Learning Rust With Entirely Too Many Linked Lists"](https://rust-unofficial.github.io/too-many-lists/). *rust-unofficial.github.io*. Retrieved 2025-08-06.
 123. **[↑](#cite_ref-130)** Noble, James; Mackay, Julian; Wrigstad, Tobias (2023-10-16). ["Rusty Links in Local Chains✱"](https://doi.org/10.1145/3611096.3611097). *Proceedings of the 24th ACM International Workshop on Formal
-Techniques for Java-like Programs*. New York, NY, USA: Association for Computing Machinery.
-pp. 1–3\. [doi](/wiki/Doi_(identifier) "Doi (identifier)"):[10.1145/3611096.3611097](https://doi.org/10.1145%2F3611096.3611097). [ISBN](/wiki/ISBN_(identifier) "ISBN (identifier)") [979-8-4007-0784-1](/wiki/Special:BookSources/979-8-4007-0784-1 "Special:BookSources/979-8-4007-0784-1").
+     Techniques for Java-like Programs*. New York, NY, USA: Association for Computing Machinery.
+     pp. 1–3\. [doi](/wiki/Doi_(identifier) "Doi (identifier)"):[10.1145/3611096.3611097](https://doi.org/10.1145%2F3611096.3611097). [ISBN](/wiki/ISBN_(identifier) "ISBN (identifier)") [979-8-4007-0784-1](/wiki/Special:BookSources/979-8-4007-0784-1 "Special:BookSources/979-8-4007-0784-1").
 124. ^ [***a***](#cite_ref-IsRustSafely_131-0) [***b***](#cite_ref-IsRustSafely_131-1) Evans, Ana Nora; Campbell, Bradford; Soffa, Mary Lou (2020-10-01). ["Is rust used safely by software developers?"](https://doi.org/10.1145/3377811.3380413). *Proceedings of the ACM/IEEE 42nd International Conference on
-Software Engineering*. New York, NY, USA: Association for Computing Machinery.
-pp. 246–257\. [arXiv](/wiki/ArXiv_(identifier) "ArXiv (identifier)"):[2007.00752](https://arxiv.org/abs/2007.00752). [doi](/wiki/Doi_(identifier) "Doi (identifier)"):[10.1145/3377811.3380413](https://doi.org/10.1145%2F3377811.3380413). [ISBN](/wiki/ISBN_(identifier) "ISBN (identifier)") [978-1-4503-7121-6](/wiki/Special:BookSources/978-1-4503-7121-6 "Special:BookSources/978-1-4503-7121-6").
+     Software Engineering*. New York, NY, USA: Association for Computing Machinery.
+     pp. 246–257\. [arXiv](/wiki/ArXiv_(identifier) "ArXiv (identifier)"):[2007.00752](https://arxiv.org/abs/2007.00752). [doi](/wiki/Doi_(identifier) "Doi (identifier)"):[10.1145/3377811.3380413](https://doi.org/10.1145%2F3377811.3380413). [ISBN](/wiki/ISBN_(identifier) "ISBN (identifier)") [978-1-4503-7121-6](/wiki/Special:BookSources/978-1-4503-7121-6 "Special:BookSources/978-1-4503-7121-6").
 125. **[↑](#cite_ref-132)** ["Behavior considered undefined"](https://doc.rust-lang.org/reference/behavior-considered-undefined.html). *The Rust Reference*. Retrieved 2025-08-06.
 126. **[↑](#cite_ref-FOOTNOTEKlabnikNichols2023449–455_133-0)** [Klabnik & Nichols 2023](#CITEREFKlabnikNichols2023),
-pp. 449–455.
+     pp. 449–455.
 127. **[↑](#cite_ref-FOOTNOTEGjengset2021101–102_134-0)** [Gjengset 2021](#CITEREFGjengset2021),
-pp. 101–102.
+     pp. 101–102.
 128. **[↑](#cite_ref-Rust_Ref._–_Macros_By_Example_135-0)** ["Macros By Example"](https://doc.rust-lang.org/reference/macros-by-example.html). *The Rust Reference*. [Archived](https://web.archive.org/web/20230421052332/https://doc.rust-lang.org/reference/macros-by-example.html) from the original on 2023-04-21. Retrieved 2023-04-21.
 129. **[↑](#cite_ref-FOOTNOTEKlabnikNichols2019446–448_136-0)** [Klabnik & Nichols 2019](#CITEREFKlabnikNichols2019),
-pp. 446–448.
+     pp. 446–448.
 130. **[↑](#cite_ref-rust-procedural-macros_137-0)** ["Procedural Macros"](https://doc.rust-lang.org/reference/procedural-macros.html). *The Rust Programming Language Reference*. [Archived](https://web.archive.org/web/20201107233444/https://doc.rust-lang.org/reference/procedural-macros.html) from the original on 2020-11-07. Retrieved 2021-03-23.
 131. **[↑](#cite_ref-FOOTNOTEKlabnikNichols2019449–455_138-0)** [Klabnik & Nichols 2019](#CITEREFKlabnikNichols2019),
-pp. 449–455.
+     pp. 449–455.
 132. **[↑](#cite_ref-139)** Baumgartner, Stefan (2025-05-23). ["Programming language: Rust 2024 is the most comprehensive edition to date"](https://www.heise.de/en/background/Programming-language-Rust-2024-is-the-most-comprehensive-edition-to-date-10393917.html). *[heise online](/wiki/Heise_online "Heise online")*. Retrieved 2025-06-28.
 133. ^ [***a***](#cite_ref-FOOTNOTEGjengset2021193–209_141-0) [***b***](#cite_ref-FOOTNOTEGjengset2021193–209_141-1) [***c***](#cite_ref-FOOTNOTEGjengset2021193–209_141-2) [Gjengset 2021](#CITEREFGjengset2021),
-pp. 193–209.
+     pp. 193–209.
 134. **[↑](#cite_ref-142)** ["Safe Interoperability between Rust and C++ with CXX"](https://www.infoq.com/news/2020/12/cpp-rust-interop-cxx/). *InfoQ*. 2020-12-06. [Archived](https://web.archive.org/web/20210122142035/https://www.infoq.com/news/2020/12/cpp-rust-interop-cxx/) from the original on 2021-01-22. Retrieved 2021-01-03.
 135. **[↑](#cite_ref-FOOTNOTEBlandyOrendorffTindall20216–8_143-0)** [Blandy, Orendorff & Tindall 2021](#CITEREFBlandyOrendorffTindall2021), pp. 6–8.
 136. **[↑](#cite_ref-144)** ["Overview of the compiler"](https://rustc-dev-guide.rust-lang.org/overview.html). *Rust Compiler Development Guide*. Rust project contributors. [Archived](https://web.archive.org/web/20230531035222/https://rustc-dev-guide.rust-lang.org/overview.html) from the original on 2023-05-31. Retrieved 2024-11-07.
 137. **[↑](#cite_ref-145)** ["Code Generation"](https://rustc-dev-guide.rust-lang.org/backend/codegen.html). *Rust Compiler Development Guide*. Rust project
-contributors. Retrieved 2024-03-03.
+     contributors. Retrieved 2024-03-03.
 138. **[↑](#cite_ref-146)** ["rust-lang/rustc_codegen_gcc"](https://github.com/rust-lang/rustc_codegen_gcc#Motivation). *[GitHub](/wiki/GitHub "GitHub")*. The Rust Programming Language. 2024-03-02. Retrieved 2024-03-03.
 139. **[↑](#cite_ref-147)** ["rust-lang/rustc_codegen_cranelift"](https://github.com/rust-lang/rustc_codegen_cranelift). *[GitHub](/wiki/GitHub "GitHub")*. The Rust Programming Language. 2024-03-02. Retrieved 2024-03-03.
 140. ^ [***a***](#cite_ref-Nature_148-0) [***b***](#cite_ref-Nature_148-1) [***c***](#cite_ref-Nature_148-2) Perkel, Jeffrey M. (2020-12-01). ["Why scientists are turning to Rust"](https://www.nature.com/articles/d41586-020-03382-2). *[Nature](/wiki/Nature_(journal) "Nature (journal)")*. **588** (7836): 185–186. [Bibcode](/wiki/Bibcode_(identifier) "Bibcode (identifier)"):[2020Natur.588..185P](https://ui.adsabs.harvard.edu/abs/2020Natur.588..185P). [doi](/wiki/Doi_(identifier) "Doi (identifier)"):[10.1038/d41586-020-03382-2](https://doi.org/10.1038%2Fd41586-020-03382-2). [PMID](/wiki/PMID_(identifier) "PMID (identifier)") [33262490](https://pubmed.ncbi.nlm.nih.gov/33262490). [S2CID](/wiki/S2CID_(identifier) "S2CID (identifier)") [227251258](https://api.semanticscholar.org/CorpusID:227251258). [Archived](https://web.archive.org/web/20220506040523/https://www.nature.com/articles/d41586-020-03382-2) from the original on 2022-05-06. Retrieved 2022-05-15.
 141. **[↑](#cite_ref-149)** Simone, Sergio De (2019-04-18). ["Rust 1.34 Introduces Alternative Registries for Non-Public Crates"](https://www.infoq.com/news/2019/04/rust-1.34-additional-registries). *InfoQ*. [Archived](https://web.archive.org/web/20220714164454/https://www.infoq.com/news/2019/04/rust-1.34-additional-registries) from the original on 2022-07-14. Retrieved 2022-07-14.
 142. **[↑](#cite_ref-FOOTNOTEKlabnikNichols2019511–512_150-0)** [Klabnik & Nichols 2019](#CITEREFKlabnikNichols2019),
-pp. 511–512.
+     pp. 511–512.
 143. **[↑](#cite_ref-151)** ["Clippy"](https://github.com/rust-lang/rust-clippy). *[GitHub](/wiki/GitHub "GitHub")*. The Rust Programming Language. 2023-11-30. [Archived](https://web.archive.org/web/20210523042004/https://github.com/rust-lang/rust-clippy) from the original on 2021-05-23. Retrieved 2023-11-30.
 144. **[↑](#cite_ref-152)** ["Clippy Lints"](https://rust-lang.github.io/rust-clippy/master/index.html). *The Rust Programming Language*. Retrieved 2023-11-30.
 145. **[↑](#cite_ref-Rust_Book_G_153-0)** [Klabnik & Nichols 2019](#CITEREFKlabnikNichols2019),
-Appendix G – How Rust is Made and "Nightly Rust"
+     Appendix G – How Rust is Made and "Nightly Rust"
 146. **[↑](#cite_ref-FOOTNOTEBlandyOrendorffTindall2021176–177_154-0)** [Blandy, Orendorff & Tindall 2021](#CITEREFBlandyOrendorffTindall2021), pp. 176–177.
 147. **[↑](#cite_ref-FOOTNOTEKlabnikNichols2023623_155-0)** [Klabnik & Nichols 2023](#CITEREFKlabnikNichols2023),
-p. 623.
+     p. 623.
 148. **[↑](#cite_ref-156)** Anderson, Tim (2021-11-30). ["Can Rust save the planet? Why, and why not"](https://www.theregister.com/2021/11/30/aws_reinvent_rust/). *[The Register](/wiki/The_Register "The Register")*. [Archived](https://web.archive.org/web/20220711001629/https://www.theregister.com/2021/11/30/aws_reinvent_rust/) from the original on 2022-07-11. Retrieved 2022-07-11.
 149. **[↑](#cite_ref-157)** Yegulalp, Serdar (2021-10-06). ["What is the Rust language? Safe, fast, and easy software development"](https://www.infoworld.com/article/3218074/what-is-rust-safe-fast-and-easy-software-development.html). *[InfoWorld](/wiki/InfoWorld "InfoWorld")*. [Archived](https://web.archive.org/web/20220624101013/https://www.infoworld.com/article/3218074/what-is-rust-safe-fast-and-easy-software-development.html) from the original on 2022-06-24. Retrieved 2022-06-25.
 150. **[↑](#cite_ref-FOOTNOTEMcNamara202111_158-0)** [McNamara 2021](#CITEREFMcNamara2021), p. 11.
 151. ^ [***a***](#cite_ref-SaferAtAnySpeed_159-0) [***b***](#cite_ref-SaferAtAnySpeed_159-1) Popescu, Natalie; Xu, Ziyang; Apostolakis, Sotiris; August, David I.;
-Levy, Amit (2021-10-15). ["Safer at any speed: automatic context-aware safety enhancement for Rust"](https://doi.org/10.1145%2F3485480). *Proceedings of the ACM on Programming Languages*. **5** (OOPSLA). Section 2. [doi](/wiki/Doi_(identifier) "Doi (identifier)"):[10.1145/3485480](https://doi.org/10.1145%2F3485480). [S2CID](/wiki/S2CID_(identifier) "S2CID (identifier)") [238212612](https://api.semanticscholar.org/CorpusID:238212612). p. 5: "We observe a large variance in the overheads of checked indexing:
-23.6% of benchmarks do report significant performance hits from
-checked indexing, but 64.5% report little-to-no impact and,
-surprisingly, 11.8% report improved performance ... Ultimately,
-while unchecked indexing can improve performance, most of the time
-it does not."
+     Levy, Amit (2021-10-15). ["Safer at any speed: automatic context-aware safety enhancement for Rust"](https://doi.org/10.1145%2F3485480). *Proceedings of the ACM on Programming Languages*. **5** (OOPSLA). Section 2. [doi](/wiki/Doi_(identifier) "Doi (identifier)"):[10.1145/3485480](https://doi.org/10.1145%2F3485480). [S2CID](/wiki/S2CID_(identifier) "S2CID (identifier)") [238212612](https://api.semanticscholar.org/CorpusID:238212612). p. 5: "We observe a large variance in the overheads of checked indexing:
+     23.6% of benchmarks do report significant performance hits from
+     checked indexing, but 64.5% report little-to-no impact and,
+     surprisingly, 11.8% report improved performance ... Ultimately,
+     while unchecked indexing can improve performance, most of the time
+     it does not."
 152. **[↑](#cite_ref-FOOTNOTEMcNamara202119,_27_160-0)** [McNamara 2021](#CITEREFMcNamara2021), p. 19, 27.
 153. **[↑](#cite_ref-161)** Couprie, Geoffroy (2015). "Nom, A Byte oriented, streaming, Zero
-copy, Parser Combinators Library in Rust". *2015 IEEE Security and Privacy Workshops*. pp. 142–148\. [doi](/wiki/Doi_(identifier) "Doi (identifier)"):[10.1109/SPW.2015.31](https://doi.org/10.1109%2FSPW.2015.31). [ISBN](/wiki/ISBN_(identifier) "ISBN (identifier)") [978-1-4799-9933-0](/wiki/Special:BookSources/978-1-4799-9933-0 "Special:BookSources/978-1-4799-9933-0"). [S2CID](/wiki/S2CID_(identifier) "S2CID (identifier)") [16608844](https://api.semanticscholar.org/CorpusID:16608844).
+     copy, Parser Combinators Library in Rust". *2015 IEEE Security and Privacy Workshops*. pp. 142–148\. [doi](/wiki/Doi_(identifier) "Doi (identifier)"):[10.1109/SPW.2015.31](https://doi.org/10.1109%2FSPW.2015.31). [ISBN](/wiki/ISBN_(identifier) "ISBN (identifier)") [978-1-4799-9933-0](/wiki/Special:BookSources/978-1-4799-9933-0 "Special:BookSources/978-1-4799-9933-0"). [S2CID](/wiki/S2CID_(identifier) "S2CID (identifier)") [16608844](https://api.semanticscholar.org/CorpusID:16608844).
 154. **[↑](#cite_ref-FOOTNOTEMcNamara202120_162-0)** [McNamara 2021](#CITEREFMcNamara2021), p. 20.
 155. **[↑](#cite_ref-163)** ["Code generation"](https://doc.rust-lang.org/reference/attributes/codegen.html). *The Rust Reference*. [Archived](https://web.archive.org/web/20221009202615/https://doc.rust-lang.org/reference/attributes/codegen.html) from the original on 2022-10-09. Retrieved 2022-10-09.
 156. **[↑](#cite_ref-how-fast-is-rust_164-0)** ["How Fast Is Rust?"](https://doc.rust-lang.org/1.0.0/complement-lang-faq.html#how-fast-is-rust?). *The Rust Programming Language FAQ*. [Archived](https://web.archive.org/web/20201028102013/https://doc.rust-lang.org/1.0.0/complement-lang-faq.html#how-fast-is-rust?) from the original on 2020-10-28. Retrieved 2019-04-11.
 157. **[↑](#cite_ref-165)** Farshin, Alireza; Barbette, Tom; Roozbeh, Amir; Maguire, Gerald Q.
-Jr; Kostić, Dejan (2021). "PacketMill: Toward per-Core 100-GBPS
-networking". [*Proceedings of the 26th ACM International Conference on Architectural Support for Programming Languages and Operating Systems*](https://dlnext.acm.org/doi/abs/10.1145/3445814.3446724). pp. 1–17\. [doi](/wiki/Doi_(identifier) "Doi (identifier)"):[10.1145/3445814.3446724](https://doi.org/10.1145%2F3445814.3446724). [ISBN](/wiki/ISBN_(identifier) "ISBN (identifier)") [9781450383172](/wiki/Special:BookSources/9781450383172 "Special:BookSources/9781450383172"). [S2CID](/wiki/S2CID_(identifier) "S2CID (identifier)") [231949599](https://api.semanticscholar.org/CorpusID:231949599). [Archived](https://web.archive.org/web/20220712060927/https://dlnext.acm.org/doi/abs/10.1145/3445814.3446724) from the original on 2022-07-12. Retrieved 2022-07-12. "... While some compilers (e.g., Rust) support structure reordering
-[82], C & C++ compilers are forbidden to reorder data structures
-(e.g., struct or class) [74] ..."
+     Jr; Kostić, Dejan (2021). "PacketMill: Toward per-Core 100-GBPS
+     networking". [*Proceedings of the 26th ACM International Conference on Architectural Support for Programming Languages and Operating Systems*](https://dlnext.acm.org/doi/abs/10.1145/3445814.3446724). pp. 1–17\. [doi](/wiki/Doi_(identifier) "Doi (identifier)"):[10.1145/3445814.3446724](https://doi.org/10.1145%2F3445814.3446724). [ISBN](/wiki/ISBN_(identifier) "ISBN (identifier)") [9781450383172](/wiki/Special:BookSources/9781450383172 "Special:BookSources/9781450383172"). [S2CID](/wiki/S2CID_(identifier) "S2CID (identifier)") [231949599](https://api.semanticscholar.org/CorpusID:231949599). [Archived](https://web.archive.org/web/20220712060927/https://dlnext.acm.org/doi/abs/10.1145/3445814.3446724) from the original on 2022-07-12. Retrieved 2022-07-12. "... While some compilers (e.g., Rust) support structure reordering
+     [82], C & C++ compilers are forbidden to reorder data structures
+     (e.g., struct or class) [74] ..."
 158. **[↑](#cite_ref-FOOTNOTEGjengset202122_166-0)** [Gjengset 2021](#CITEREFGjengset2021), p. 22.
 159. **[↑](#cite_ref-167)** Keizer, Gregg (2016-10-31). ["Mozilla plans to rejuvenate Firefox in 2017"](https://www.computerworld.com/article/3137050/mozilla-plans-to-rejuvenate-firefox-in-2017.html). *[Computerworld](/wiki/Computerworld "Computerworld")*. [Archived](https://web.archive.org/web/20230513020437/https://www.computerworld.com/article/3137050/mozilla-plans-to-rejuvenate-firefox-in-2017.html) from the original on 2023-05-13. Retrieved 2023-05-13.
 160. **[↑](#cite_ref-168)** Claburn, Thomas (2023-01-12). ["Google polishes Chromium code with a layer of Rust"](https://www.theregister.com/2023/01/12/google_chromium_rust/). *[The Register](/wiki/The_Register "The Register")*. Retrieved 2024-07-17.
@@ -1438,11 +1438,11 @@ networking". [*Proceedings of the 26th ACM International Conference on Architect
 167. **[↑](#cite_ref-175)** Claburn, Thomas (2022-09-20). ["In Rust We Trust: Microsoft Azure CTO shuns C and C++"](https://www.theregister.com/2022/09/20/rust_microsoft_c/). *[The Register](/wiki/The_Register "The Register")*. Retrieved 2024-07-07.
 168. **[↑](#cite_ref-176)** Simone, Sergio De (2019-03-10). ["NPM Adopted Rust to Remove Performance Bottlenecks"](https://www.infoq.com/news/2019/03/rust-npm-performance/). *InfoQ*. [Archived](https://web.archive.org/web/20231119135434/https://www.infoq.com/news/2019/03/rust-npm-performance/) from the original on 2023-11-19. Retrieved 2023-11-20.
 169. **[↑](#cite_ref-177)** Lyu, Shing (2020). ["Welcome to the World of Rust"](https://doi.org/10.1007/978-1-4842-5599-5_1). In Lyu, Shing (ed.). *Practical Rust Projects: Building Game, Physical Computing, and
-Machine Learning Applications*. Berkeley, CA: Apress. pp. 1–8\. [doi](/wiki/Doi_(identifier) "Doi (identifier)"):[10.1007/978-1-4842-5599-5_1](https://doi.org/10.1007%2F978-1-4842-5599-5_1). [ISBN](/wiki/ISBN_(identifier) "ISBN (identifier)") [978-1-4842-5599-5](/wiki/Special:BookSources/978-1-4842-5599-5 "Special:BookSources/978-1-4842-5599-5"). Retrieved 2023-11-29.
+     Machine Learning Applications*. Berkeley, CA: Apress. pp. 1–8\. [doi](/wiki/Doi_(identifier) "Doi (identifier)"):[10.1007/978-1-4842-5599-5_1](https://doi.org/10.1007%2F978-1-4842-5599-5_1). [ISBN](/wiki/ISBN_(identifier) "ISBN (identifier)") [978-1-4842-5599-5](/wiki/Special:BookSources/978-1-4842-5599-5 "Special:BookSources/978-1-4842-5599-5"). Retrieved 2023-11-29.
 170. **[↑](#cite_ref-178)** Lyu, Shing (2021). ["Rust in the Web World"](https://doi.org/10.1007/978-1-4842-6589-5_1). In Lyu, Shing (ed.). *Practical Rust Web Projects: Building Cloud and Web-Based
-Applications*. Berkeley, CA: Apress. pp. 1–7\. [doi](/wiki/Doi_(identifier) "Doi (identifier)"):[10.1007/978-1-4842-6589-5_1](https://doi.org/10.1007%2F978-1-4842-6589-5_1). [ISBN](/wiki/ISBN_(identifier) "ISBN (identifier)") [978-1-4842-6589-5](/wiki/Special:BookSources/978-1-4842-6589-5 "Special:BookSources/978-1-4842-6589-5"). Retrieved 2023-11-29.
+     Applications*. Berkeley, CA: Apress. pp. 1–7\. [doi](/wiki/Doi_(identifier) "Doi (identifier)"):[10.1007/978-1-4842-6589-5_1](https://doi.org/10.1007%2F978-1-4842-6589-5_1). [ISBN](/wiki/ISBN_(identifier) "ISBN (identifier)") [978-1-4842-6589-5](/wiki/Special:BookSources/978-1-4842-6589-5 "Special:BookSources/978-1-4842-6589-5"). Retrieved 2023-11-29.
 171. ^ [***a***](#cite_ref-UsenixRustForLinux_179-0) [***b***](#cite_ref-UsenixRustForLinux_179-1) [***c***](#cite_ref-UsenixRustForLinux_179-2) Li, Hongyu; Guo, Liwei; Yang, Yexuan; Wang, Shangguang; Xu, Mengwei
-(2024-06-30). ["An Empirical Study of Rust-for-Linux: The Success, Dissatisfaction, and Compromise"](https://www.usenix.org/publications/loginonline/empirical-study-rust-linux-success-dissatisfaction-and-compromise). *[USENIX](/wiki/USENIX "USENIX")*. Retrieved 2024-11-28.
+     (2024-06-30). ["An Empirical Study of Rust-for-Linux: The Success, Dissatisfaction, and Compromise"](https://www.usenix.org/publications/loginonline/empirical-study-rust-linux-success-dissatisfaction-and-compromise). *[USENIX](/wiki/USENIX "USENIX")*. Retrieved 2024-11-28.
 172. **[↑](#cite_ref-180)** Corbet, Jonathan (2022-10-13). ["A first look at Rust in the 6.1 kernel"](https://lwn.net/Articles/910762/). *[LWN.net](/wiki/LWN.net "LWN.net")*. [Archived](https://web.archive.org/web/20231117141103/https://lwn.net/Articles/910762/) from the original on 2023-11-17. Retrieved 2023-11-11.
 173. **[↑](#cite_ref-181)** Vaughan-Nichols, Steven (2021-12-07). ["Rust takes a major step forward as Linux's second official language"](https://www.zdnet.com/article/rust-takes-a-major-step-forward-as-linuxs-second-official-language/). *[ZDNET](/wiki/ZDNET "ZDNET")*. Retrieved 2024-11-27.
 174. **[↑](#cite_ref-182)** Corbet, Jonathan (2022-11-17). ["Rust in the 6.2 kernel"](https://lwn.net/Articles/914458/). *[LWN.net](/wiki/LWN.net "LWN.net")*. Retrieved 2024-11-28.
@@ -1465,12 +1465,12 @@ Applications*. Berkeley, CA: Apress. pp. 1–7\. [doi](/wiki/Doi_(identifier) "D
 191. **[↑](#cite_ref-199)** Claburn, Thomas (2022-06-23). ["Linus Torvalds says Rust is coming to the Linux kernel"](https://www.theregister.com/2022/06/23/linus_torvalds_rust_linux_kernel/). *[The Register](/wiki/The_Register "The Register")*. [Archived](https://web.archive.org/web/20220728221531/https://www.theregister.com/2022/06/23/linus_torvalds_rust_linux_kernel/) from the original on 2022-07-28. Retrieved 2022-07-15.
 192. **[↑](#cite_ref-201)** Wallach, Dan. ["TRACTOR: Translating All C to Rust"](https://www.darpa.mil/research/programs/translating-all-c-to-rust). [DARPA](/wiki/DARPA "DARPA"). Retrieved 2025-08-03.
 193. **[↑](#cite_ref-202)** Jung, Ralf; Jourdan, Jacques-Henri; Krebbers, Robbert; Dreyer, Derek
-(2017-12-27). ["RustBelt: securing the foundations of the Rust programming language"](https://dl.acm.org/doi/10.1145/3158154). *Proceedings of the ACM on Programming Languages*. **2** (POPL): 1–34\. [doi](/wiki/Doi_(identifier) "Doi (identifier)"):[10.1145/3158154](https://doi.org/10.1145%2F3158154). [hdl](/wiki/Hdl_(identifier) "Hdl (identifier)"):[21.11116/0000-0003-34C6-3](https://hdl.handle.net/21.11116%2F0000-0003-34C6-3). [ISSN](/wiki/ISSN_(identifier) "ISSN (identifier)") [2475-1421](https://search.worldcat.org/issn/2475-1421).
+     (2017-12-27). ["RustBelt: securing the foundations of the Rust programming language"](https://dl.acm.org/doi/10.1145/3158154). *Proceedings of the ACM on Programming Languages*. **2** (POPL): 1–34\. [doi](/wiki/Doi_(identifier) "Doi (identifier)"):[10.1145/3158154](https://doi.org/10.1145%2F3158154). [hdl](/wiki/Hdl_(identifier) "Hdl (identifier)"):[21.11116/0000-0003-34C6-3](https://hdl.handle.net/21.11116%2F0000-0003-34C6-3). [ISSN](/wiki/ISSN_(identifier) "ISSN (identifier)") [2475-1421](https://search.worldcat.org/issn/2475-1421).
 194. **[↑](#cite_ref-203)** Popescu, Natalie; Xu, Ziyang; Apostolakis, Sotiris; August, David I.;
-Levy, Amit (2021-10-20). ["Safer at any speed: automatic context-aware safety enhancement for Rust"](https://doi.org/10.1145%2F3485480). *Proceedings of the ACM on Programming Languages*. **5** (OOPSLA): 1–23\. [doi](/wiki/Doi_(identifier) "Doi (identifier)"):[10.1145/3485480](https://doi.org/10.1145%2F3485480). [ISSN](/wiki/ISSN_(identifier) "ISSN (identifier)") [2475-1421](https://search.worldcat.org/issn/2475-1421).
+     Levy, Amit (2021-10-20). ["Safer at any speed: automatic context-aware safety enhancement for Rust"](https://doi.org/10.1145%2F3485480). *Proceedings of the ACM on Programming Languages*. **5** (OOPSLA): 1–23\. [doi](/wiki/Doi_(identifier) "Doi (identifier)"):[10.1145/3485480](https://doi.org/10.1145%2F3485480). [ISSN](/wiki/ISSN_(identifier) "ISSN (identifier)") [2475-1421](https://search.worldcat.org/issn/2475-1421).
 195. **[↑](#cite_ref-ResearchSoftware1_204-0)** Blanco-Cuaresma, Sergi; Bolmont, Emeline (2017-05-30). ["What can the programming language Rust do for astrophysics?"](https://www.cambridge.org/core/journals/proceedings-of-the-international-astronomical-union/article/what-can-the-programming-language-rust-do-for-astrophysics/B51B6DF72B7641F2352C05A502F3D881). *[Proceedings of the International Astronomical Union](/wiki/Proceedings_of_the_International_Astronomical_Union "Proceedings of the International Astronomical Union")*. **12** (S325): 341–344. [arXiv](/wiki/ArXiv_(identifier) "ArXiv (identifier)"):[1702.02951](https://arxiv.org/abs/1702.02951). [Bibcode](/wiki/Bibcode_(identifier) "Bibcode (identifier)"):[2017IAUS..325..341B](https://ui.adsabs.harvard.edu/abs/2017IAUS..325..341B). [doi](/wiki/Doi_(identifier) "Doi (identifier)"):[10.1017/S1743921316013168](https://doi.org/10.1017%2FS1743921316013168). [ISSN](/wiki/ISSN_(identifier) "ISSN (identifier)") [1743-9213](https://search.worldcat.org/issn/1743-9213). [S2CID](/wiki/S2CID_(identifier) "S2CID (identifier)") [7857871](https://api.semanticscholar.org/CorpusID:7857871). [Archived](https://web.archive.org/web/20220625140128/https://www.cambridge.org/core/journals/proceedings-of-the-international-astronomical-union/article/what-can-the-programming-language-rust-do-for-astrophysics/B51B6DF72B7641F2352C05A502F3D881) from the original on 2022-06-25. Retrieved 2022-06-25.
 196. **[↑](#cite_ref-FOOTNOTEKlabnikNichols20194_205-0)** [Klabnik & Nichols 2019](#CITEREFKlabnikNichols2019),
-p. 4.
+     p. 4.
 197. **[↑](#cite_ref-206)** ["Getting Started"](https://www.rust-lang.org/learn/get-started#ferris). *The Rust Programming Language*. [Archived](https://web.archive.org/web/20201101145703/https://www.rust-lang.org/learn/get-started#ferris) from the original on 2020-11-01. Retrieved 2020-10-11.
 198. **[↑](#cite_ref-StateOfRustSurvey2024_207-0)** The Rust Survey Team (2025-02-13). ["2024 State of Rust Survey Results"](https://blog.rust-lang.org/2025/02/13/2024-State-Of-Rust-Survey-results.html). *The Rust Programming Language*. Retrieved 2025-09-07.
 199. **[↑](#cite_ref-208)** ["The top programming languages"](https://octoverse.github.com/2022/top-programming-languages). *The State of the Octoverse*. 2022. Retrieved 2025-06-25.
