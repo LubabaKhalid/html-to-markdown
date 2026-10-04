@@ -547,7 +547,7 @@ fn should_take_the_base_href_and_canonical_link_from_their_elements_and_a_meta_t
     let document = convert(html, Some(opts)).unwrap().metadata.document;
     assert_eq!(document.title.as_deref(), Some("Meta"));
     assert!(!document.meta_tags.contains_key("title"));
-    assert_eq!(document.base_href.as_deref(), Some("https://example.com/dir/page"));
+    assert_eq!(document.base_href, None);
     assert_eq!(document.canonical_url, None);
 }
 

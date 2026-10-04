@@ -61,6 +61,29 @@ fn should_resolve_relative_link_against_base_url_on_both_tiers() {
 }
 
 #[test]
+fn should_not_report_caller_base_url_as_document_frontmatter() {
+    let html = r#"<html><head></head><body><a href="child.html">child</a></body></html>"#;
+
+    for tier_strategy in [TierStrategy::Tier1, TierStrategy::Tier2] {
+        let options = ConversionOptions {
+            base_url: Some("https://example.com/blog/index.html".to_string()),
+            extract_metadata: true,
+            tier_strategy,
+            ..ConversionOptions::default()
+        };
+        let output = convert(html, Some(options))
+            .expect("conversion should succeed")
+            .content
+            .unwrap_or_default();
+
+        assert_eq!(
+            output, "[child](https://example.com/blog/child.html)\n",
+            "tier: {tier_strategy:?}"
+        );
+    }
+}
+
+#[test]
 fn should_report_the_effective_document_base_in_frontmatter() {
     let html = r#"<html><head><base href="/other/"></head><body><a href="x">x</a></body></html>"#;
 

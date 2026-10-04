@@ -154,11 +154,11 @@ fn prepare_conversion<'a>(html: &'a str, options: &ConversionOptions) -> Result<
         .as_deref()
         .and_then(|base| crate::converter::url_resolve::compute_effective_base(document_base_href.as_deref(), base))
         .map(std::rc::Rc::new);
-    let metadata_base_href = effective_base
-        .as_deref()
-        .map(url::Url::as_str)
-        .map(str::to_owned)
-        .or_else(|| document_base_href.clone());
+    let metadata_base_href = document_base_href.as_ref().map(|document_base_href| {
+        effective_base
+            .as_deref()
+            .map_or_else(|| document_base_href.clone(), |base| base.as_str().to_owned())
+    });
     Ok(PreparedConversion {
         html: normalized_html,
         effective_base,
