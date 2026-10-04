@@ -162,8 +162,12 @@ pub fn handle(
         output.push_str(hard_break_marker(options));
     } else if output.len() == ctx.block_content_start {
         // ~keep A paragraph-leading break has no preceding line and therefore emits nothing
-        // ~keep (#572). A bare top-level break remains an intentional leading line (#112).
-        if !ctx.in_paragraph {
+        // ~keep (#572), but only the paragraph's own buffer can prove that position. A fresh
+        // ~keep inline-wrapper scratch buffer can have the same length after real paragraph
+        // ~keep content; its bare newline is an internal sentinel that the wrapper turns into
+        // ~keep either a real break before following content or a separator when break-only.
+        // ~keep A bare top-level break also remains an intentional leading line (#112).
+        if !ctx.in_paragraph || std::ptr::from_ref::<String>(output) as usize != ctx.block_output_ptr {
             output.push('\n');
         }
     } else {
