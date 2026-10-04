@@ -144,99 +144,83 @@ fn collect_table_grid(
     parser: &tl::Parser,
     handler: HandlerContext<'_>,
 ) -> Option<crate::types::TableGrid> {
-    use utils::{is_tag_name, normalized_tag_name};
-
     let tl::Node::Tag(tag) = node_handle.get(parser)? else {
         return None;
     };
 
-    let mut grid_cells = Vec::new();
-    let mut row_index: u32 = 0;
-    let mut max_cols: u32 = 0;
-    let mut cell_handles = Vec::new();
+    let mut state = GridState::default();
 
     let children = tag.children();
     for child_handle in children.top().iter() {
-        if let Some(tl::Node::Tag(child_tag)) = child_handle.get(parser) {
-            let tag_name = normalized_tag_name(child_tag.name().as_utf8_str());
-            match tag_name.as_ref() {
-                "thead" | "tbody" | "tfoot" => {
-                    let is_header_section = tag_name.as_ref() == "thead";
-                    for row_handle in child_tag.children().top().iter() {
-                        if is_tag_name(row_handle, parser, handler.dom_ctx, "tr") {
-                            collect_grid_row(
-                                row_handle,
-                                parser,
-                                handler.options,
-                                handler.ctx,
-                                handler.dom_ctx,
-                                &mut cell_handles,
-                                &mut grid_cells,
-                                &mut row_index,
-                                &mut max_cols,
-                                is_header_section,
-                                handler.depth + 1,
-                            );
-                        }
-                    }
-                }
-                "tr" | "row" => {
-                    let is_first = row_index == 0;
-                    collect_grid_row(
-                        child_handle,
-                        parser,
-                        handler.options,
-                        handler.ctx,
-                        handler.dom_ctx,
-                        &mut cell_handles,
-                        &mut grid_cells,
-                        &mut row_index,
-                        &mut max_cols,
-                        is_first,
-                        handler.depth + 1,
-                    );
-                }
-                _ => {}
-            }
-        }
+        collect_grid_child(child_handle, parser, handler, &mut state);
     }
 
-    if row_index == 0 {
+    if state.row_index == 0 {
         return None;
     }
 
     Some(crate::types::TableGrid {
-        rows: row_index,
-        cols: max_cols,
-        cells: grid_cells,
+        rows: state.row_index,
+        cols: state.max_cols,
+        cells: state.grid_cells,
     })
+}
+
+#[derive(Default)]
+struct GridState {
+    cell_handles: Vec<tl::NodeHandle>,
+    grid_cells: Vec<crate::types::GridCell>,
+    row_index: u32,
+    max_cols: u32,
+}
+
+fn collect_grid_child(
+    child_handle: &tl::NodeHandle,
+    parser: &tl::Parser,
+    handler: HandlerContext<'_>,
+    state: &mut GridState,
+) {
+    use utils::{is_tag_name, normalized_tag_name};
+
+    let Some(tl::Node::Tag(child_tag)) = child_handle.get(parser) else {
+        return;
+    };
+    let tag_name = normalized_tag_name(child_tag.name().as_utf8_str());
+    match tag_name.as_ref() {
+        "thead" | "tbody" | "tfoot" => {
+            let is_header_section = tag_name.as_ref() == "thead";
+            for row_handle in child_tag.children().top().iter() {
+                if is_tag_name(row_handle, parser, handler.dom_ctx, "tr") {
+                    collect_grid_row(row_handle, parser, handler, state, is_header_section);
+                }
+            }
+        }
+        "tr" | "row" => {
+            collect_grid_row(child_handle, parser, handler, state, state.row_index == 0);
+        }
+        _ => {}
+    }
 }
 
 /// Process a single table row for grid collection.
 ///
 /// `depth` is the row's own recursion depth; cell content is walked at `depth + 1`.
-#[allow(clippy::too_many_arguments)]
 fn collect_grid_row(
     row_handle: &tl::NodeHandle,
     parser: &tl::Parser,
-    options: &crate::options::ConversionOptions,
-    ctx: &super::super::Context,
-    dom_ctx: &super::super::DomContext,
-    cell_handles: &mut Vec<tl::NodeHandle>,
-    grid_cells: &mut Vec<crate::types::GridCell>,
-    row_index: &mut u32,
-    max_cols: &mut u32,
+    handler: HandlerContext<'_>,
+    state: &mut GridState,
     is_header_section: bool,
-    depth: usize,
 ) {
     use cell::{collect_table_cells, get_colspan_rowspan};
 
-    collect_table_cells(row_handle, parser, dom_ctx, cell_handles);
+    collect_table_cells(row_handle, parser, handler.dom_ctx, &mut state.cell_handles);
 
     let mut col_index: u32 = 0;
-    for cell_handle in cell_handles.iter() {
+    for cell_handle in &state.cell_handles {
         let is_header = is_header_section
-            || dom_ctx
+            || handler
+                .dom_ctx
                 .tag_name_for(*cell_handle, parser)
                 .is_some_and(|name| name.as_ref() == "th");
 
@@ -249,7 +233,7 @@ fn collect_grid_row(
         // ~keep including into the very `DocumentStructure` this walk exists to build.
         let mut cell_ctx = super::super::Context {
             in_table_cell: true,
-            ..ctx.clone()
+            ..handler.ctx.clone()
         };
         #[cfg(feature = "metadata")]
         {
@@ -262,16 +246,24 @@ fn collect_grid_row(
         }
         if let Some(tl::Node::Tag(cell_tag)) = cell_handle.get(parser) {
             for child_handle in cell_tag.children().top().iter() {
-                super::super::walk_node(child_handle, parser, &mut text, options, &cell_ctx, depth + 1, dom_ctx);
+                super::super::walk_node(
+                    child_handle,
+                    parser,
+                    &mut text,
+                    handler.options,
+                    &cell_ctx,
+                    handler.depth + 2,
+                    handler.dom_ctx,
+                );
             }
         }
         let content = crate::text::normalize_whitespace_cow(&text).trim().to_string();
 
         let (colspan, rowspan) = get_colspan_rowspan(cell_handle, parser);
 
-        grid_cells.push(crate::types::GridCell {
+        state.grid_cells.push(crate::types::GridCell {
             content,
-            row: *row_index,
+            row: state.row_index,
             col: col_index,
             row_span: rowspan as u32,
             col_span: colspan as u32,
@@ -280,8 +272,6 @@ fn collect_grid_row(
 
         col_index += colspan as u32;
     }
-    if col_index > *max_cols {
-        *max_cols = col_index;
-    }
-    *row_index += 1;
+    state.max_cols = state.max_cols.max(col_index);
+    state.row_index += 1;
 }
