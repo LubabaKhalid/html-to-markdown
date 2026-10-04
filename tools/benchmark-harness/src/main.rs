@@ -463,6 +463,10 @@ struct OracleArgs {
     #[arg(long, default_value = "tools/benchmark-harness/snapshots")]
     snapshots: PathBuf,
 
+    /// Calibrated baseline containing expected default output sizes.
+    #[arg(long, default_value = "tools/benchmark-harness/baselines/baseline.json")]
+    baseline: PathBuf,
+
     /// Only test fixtures belonging to this group.
     #[arg(long)]
     filter: Option<String>,
@@ -480,6 +484,7 @@ struct OracleArgs {
 fn cmd_oracle(args: OracleArgs) -> Result<()> {
     let loader = fixture::Loader::new(args.fixtures.clone());
     let fixtures = loader.load(args.filter.as_deref())?;
+    let baseline = load_calibrated_baseline(&args.baseline)?;
 
     let mut failures = Vec::new();
     let mut skipped = 0usize;
@@ -516,6 +521,7 @@ fn cmd_oracle(args: OracleArgs) -> Result<()> {
     }
 
     if args.bless {
+        oracle::validate_output_sizes(&args.snapshots, &fixtures, &baseline.runs)?;
         println!(
             "Snapshots blessed for {} fixture(s) ({} skipped due to core panics).",
             fixtures.len(),
@@ -523,6 +529,7 @@ fn cmd_oracle(args: OracleArgs) -> Result<()> {
         );
         Ok(())
     } else if failures.is_empty() {
+        oracle::validate_output_sizes(&args.snapshots, &fixtures, &baseline.runs)?;
         println!(
             "All oracle snapshots match ({} ok, {} skipped due to known core panics).",
             passed, skipped
@@ -575,6 +582,16 @@ fn load_schema_v2(path: &PathBuf, kind: &str) -> Result<RunResults> {
         "unsupported {kind} schema {schema}; expected {SCHEMA_VERSION}"
     );
     serde_json::from_value(value).with_context(|| format!("decoding schema-v2 {kind} {}", path.display()))
+}
+
+fn load_calibrated_baseline(path: &PathBuf) -> Result<CalibratedBaseline> {
+    let value = load_value(path)?;
+    let schema = schema_of(&value);
+    anyhow::ensure!(
+        schema == SCHEMA_VERSION,
+        "unsupported baseline schema {schema}; expected {SCHEMA_VERSION}"
+    );
+    serde_json::from_value(value).with_context(|| format!("decoding schema-v2 baseline {}", path.display()))
 }
 
 fn git_sha() -> String {

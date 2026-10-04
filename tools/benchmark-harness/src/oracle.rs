@@ -13,11 +13,15 @@
 //! panic inside `converter.rs:163` on this codebase.  The oracle catches the
 //! panic and logs a NOTE instead of aborting.
 
+use std::collections::HashMap;
 use std::fs;
 use std::path::Path;
 
 use anyhow::{Context, Result};
 use html_to_markdown_rs::options::{CodeBlockStyle, ConversionOptions, HeadingStyle};
+
+use crate::fixture::Fixture;
+use crate::schema::CalibratedBenchRecord;
 
 /// The four conversion configurations used for oracle testing.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -165,6 +169,44 @@ pub fn compare(snapshots_dir: &Path, rel_path: &str, html: &str, perm: Permutati
     }
 }
 
+/// Verify that every fixture's default snapshot has the exact output byte count
+/// recorded in the calibrated benchmark baseline.
+pub fn validate_output_sizes(
+    snapshots_dir: &Path,
+    fixtures: &[Fixture],
+    baseline: &[CalibratedBenchRecord],
+) -> Result<()> {
+    let mut baseline_sizes = HashMap::with_capacity(baseline.len());
+    for record in baseline {
+        anyhow::ensure!(
+            baseline_sizes
+                .insert(record.fixture.as_str(), record.output_bytes)
+                .is_none(),
+            "duplicate baseline fixture {}",
+            record.fixture
+        );
+    }
+
+    for fixture in fixtures {
+        let expected = baseline_sizes
+            .get(fixture.rel_path.as_str())
+            .with_context(|| format!("baseline has no output size for {}", fixture.rel_path))?;
+        let snapshot = snapshots_dir.join(snapshot_name(&fixture.rel_path, Permutation::Default));
+        let observed = snapshot
+            .metadata()
+            .with_context(|| format!("reading snapshot size {}", snapshot.display()))?
+            .len();
+        anyhow::ensure!(
+            observed == *expected,
+            "baseline output size mismatch for {}: snapshot has {} bytes, baseline records {} bytes",
+            fixture.rel_path,
+            observed,
+            expected
+        );
+    }
+    Ok(())
+}
+
 /// Run `convert()` catching any panics.
 ///
 /// Returns `Ok(String)` on success or `Err(String)` with the panic message.
@@ -217,4 +259,55 @@ fn build_diff(expected: &str, actual: &str) -> String {
         ));
     }
     out
+}
+
+#[cfg(test)]
+mod tests {
+    use std::fs;
+
+    use tempfile::tempdir;
+
+    use super::{Permutation, validate_output_sizes};
+    use crate::fixture::Fixture;
+    use crate::schema::CalibratedBenchRecord;
+
+    #[test]
+    fn should_reject_snapshot_size_that_differs_from_baseline() {
+        let dir = tempdir().expect("tempdir should be created");
+        let fixture = Fixture {
+            rel_path: "sample.html".to_owned(),
+            path: dir.path().join("sample.html"),
+            group: "synthetic".to_owned(),
+            bytes: 13,
+        };
+        let snapshot = dir
+            .path()
+            .join(super::snapshot_name(&fixture.rel_path, Permutation::Default));
+        fs::write(snapshot, b"four").expect("snapshot should be written");
+        let mut baseline = CalibratedBenchRecord {
+            fixture: fixture.rel_path.clone(),
+            group: fixture.group.clone(),
+            bytes: fixture.bytes,
+            median_ms: 1.0,
+            mad_ms: 0.1,
+            mb_per_s: 1.0,
+            output_bytes: 4,
+        };
+
+        validate_output_sizes(
+            dir.path(),
+            std::slice::from_ref(&fixture),
+            std::slice::from_ref(&baseline),
+        )
+        .expect("matching absolute output byte counts should pass");
+        baseline.output_bytes = 5;
+
+        let error = validate_output_sizes(dir.path(), &[fixture], &[baseline])
+            .expect_err("a planted output size mismatch must fail the oracle gate");
+
+        assert_eq!(
+            error.to_string(),
+            "baseline output size mismatch for sample.html: snapshot has 4 bytes, baseline records 5 bytes"
+        );
+    }
 }
