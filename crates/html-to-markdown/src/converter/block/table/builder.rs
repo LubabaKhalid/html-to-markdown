@@ -9,6 +9,7 @@ use super::cell::{collect_table_cells, get_colspan};
 use super::cells::{CellTextCache, RowEnv, append_layout_row, collect_row_cell_widths, convert_table_row};
 use super::scanner::{TableScan, scan_table};
 use super::utils::{is_tag_name, normalized_tag_name};
+use crate::converter::block::container::HandlerContext;
 
 /// Return the content cell of a one-cell layout wrapper containing a nested table.
 /// Stop at that cell, so nested data headers do not give the wrapper table semantics.
@@ -148,11 +149,14 @@ pub fn handle_table(
     node_handle: &tl::NodeHandle,
     parser: &tl::Parser,
     output: &mut String,
-    options: &crate::options::ConversionOptions,
-    ctx: &super::super::super::Context,
-    dom_ctx: &super::super::super::DomContext,
-    depth: usize,
+    handler: HandlerContext<'_>,
 ) {
+    let HandlerContext {
+        options,
+        ctx,
+        dom_ctx,
+        depth,
+    } = handler;
     if let Some(tl::Node::Tag(tag)) = node_handle.get(parser) {
         #[cfg(feature = "visitor")]
         let table_output_start = output.len();

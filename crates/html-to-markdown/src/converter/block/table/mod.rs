@@ -19,6 +19,8 @@ pub mod layout;
 pub mod scanner;
 pub(super) mod utils;
 
+use crate::converter::block::container::HandlerContext;
+
 pub use caption::handle_caption;
 
 /// Dispatches table element handling to the main `convert_table` function.
@@ -43,14 +45,11 @@ pub fn dispatch_table_handler(
     node_handle: &tl::NodeHandle,
     parser: &tl::Parser,
     output: &mut String,
-    options: &crate::options::ConversionOptions,
-    ctx: &super::super::Context,
-    depth: usize,
-    dom_ctx: &super::super::DomContext,
+    handler: HandlerContext<'_>,
 ) -> bool {
     match tag_name {
         "table" => {
-            builder::handle_table(node_handle, parser, output, options, ctx, dom_ctx, depth);
+            builder::handle_table(node_handle, parser, output, handler);
             true
         }
         _ => false,
@@ -83,16 +82,13 @@ pub fn handle_table_with_context(
     node_handle: &tl::NodeHandle,
     parser: &tl::Parser,
     output: &mut String,
-    options: &crate::options::ConversionOptions,
-    ctx: &super::super::Context,
-    dom_ctx: &super::super::DomContext,
-    depth: usize,
+    handler: HandlerContext<'_>,
 ) {
     let mut table_output = String::new();
-    builder::handle_table(node_handle, parser, &mut table_output, options, ctx, dom_ctx, depth);
+    builder::handle_table(node_handle, parser, &mut table_output, handler);
 
-    if let Some(ref sc) = ctx.structure_collector {
-        if let Some(grid) = collect_table_grid(node_handle, parser, options, ctx, dom_ctx, depth) {
+    if let Some(ref sc) = handler.ctx.structure_collector {
+        if let Some(grid) = collect_table_grid(node_handle, parser, handler) {
             sc.borrow_mut().push_table_data(grid, table_output.trim().to_string());
         }
     }
@@ -105,7 +101,7 @@ pub fn handle_table_with_context(
         return;
     }
 
-    if ctx.in_list_item {
+    if handler.ctx.in_list_item {
         let has_caption = table_output.starts_with('*');
 
         if !has_caption {
@@ -116,7 +112,12 @@ pub fn handle_table_with_context(
             }
         }
 
-        let indented = layout::indent_table_for_list(&table_output, ctx.list_depth, ctx.list_indent_columns, options);
+        let indented = layout::indent_table_for_list(
+            &table_output,
+            handler.ctx.list_depth,
+            handler.ctx.list_indent_columns,
+            handler.options,
+        );
         output.push_str(&indented);
     } else {
         if !output.is_empty() && !output.ends_with("\n\n") {
@@ -141,10 +142,7 @@ pub fn handle_table_with_context(
 fn collect_table_grid(
     node_handle: &tl::NodeHandle,
     parser: &tl::Parser,
-    options: &crate::options::ConversionOptions,
-    ctx: &super::super::Context,
-    dom_ctx: &super::super::DomContext,
-    depth: usize,
+    handler: HandlerContext<'_>,
 ) -> Option<crate::types::TableGrid> {
     use utils::{is_tag_name, normalized_tag_name};
 
@@ -165,19 +163,19 @@ fn collect_table_grid(
                 "thead" | "tbody" | "tfoot" => {
                     let is_header_section = tag_name.as_ref() == "thead";
                     for row_handle in child_tag.children().top().iter() {
-                        if is_tag_name(row_handle, parser, dom_ctx, "tr") {
+                        if is_tag_name(row_handle, parser, handler.dom_ctx, "tr") {
                             collect_grid_row(
                                 row_handle,
                                 parser,
-                                options,
-                                ctx,
-                                dom_ctx,
+                                handler.options,
+                                handler.ctx,
+                                handler.dom_ctx,
                                 &mut cell_handles,
                                 &mut grid_cells,
                                 &mut row_index,
                                 &mut max_cols,
                                 is_header_section,
-                                depth + 1,
+                                handler.depth + 1,
                             );
                         }
                     }
@@ -187,15 +185,15 @@ fn collect_table_grid(
                     collect_grid_row(
                         child_handle,
                         parser,
-                        options,
-                        ctx,
-                        dom_ctx,
+                        handler.options,
+                        handler.ctx,
+                        handler.dom_ctx,
                         &mut cell_handles,
                         &mut grid_cells,
                         &mut row_index,
                         &mut max_cols,
                         is_first,
-                        depth + 1,
+                        handler.depth + 1,
                     );
                 }
                 _ => {}

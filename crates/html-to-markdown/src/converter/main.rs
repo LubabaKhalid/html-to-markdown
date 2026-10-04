@@ -909,10 +909,7 @@ fn convert_node(
                     node_handle,
                     parser,
                     output,
-                    options,
-                    ctx,
-                    depth,
-                    dom_ctx,
+                    crate::converter::block::container::HandlerContext::new(options, ctx, depth, dom_ctx),
                 ),
                 "table" => {
                     // ~keep Issue #406: during an outer table's width-measurement pre-pass,
@@ -934,10 +931,7 @@ fn convert_node(
                         node_handle,
                         parser,
                         output,
-                        options,
-                        ctx,
-                        dom_ctx,
-                        depth,
+                        crate::converter::block::container::HandlerContext::new(options, ctx, depth, dom_ctx),
                     );
                 }
 
