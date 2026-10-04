@@ -485,8 +485,8 @@ fn format_code_block(
         // ~keep shedding their markers in a cell. Line breaks fold to a space rather than to
         // ~keep `<br>` so that the two tiers stay byte-equal. The cell break separates the block
         // ~keep from the cell content before it (issue #645).
-        let content = content.trim_matches('\n');
-        if !content.is_empty() && !ctx.convert_as_inline && !ctx.in_code {
+        let trimmed_content = content.trim_matches('\n');
+        if !trimmed_content.is_empty() && !ctx.convert_as_inline && !ctx.in_code {
             crate::converter::main_helpers::separate_block_in_cell(output, options.br_in_tables);
         }
         format_preformatted_cell_content(
@@ -581,32 +581,60 @@ pub(in crate::converter) fn format_preformatted_cell_content(
         return;
     }
 
+    let (normalized, break_offsets) = normalize_preformatted_cell_content(content, break_offsets, preserve_whitespace);
     let mut start = 0;
     let mut wrote_segment = false;
-    for &offset in break_offsets {
-        let offset = offset.min(content.len());
-        if offset < start || !content.is_char_boundary(offset) {
+    let mut pending_breaks = 0;
+    for offset in break_offsets {
+        if offset < start || !normalized.is_char_boundary(offset) {
             continue;
         }
-        let normalized = normalize_preformatted_cell_segment(&content[start..offset], preserve_whitespace);
-        let segment = crate::text::fold_cell_line_breaks_verbatim_cow(&normalized);
+        let segment = crate::text::fold_cell_line_breaks_verbatim_cow(&normalized[start..offset]);
         if !segment.is_empty() {
             if wrote_segment {
-                output.push_str("<br>");
+                for _ in 0..pending_breaks {
+                    output.push_str("<br>");
+                }
             }
             format_inline_code(segment.as_ref(), output);
             wrote_segment = true;
+            pending_breaks = 0;
         }
-        start = offset + usize::from(content.as_bytes().get(offset) == Some(&b'\n'));
+        pending_breaks += 1;
+        start = offset + 1;
     }
-    let normalized = normalize_preformatted_cell_segment(&content[start..], preserve_whitespace);
-    let segment = crate::text::fold_cell_line_breaks_verbatim_cow(&normalized);
+    let segment = crate::text::fold_cell_line_breaks_verbatim_cow(&normalized[start..]);
     if !segment.is_empty() {
         if wrote_segment {
-            output.push_str("<br>");
+            for _ in 0..pending_breaks {
+                output.push_str("<br>");
+            }
         }
         format_inline_code(segment.as_ref(), output);
     }
+}
+
+fn normalize_preformatted_cell_content(
+    content: &str,
+    break_offsets: &[usize],
+    preserve_whitespace: bool,
+) -> (String, Vec<usize>) {
+    let core = content.trim_matches('\n');
+    let core_start = content.len() - content.trim_start_matches('\n').len();
+    let normalized = if preserve_whitespace {
+        core.to_string()
+    } else {
+        dedent_code_block(core)
+    };
+    let newline_offsets: Vec<usize> = normalized.match_indices('\n').map(|(offset, _)| offset).collect();
+    let normalized_break_offsets = break_offsets
+        .iter()
+        .filter_map(|&offset| offset.checked_sub(core_start))
+        .filter(|&offset| offset < core.len() && core.as_bytes().get(offset) == Some(&b'\n'))
+        .map(|offset| core[..offset].bytes().filter(|&byte| byte == b'\n').count())
+        .filter_map(|ordinal| newline_offsets.get(ordinal).copied())
+        .collect();
+    (normalized, normalized_break_offsets)
 }
 
 fn normalize_preformatted_cell_segment(content: &str, preserve_whitespace: bool) -> String {

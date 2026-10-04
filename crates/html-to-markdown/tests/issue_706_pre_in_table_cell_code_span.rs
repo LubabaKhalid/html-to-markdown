@@ -84,6 +84,32 @@ fn should_keep_a_nested_br_between_preformatted_segments_outside_the_code_spans(
 }
 
 #[test]
+fn should_keep_consecutive_br_boundaries_between_preformatted_segments() {
+    let options = ConversionOptions {
+        br_in_tables: true,
+        ..options()
+    };
+    assert_tiers_with_options(
+        "<table><tr><td><pre>a<br><br>b</pre></td><td>z</td></tr></table>",
+        options,
+        "| `a`<br><br>`b` | z |\n| -------------- | --- |\n",
+    );
+}
+
+#[test]
+fn should_dedent_preformatted_table_cell_content_before_splitting_at_br() {
+    let options = ConversionOptions {
+        br_in_tables: true,
+        ..options()
+    };
+    assert_tiers_with_options(
+        "<table><tr><td><pre>a<br>  b</pre></td><td>z</td></tr></table>",
+        options,
+        "| `a`<br>`  b` | z |\n| ------------ | --- |\n",
+    );
+}
+
+#[test]
 fn should_keep_literal_br_text_inside_a_preformatted_code_span() {
     let options = ConversionOptions {
         br_in_tables: true,
