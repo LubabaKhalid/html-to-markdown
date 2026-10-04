@@ -71,6 +71,7 @@ jobs:
               - "fixtures/**"
               - "alef.toml"
               - ".github/workflows/ci-e2e.yaml"
+              - ".github/workflows/ci-e2e-delegated.yaml"
             ffi:
               - "crates/html-to-markdown-ffi/**"
               - "crates/html-to-markdown/**"
@@ -172,7 +173,6 @@ jobs:
     uses: ./.github/workflows/ci-e2e-delegated.yaml
     with:
       task: e2e-freshness
-    secrets: inherit
   build-ffi:
     needs: [changes]
     name: "Build: FFI (${{ matrix.runner }})"
@@ -191,7 +191,6 @@ jobs:
     with:
       task: build-ffi
       runner: ${{ matrix.runner }}
-    secrets: inherit
   build-python:
     needs: [changes]
     name: "Build: Python (${{ matrix.os }})"
@@ -377,7 +376,6 @@ jobs:
     uses: ./.github/workflows/ci-e2e-delegated.yaml
     with:
       task: build-node-linux-arm64-gnu
-    secrets: inherit
   build-ruby:
     needs: [changes]
     name: "Build: Ruby (${{ matrix.os }}, ruby-${{ matrix.ruby }})"
@@ -557,7 +555,6 @@ jobs:
       task: build-java
       os: ${{ matrix.os }}
       java: ${{ matrix.java }}
-    secrets: inherit
   build-wasm:
     needs: [changes]
     name: "Build: WASM"
@@ -565,7 +562,6 @@ jobs:
     uses: ./.github/workflows/ci-e2e-delegated.yaml
     with:
       task: build-wasm
-    secrets: inherit
   test-python:
     needs: [build-python, changes]
     name: "Test: Python (${{ matrix.os }}, py-${{ matrix.python }})"
@@ -681,7 +677,6 @@ jobs:
       task: test-ruby
       os: ${{ matrix.os }}
       ruby: ${{ matrix.ruby }}
-    secrets: inherit
   test-php:
     needs: [build-php, changes]
     name: "Test: PHP"
@@ -689,7 +684,6 @@ jobs:
     uses: ./.github/workflows/ci-e2e-delegated.yaml
     with:
       task: test-php
-    secrets: inherit
   test-csharp:
     needs: [build-csharp, build-ffi, changes]
     name: "Test: C# (${{ matrix.os }})"
@@ -752,7 +746,6 @@ jobs:
     uses: ./.github/workflows/ci-e2e-delegated.yaml
     with:
       task: test-go
-    secrets: inherit
   test-java:
     needs: [build-java, changes]
     name: "Test: Java (${{ matrix.os }})"
@@ -791,7 +784,6 @@ jobs:
     uses: ./.github/workflows/ci-e2e-delegated.yaml
     with:
       task: test-elixir
-    secrets: inherit
   test-r:
     needs: [changes]
     name: "Test: R"
@@ -799,7 +791,6 @@ jobs:
     uses: ./.github/workflows/ci-e2e-delegated.yaml
     with:
       task: test-r
-    secrets: inherit
   test-c-ffi:
     needs: [build-ffi, changes]
     name: "Test: C FFI (${{ matrix.runner }})"
@@ -858,7 +849,6 @@ jobs:
     uses: ./.github/workflows/ci-e2e-delegated.yaml
     with:
       task: test-c-ffi-windows
-    secrets: inherit
   test-wasm:
     needs: [build-wasm, changes]
     name: "Test: WASM"
@@ -866,7 +856,6 @@ jobs:
     uses: ./.github/workflows/ci-e2e-delegated.yaml
     with:
       task: test-wasm
-    secrets: inherit
   build-kotlin-android:
     needs: [changes]
     name: "Build: Kotlin Android"
@@ -874,7 +863,6 @@ jobs:
     uses: ./.github/workflows/ci-e2e-delegated.yaml
     with:
       task: build-kotlin-android
-    secrets: inherit
   test-kotlin-android:
     needs: [changes]
     name: "Test: Kotlin Android (host JVM)"
@@ -882,7 +870,6 @@ jobs:
     uses: ./.github/workflows/ci-e2e-delegated.yaml
     with:
       task: test-kotlin-android
-    secrets: inherit
   test-swift:
     needs: [changes]
     name: "Test: Swift"
@@ -890,7 +877,6 @@ jobs:
     uses: ./.github/workflows/ci-e2e-delegated.yaml
     with:
       task: test-swift
-    secrets: inherit
   test-dart:
     needs: [changes]
     name: "Test: Dart"
@@ -898,7 +884,6 @@ jobs:
     uses: ./.github/workflows/ci-e2e-delegated.yaml
     with:
       task: test-dart
-    secrets: inherit
   test-zig:
     needs: [changes]
     name: "Test: Zig"
@@ -906,7 +891,6 @@ jobs:
     uses: ./.github/workflows/ci-e2e-delegated.yaml
     with:
       task: test-zig
-    secrets: inherit
   e2e-result:
     name: "E2E result"
     needs:

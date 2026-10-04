@@ -11,6 +11,7 @@ import yaml
 
 ROOT = Path(__file__).resolve().parents[2]
 WORKFLOW_PATH = ROOT / ".github" / "workflows" / "ci-e2e.yaml"
+DELEGATED_WORKFLOW_PATH = ROOT / ".github" / "workflows" / "ci-e2e-delegated.yaml"
 ALEF_PATH = ROOT / "alef.toml"
 OUTPUT_FILTER = re.compile(r"steps\.filter\.outputs\.([a-z]+) == 'true'")
 ALEF_LANGUAGE = re.compile(r"alef test --e2e --lang ([a-z_]+)")
@@ -68,8 +69,10 @@ def _command_inputs(command: str, working_directory: str, packages: dict[str, st
     return inputs
 
 
-def _job_inputs(job: dict[str, Any], alef: dict[str, Any], packages: dict[str, str]) -> set[str]:
-    inputs = {".github/workflows/ci-e2e.yaml"}
+def _job_inputs(
+    job: dict[str, Any], alef: dict[str, Any], packages: dict[str, str], workflow_inputs: set[str]
+) -> set[str]:
+    inputs = set(workflow_inputs)
     commands = _commands(job, alef)
     if any(ALEF_LANGUAGE.search(command) for command in commands):
         inputs.add("alef.toml")
@@ -99,7 +102,17 @@ def _covered(path: str, patterns: set[str]) -> bool:
     )
 
 
-def _filter_input_problems(workflow: dict[str, Any], alef: dict[str, Any]) -> list[str]:
+def _resolved_job(job: dict[str, Any], delegated: dict[str, Any]) -> tuple[dict[str, Any], set[str]]:
+    workflow_inputs = {".github/workflows/ci-e2e.yaml"}
+    if job.get("uses") != "./.github/workflows/ci-e2e-delegated.yaml":
+        return job, workflow_inputs
+
+    workflow_inputs.add(".github/workflows/ci-e2e-delegated.yaml")
+    task = str(job.get("with", {}).get("task", ""))
+    return delegated["jobs"][task], workflow_inputs
+
+
+def _filter_input_problems(workflow: dict[str, Any], delegated: dict[str, Any], alef: dict[str, Any]) -> list[str]:
     filters = yaml.safe_load(_filter_step(workflow)["with"]["filters"])
     outputs = workflow["jobs"]["changes"]["outputs"]
     packages = _cargo_packages()
@@ -108,10 +121,11 @@ def _filter_input_problems(workflow: dict[str, Any], alef: dict[str, Any]) -> li
         output = outputs.get(f"run-{job_id}")
         if output is None:
             continue
+        resolved_job, workflow_inputs = _resolved_job(job, delegated)
         patterns = {pattern for name in OUTPUT_FILTER.findall(output) for pattern in filters[name]}
         problems.extend(
             f"{job_id}: no assigned filter covers {path}"
-            for path in sorted(_job_inputs(job, alef, packages))
+            for path in sorted(_job_inputs(resolved_job, alef, packages, workflow_inputs))
             if not _covered(path, patterns)
         )
     return problems
@@ -119,20 +133,22 @@ def _filter_input_problems(workflow: dict[str, Any], alef: dict[str, Any]) -> li
 
 def test_every_e2e_leg_filter_covers_the_inputs_its_job_reads() -> None:
     workflow = yaml.safe_load(WORKFLOW_PATH.read_text(encoding="utf-8"))
+    delegated = yaml.safe_load(DELEGATED_WORKFLOW_PATH.read_text(encoding="utf-8"))
     alef = tomllib.loads(ALEF_PATH.read_text(encoding="utf-8"))
 
-    assert _filter_input_problems(workflow, alef) == []
+    assert _filter_input_problems(workflow, delegated, alef) == []
 
 
 def test_missing_jni_filter_input_is_reported() -> None:
     workflow = yaml.safe_load(WORKFLOW_PATH.read_text(encoding="utf-8"))
+    delegated = yaml.safe_load(DELEGATED_WORKFLOW_PATH.read_text(encoding="utf-8"))
     alef = tomllib.loads(ALEF_PATH.read_text(encoding="utf-8"))
     changed = copy.deepcopy(workflow)
     filters = yaml.safe_load(_filter_step(changed)["with"]["filters"])
     filters["kotlin"].remove("crates/html-to-markdown-rs-jni/**")
     _filter_step(changed)["with"]["filters"] = yaml.safe_dump(filters)
 
-    problems = _filter_input_problems(changed, alef)
+    problems = _filter_input_problems(changed, delegated, alef)
 
     assert "build-kotlin-android: no assigned filter covers crates/html-to-markdown-rs-jni" in problems
 
