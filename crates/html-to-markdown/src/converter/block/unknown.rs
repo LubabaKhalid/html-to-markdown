@@ -8,7 +8,6 @@
 //! - Manages trailing whitespace intelligently
 
 use crate::converter::block::container::HandlerContext;
-use crate::options::ConversionOptions;
 #[cfg(feature = "visitor")]
 use std::borrow::Cow;
 use tl::{NodeHandle, Parser};

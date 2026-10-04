@@ -26,8 +26,8 @@ pub fn handle(node_handle: &NodeHandle, parser: &Parser, output: &mut String, ha
     let HandlerContext {
         options,
         ctx,
-        depth,
-        dom_ctx,
+        depth: _,
+        dom_ctx: _,
     } = handler;
     #[cfg(feature = "visitor")]
     if visit_line_break(node_handle, parser, output, handler) {
@@ -38,13 +38,13 @@ pub fn handle(node_handle: &NodeHandle, parser: &Parser, output: &mut String, ha
         rule_like_text.advance();
     }
 
-    if write_special_break(output, options, ctx) {
+    if write_special_break(output, ctx) {
         return;
     }
     write_flow_break(output, options, ctx);
 }
 
-fn write_special_break(output: &mut String, options: &ConversionOptions, ctx: &Context) -> bool {
+fn write_special_break(output: &mut String, ctx: &Context) -> bool {
     if ctx.in_heading {
         // ~keep A single-line ATX heading cannot carry a hard break at all, so any marker
         // ~keep here is inherently lossy. A single space is the only choice that is

@@ -22,7 +22,7 @@ pub fn handle(node_handle: &NodeHandle, parser: &Parser, output: &mut String, ha
     let HandlerContext {
         options,
         ctx,
-        depth,
+        depth: _,
         dom_ctx,
     } = handler;
     #[cfg(feature = "visitor")]
