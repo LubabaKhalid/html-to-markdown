@@ -34,18 +34,21 @@ fn should_indent_a_source_line_continuation_at_the_item_column() {
     let expected = "> - aa bb\n>   aa 1.\n";
 
     assert_eq!(converted(html, NewlineStyle::Spaces, None), expected);
-    let tier1_options = ConversionOptions {
-        extract_metadata: false,
-        tier_strategy: TierStrategy::Tier1,
-        ..ConversionOptions::default()
-    };
-    assert_eq!(
-        convert(html, Some(tier1_options))
-            .expect("conversion must succeed")
-            .content
-            .unwrap_or_default(),
-        expected
-    );
+    #[cfg(feature = "testkit")]
+    {
+        let tier1_options = ConversionOptions {
+            extract_metadata: false,
+            tier_strategy: TierStrategy::Tier1,
+            ..ConversionOptions::default()
+        };
+        assert_eq!(
+            convert(html, Some(tier1_options))
+                .expect("conversion must succeed")
+                .content
+                .unwrap_or_default(),
+            expected
+        );
+    }
 }
 
 #[test]
