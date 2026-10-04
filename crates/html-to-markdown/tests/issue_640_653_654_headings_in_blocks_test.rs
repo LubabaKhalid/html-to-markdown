@@ -537,19 +537,20 @@ fn should_keep_the_text_of_a_quote_in_a_wide_ordered_item_right_after_an_inline_
 }
 
 #[test]
-fn should_keep_text_after_a_quote_in_a_list_in_a_caption_or_summary_after_the_list_item_ended_out_of_a_code_block() {
+fn should_keep_a_caption_or_summary_with_nested_blocks_inside_the_list_item() {
+    // ~keep Figures preserve their containing list item, as details elements do (#657).
     let html = "<ul><li>a<ul><li>b<figure><figcaption><ul><li>y<blockquote><ul><li>x<blockquote>q</blockquote>t</li></ul></blockquote>u</li></ul></figcaption></figure></li></ul></li></ul>";
     assert_converts(
         html,
         &width4(options(TierStrategy::Tier2)),
-        "- a\n    * b\n\n*+ y\n            > - x\n            >     > q\n            >     t\n            u*\n",
-        "<ul><li>a<ul><li>b</li></ul></li></ul><p><em>+ y&gt; - x&gt;     &gt; q&gt;     tu</em></p>",
+        "- a\n    * b\n\n        *+ y\n            > - x\n            >     > q\n            >     t\n            u*\n",
+        "<ul><li>a<ul><li><p>b</p><p><em>+ y&gt; - x&gt;     &gt; q&gt;     tu</em></p></li></ul></li></ul>",
     );
     assert_converts(
         html,
         &tabs(options(TierStrategy::Tier2)),
-        "- a\n\t* b\n\n*+ y\n\t\t> - x\n\t\t> \t> q\n\t\t> \tt\n\t\tu*\n",
-        "<ul><li>a<ul><li>b</li></ul></li></ul><p><em>+ y&gt; - x&gt; \t&gt; q&gt; \ttu</em></p>",
+        "- a\n\t* b\n\n\t\t*+ y\n\t\t> - x\n\t\t> \t> q\n\t\t> \tt\n\n\t\tu*\n",
+        "<ul><li>a<ul><li><p>b</p><p>*+ y</p><blockquote><ul><li>x<blockquote><p>qt</p></blockquote></li></ul></blockquote><p>u*</p></li></ul></li></ul>",
     );
     // ~keep A details converts like a div, so its summary stays in the list item.
     let html = "<ul><li>a<ul><li>b<details><summary><ul><li>y<blockquote><ul><li>x<blockquote>q</blockquote>t</li></ul></blockquote>u</li></ul></summary></details></li></ul></li></ul>";
