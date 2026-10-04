@@ -34,8 +34,9 @@ fn should_escape_each_djot_dash_and_backtick_at_a_line_start_after_a_break() {
     }
 
     let html = r#"<ol start="10"><li><a href="u">a<br><span>```</span></a></li></ol>"#;
-    assert_eq!(convert_djot(html, TierStrategy::Tier1), "10. [a\\\n    \\`\\`\\`](u)\n");
-    assert_eq!(convert_djot(html, TierStrategy::Tier2), "10. [a\\\n \\`\\`\\`](u)\n");
+    for tier_strategy in [TierStrategy::Tier1, TierStrategy::Tier2] {
+        assert_eq!(convert_djot(html, tier_strategy), "10. [a\\\n    \\`\\`\\`](u)\n");
+    }
 }
 
 #[test]
