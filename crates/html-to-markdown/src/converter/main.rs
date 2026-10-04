@@ -57,7 +57,6 @@ pub struct ConversionParameters<'a> {
     pub base_url: Option<std::rc::Rc<url::Url>>,
     pub document_base_href: Option<&'a str>,
 }
-
 /// Internal implementation of HTML to Markdown conversion.
 ///
 /// Returns the converted content, optional document structure, extracted tables, and an

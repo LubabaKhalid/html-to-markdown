@@ -164,19 +164,31 @@ pub fn handle_summary(
         if handler.ctx.convert_as_inline {
             output.push_str(trimmed);
         } else {
-            let mut bold = String::with_capacity(trimmed.len() + 4);
-            crate::converter::inline::emphasis::emit_strong_wrapped(
-                &mut bold,
-                trimmed,
-                handler.options,
-                handler.ctx,
-                node_handle,
-                parser,
-                handler.dom_ctx,
-            );
-            crate::converter::block::div::push_block(output, handler.options, handler.ctx, &bold);
+            render_summary_block(output, trimmed, node_handle, parser, handler);
         }
     }
+}
+
+fn render_summary_block(
+    output: &mut String,
+    content: &str,
+    node_handle: &tl::NodeHandle,
+    parser: &tl::Parser,
+    handler: super::HandlerContext<'_>,
+) {
+    let mut bold = String::with_capacity(content.len() + 4);
+    crate::converter::inline::emphasis::emit_strong_wrapped(
+        &mut bold,
+        content,
+        crate::converter::inline::wrapped::InlineSite {
+            node_handle,
+            parser,
+            dom_ctx: handler.dom_ctx,
+            ctx: handler.ctx,
+            options: handler.options,
+        },
+    );
+    crate::converter::block::div::push_block(output, handler.options, handler.ctx, &bold);
 }
 
 #[cfg(feature = "visitor")]

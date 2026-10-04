@@ -240,11 +240,13 @@ pub fn handle_legend(
                 crate::converter::inline::emphasis::emit_strong_wrapped_blocks(
                     &mut bold,
                     trimmed,
-                    options,
-                    ctx,
-                    node_handle,
-                    parser,
-                    dom_ctx,
+                    crate::converter::inline::wrapped::InlineSite {
+                        node_handle,
+                        parser,
+                        dom_ctx,
+                        ctx,
+                        options,
+                    },
                 );
                 crate::converter::block::div::push_block(output, options, ctx, &bold);
             }
