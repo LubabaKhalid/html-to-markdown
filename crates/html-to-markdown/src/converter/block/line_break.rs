@@ -12,6 +12,10 @@ use tl::{NodeHandle, Parser};
 type Context = crate::converter::Context;
 type DomContext = crate::converter::DomContext;
 
+fn is_paragraph_block_output(output: &String, ctx: &Context) -> bool {
+    ctx.in_paragraph && std::ptr::from_ref::<String>(output) as usize == ctx.block_output_ptr
+}
+
 /// Handle line break elements (br).
 ///
 /// Converts to appropriate Markdown line break syntax based on the configured
@@ -167,7 +171,7 @@ pub fn handle(
         // ~keep content; its bare newline is an internal sentinel that the wrapper turns into
         // ~keep either a real break before following content or a separator when break-only.
         // ~keep A bare top-level break also remains an intentional leading line (#112).
-        if !ctx.in_paragraph || std::ptr::from_ref::<String>(output) as usize != ctx.block_output_ptr {
+        if !is_paragraph_block_output(output, ctx) {
             output.push('\n');
         }
     } else {
