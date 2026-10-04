@@ -597,6 +597,8 @@ fn render_regular_item(
     output: &mut String,
     render: &ItemRenderContext<'_, '_>,
 ) -> bool {
+    #[cfg(not(feature = "visitor"))]
+    let _ = node_handle;
     if render.list.ctx.in_table_cell {
         add_list_leading_separator(output, render.list.ctx, render.list.options);
     } else {
