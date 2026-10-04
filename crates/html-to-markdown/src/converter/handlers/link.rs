@@ -219,7 +219,7 @@ fn emit_heading_link(data: &LinkData<'_>, handler: &mut HandlerContext<'_>) -> b
 
 fn build_label(data: &LinkData<'_>, handler: &HandlerContext<'_>) -> String {
     if data.emit_blocks_separately {
-        return walk_label(&data.inline_children, handler.context.convert_as_inline, data, handler);
+        return walk_label(&data.inline_children, false, data, handler);
     }
     if data.saw_block {
         let content = walk_label_content(&data.children, true, data, handler);
@@ -229,7 +229,7 @@ fn build_label(data: &LinkData<'_>, handler: &HandlerContext<'_>) -> String {
             normalize_link_label(&content)
         };
     }
-    walk_label(&data.children, handler.context.convert_as_inline, data, handler)
+    walk_label(&data.children, false, data, handler)
 }
 
 fn walk_label(
@@ -250,7 +250,7 @@ fn walk_label_content(
     let link_context = Context {
         inline_depth: handler.context.inline_depth + 1,
         in_link: true,
-        convert_as_inline: merge_child_spacing,
+        convert_as_inline: handler.context.convert_as_inline || merge_child_spacing,
         link_allow_inline_images: data.link_allow_inline_images,
         ..handler.context.clone()
     };
