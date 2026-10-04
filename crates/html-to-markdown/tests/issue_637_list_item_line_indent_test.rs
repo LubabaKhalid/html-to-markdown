@@ -31,7 +31,21 @@ fn should_indent_a_backslash_break_line_at_the_item_column() {
 #[test]
 fn should_indent_a_source_line_continuation_at_the_item_column() {
     let html = "<blockquote><ul><li>aa bb\n aa 1.</li></ul></blockquote>";
-    assert_eq!(converted(html, NewlineStyle::Spaces, None), "> - aa bb\n>   aa 1.\n");
+    let expected = "> - aa bb\n>   aa 1.\n";
+
+    assert_eq!(converted(html, NewlineStyle::Spaces, None), expected);
+    let tier1_options = ConversionOptions {
+        extract_metadata: false,
+        tier_strategy: TierStrategy::Tier1,
+        ..ConversionOptions::default()
+    };
+    assert_eq!(
+        convert(html, Some(tier1_options))
+            .expect("conversion must succeed")
+            .content
+            .unwrap_or_default(),
+        expected
+    );
 }
 
 #[test]

@@ -3458,6 +3458,28 @@ fn indent_fresh_list_item_text_line(state: &mut Tier1State) {
     }
 }
 
+fn indent_list_item_text_continuation_lines(buffer: &mut String, from: usize, indent_width: usize) {
+    let emitted = &buffer[from..];
+    if indent_width == 0 || !emitted.contains('\n') || emitted.contains("\n\n") {
+        return;
+    }
+
+    // ~keep Tier-2 gives every source-line continuation inside one text node the
+    // ~keep list item's content indent (#637). Whitespace collapse has removed the
+    // ~keep source indentation by this point, so restore the structural indent here.
+    let indent = " ".repeat(indent_width);
+    let mut indented = String::with_capacity(emitted.len() + indent.len());
+    let mut lines = emitted.split_inclusive('\n').peekable();
+    while let Some(line) = lines.next() {
+        indented.push_str(line);
+        if lines.peek().is_some() {
+            indented.push_str(&indent);
+        }
+    }
+    buffer.truncate(from);
+    buffer.push_str(&indented);
+}
+
 /// Append `rendered` (a fully-formatted block's text, possibly spanning
 /// several physical lines) to `state.output`, indenting every line to the
 /// innermost open list item's continuation column when inside one.
@@ -5240,6 +5262,11 @@ fn flush_text(
         .stack
         .iter()
         .any(|frame| matches!(frame.spec.kind, TagKind::ListItem));
+    let list_indent_width = if in_list_item {
+        state.list_continuation_indent_width()
+    } else {
+        0
+    };
     let dest = state.cell_or_output_mut();
     let emitted_from = dest.len();
 
@@ -5262,6 +5289,7 @@ fn flush_text(
         decode_and_collapse_into(dest, raw, has_entities, base_offset)?;
     }
 
+    indent_list_item_text_continuation_lines(dest, emitted_from, list_indent_width);
     escape_backslash_run(dest, emitted_from, in_cell);
     if in_cell && output_format == crate::options::OutputFormat::Djot {
         let escaped = crate::converter::utility::escaping::escape_djot_table_cell_literal(
