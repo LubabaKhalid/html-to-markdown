@@ -256,7 +256,7 @@ fn handle_strong(
             let strong_ctx = Context {
                 inline_depth: ctx.inline_depth + 1,
                 in_strong: true,
-                ..ctx.clone()
+                ..ctx.inline_buffer(output, true)
             };
             for child_handle in children.top().iter() {
                 walk_node(
@@ -356,7 +356,7 @@ fn handle_emphasis(
         {
             let em_ctx = Context {
                 inline_depth: ctx.inline_depth + 1,
-                ..ctx.clone()
+                ..ctx.inline_buffer(output, true)
             };
             for child_handle in children.top().iter() {
                 walk_node(child_handle, parser, &mut content, options, &em_ctx, depth + 1, dom_ctx);

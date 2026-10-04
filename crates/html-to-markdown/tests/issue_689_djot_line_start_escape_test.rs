@@ -37,3 +37,17 @@ fn should_escape_each_djot_dash_and_backtick_at_a_line_start_after_a_break() {
     assert_eq!(convert_djot(html, TierStrategy::Tier1), "10. [a\\\n    \\`\\`\\`](u)\n");
     assert_eq!(convert_djot(html, TierStrategy::Tier2), "10. [a\\\n \\`\\`\\`](u)\n");
 }
+
+#[test]
+fn should_escape_djot_marker_runs_after_a_break_inside_detached_inline_wrappers() {
+    for (tag, marker) in [("abbr", ""), ("sub", "~"), ("sup", "^"), ("label", "")] {
+        for (text, escaped) in [("---", r"\-\-\-"), ("```", r"\`\`\`")] {
+            let html = format!("<p>a<br><{tag}>{text}</{tag}></p>");
+            assert_eq!(
+                convert_djot(&html, TierStrategy::Tier2),
+                format!("a\\\n{marker}{escaped}{marker}\n"),
+                "input: {html:?}"
+            );
+        }
+    }
+}

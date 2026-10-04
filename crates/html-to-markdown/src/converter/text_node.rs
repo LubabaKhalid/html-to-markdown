@@ -341,11 +341,14 @@ pub fn process_text_node(
         } else {
             text.as_ref()
         };
-        let strict_text = if get_previous_sibling_tag(node_handle, parser, dom_ctx) == Some("br") {
-            strip_single_leading_line_ending(strict_text).unwrap_or(strict_text)
-        } else {
-            strict_text
-        };
+        let follows_external_hard_break =
+            ctx.inline_buffer_after_hard_break && output.trim_matches([' ', '\t']).is_empty();
+        let strict_text =
+            if get_previous_sibling_tag(node_handle, parser, dom_ctx) == Some("br") || follows_external_hard_break {
+                strip_single_leading_line_ending(strict_text).unwrap_or(strict_text)
+            } else {
+                strict_text
+            };
         text::escape(
             strict_text,
             options.escape_misc,
@@ -541,13 +544,18 @@ pub fn process_text_node(
         if writes_to_block {
             crate::converter::utility::escaping::escape_djot_list_item_start(output, text_start, ctx.in_list_item);
         }
-        crate::converter::utility::escaping::escape_djot_continuation_line_start(output);
+        crate::converter::utility::escaping::escape_djot_continuation_line_start(
+            output,
+            text_start,
+            ctx.inline_buffer_after_hard_break,
+        );
     }
 }
 
-/// Remove one source line ending only when it is not the end of a blank line. ~keep
+/// Remove one source line ending and its following indentation only when it is not a blank line. ~keep
 fn strip_single_trailing_line_ending(text: &str) -> Option<&str> {
-    let without_lf = text.strip_suffix('\n')?;
+    let content_end = text.trim_end_matches([' ', '\t']).len();
+    let without_lf = text[..content_end].strip_suffix('\n')?;
     let without_line_ending = without_lf.strip_suffix('\r').unwrap_or(without_lf);
     (!without_line_ending.ends_with('\n') && !without_line_ending.ends_with('\r')).then_some(without_line_ending)
 }

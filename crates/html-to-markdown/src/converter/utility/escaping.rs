@@ -619,16 +619,22 @@ pub fn escape_djot_list_item_start(buffer: &mut String, from: usize, in_list_ite
 
 /// ~keep Djot parses leading dash runs as typographic dashes and leading backticks as verbatim
 /// markup even on a continuation line. Escape every marker in those runs after a hard break.
-pub fn escape_djot_continuation_line_start(buffer: &mut String) {
-    let Some(line_start) = buffer.rfind('\n').map(|position| position + 1) else {
+pub fn escape_djot_continuation_line_start(buffer: &mut String, from: usize, after_external_hard_break: bool) {
+    let line_start = if let Some(position) = buffer.rfind('\n') {
+        position + 1
+    } else if after_external_hard_break && buffer[..from].trim_matches([' ', '\t']).is_empty() {
+        from
+    } else {
         return;
     };
-    let previous_line = &buffer[..line_start - 1];
-    let previous_line_start = previous_line.rfind('\n').map_or(0, |position| position + 1);
-    let previous_line = &previous_line[previous_line_start..];
-    let trailing_backslashes = previous_line.len() - previous_line.trim_end_matches('\\').len();
-    if trailing_backslashes.is_multiple_of(2) {
-        return;
+    if line_start > 0 {
+        let previous_line = &buffer[..line_start - 1];
+        let previous_line_start = previous_line.rfind('\n').map_or(0, |position| position + 1);
+        let previous_line = &previous_line[previous_line_start..];
+        let trailing_backslashes = previous_line.len() - previous_line.trim_end_matches('\\').len();
+        if trailing_backslashes.is_multiple_of(2) {
+            return;
+        }
     }
 
     let indent = buffer[line_start..]

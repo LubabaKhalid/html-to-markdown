@@ -5284,7 +5284,7 @@ fn flush_text(
             if !inside_inline {
                 crate::converter::utility::escaping::escape_djot_list_item_start(dest, emitted_from, in_list_item);
             }
-            crate::converter::utility::escaping::escape_djot_continuation_line_start(dest);
+            crate::converter::utility::escaping::escape_djot_continuation_line_start(dest, emitted_from, false);
         }
     }
     if ends_in_newline_join {
