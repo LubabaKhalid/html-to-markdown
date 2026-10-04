@@ -129,13 +129,17 @@ pub fn handle(
 
     if has_content && !ctx.in_table_cell && !ctx.in_list_item && !ctx.convert_as_inline {
         if let Some(ref sc) = ctx.structure_collector {
-            let safe_start = crate::converter::utility::content::floor_char_boundary(output, content_start_pos);
-            let text = output[safe_start..].trim();
+            let text = structure_text(output, content_start_pos);
             if !text.is_empty() {
                 sc.borrow_mut().push_paragraph(text);
             }
         }
     }
+}
+
+fn structure_text(output: &str, content_start_pos: usize) -> &str {
+    let safe_start = crate::converter::utility::content::floor_char_boundary(output, content_start_pos);
+    output[safe_start..].trim()
 }
 
 /// Whether `output` ends with a bare list marker and nothing else: an ordered marker's
@@ -172,5 +176,20 @@ fn is_empty_inline_element(node_handle: &NodeHandle, parser: &Parser, _dom_ctx: 
         }
     } else {
         false
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::structure_text;
+
+    #[test]
+    fn should_clamp_structure_slice_when_output_shrinks_below_a_multibyte_start() {
+        assert_eq!(structure_text("中", 4), "");
+    }
+
+    #[test]
+    fn should_floor_structure_slice_when_start_lands_inside_a_multibyte_character() {
+        assert_eq!(structure_text("a中", 2), "中");
     }
 }
