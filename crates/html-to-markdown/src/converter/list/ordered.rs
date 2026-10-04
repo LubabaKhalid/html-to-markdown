@@ -32,7 +32,7 @@ pub fn handle_ol(node_handle: &tl::NodeHandle, parser: &tl::Parser, output: &mut
     let ListContext {
         options,
         ctx,
-        depth: _,
+        depth,
         dom_ctx,
     } = context;
     if !super::utils::has_list_item_child(*node_handle, parser, dom_ctx) {

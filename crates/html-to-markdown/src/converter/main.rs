@@ -911,9 +911,8 @@ fn render_preserved_tag(
     if preserved_menu_placeholder {
         html = restore_preserved_menu_elements(&html).into_owned();
     }
-    let custom_element_starts_block = ctx.in_list_item
-        && tag_name.contains('-')
-        && !crate::converter::list::utils::line_is_bare_list_marker(output);
+    let custom_element_starts_block =
+        ctx.in_list_item && tag_name.contains('-') && !crate::converter::list::utils::line_is_bare_list_marker(output);
     let opens_html_block = (starts_line || (preserved_menu_placeholder && ctx.in_list_item))
         && !ctx.in_marker_text()
         && !ctx.in_table_cell

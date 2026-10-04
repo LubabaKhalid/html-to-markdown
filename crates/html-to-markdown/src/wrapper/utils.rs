@@ -310,11 +310,7 @@ fn greedy_line_ends(words: &[&str], width: usize) -> Vec<usize> {
     greedy_ends
 }
 
-fn block_safe_line_starts(
-    words: &[&str],
-    greedy_ends: Vec<usize>,
-    first_line_may_open: bool,
-) -> (Vec<usize>, usize) {
+fn block_safe_line_starts(words: &[&str], greedy_ends: Vec<usize>, first_line_may_open: bool) -> (Vec<usize>, usize) {
     // ~keep Line `k` is `words[starts[k]..starts[k + 1]]`, the last one ends at `end`.
     let mut starts: Vec<usize> = Vec::new();
     let mut end = 0;

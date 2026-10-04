@@ -74,20 +74,8 @@ pub fn handle_figure(
 }
 
 fn collect_figure_content(tag: &tl::HTMLTag<'_>, parser: &tl::Parser, handler: super::HandlerContext<'_>) -> String {
-    // ~keep The figure is written at the start of the line, so inside it the list item
-    // ~keep has ended (issue #583).
-    let figure_ctx = super::Context {
-        list_item_open: false,
-        real_item_columns: 0,
-        ..handler.ctx.clone()
-    };
     let mut content = String::new();
-    super::walk_tag_children(
-        tag,
-        parser,
-        &mut content,
-        super::HandlerContext::new(handler.options, &figure_ctx, handler.depth, handler.dom_ctx),
-    );
+    super::walk_tag_children(tag, parser, &mut content, handler);
     content
 }
 

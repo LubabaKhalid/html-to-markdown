@@ -574,11 +574,7 @@ fn escape_emitted_text(dest: &mut String, context: EmittedTextContext) {
                     context.in_list_item,
                 );
             }
-            crate::converter::utility::escaping::escape_djot_continuation_line_start(
-                dest,
-                context.emitted_from,
-                false,
-            );
+            crate::converter::utility::escaping::escape_djot_continuation_line_start(dest, context.emitted_from, false);
         }
         crate::options::OutputFormat::Plain => {}
     }

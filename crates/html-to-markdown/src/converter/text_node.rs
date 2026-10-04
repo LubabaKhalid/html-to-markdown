@@ -264,8 +264,7 @@ impl TextProcessor<'_, '_, '_> {
             .unwrap_or(value);
         let preceded_by_break = get_previous_sibling_tag(self.node_handle, self.parser, self.handler.dom_ctx)
             == Some("br")
-            || (self.handler.ctx.inline_buffer_after_hard_break
-                && self.output.trim_matches([' ', '\t']).is_empty());
+            || (self.handler.ctx.inline_buffer_after_hard_break && self.output.trim_matches([' ', '\t']).is_empty());
         let strict = preceded_by_break
             .then(|| strip_single_leading_line_ending(trimmed_end))
             .flatten()
@@ -446,11 +445,7 @@ impl TextProcessor<'_, '_, '_> {
             while let Some(line) = lines.next() {
                 self.output.push_str(line);
                 if lines.peek().is_some() {
-                    crate::converter::list::utils::indent_list_item_line_start(
-                        self.output,
-                        ctx,
-                        self.handler.options,
-                    );
+                    crate::converter::list::utils::indent_list_item_line_start(self.output, ctx, self.handler.options);
                 }
             }
             return;
