@@ -122,8 +122,9 @@ pub fn block_runs_are_single_line(content: &str) -> bool {
     content.split("\n\n").all(|block| !block.contains('\n'))
 }
 
-/// ~keep A block that is a task item's first content keeps its opener outside inline
-/// delimiters, so the checkbox line cannot turn the opener into literal text (#643).
+/// ~keep A block quote that is a task item's first content keeps its opener outside inline
+/// delimiters, so the checkbox line cannot turn the opener into literal text (#643). Other
+/// block-like children retain their established inline-wrapper behavior.
 pub fn emit_first_block_wrapped(
     output: &mut String,
     content: &str,
@@ -136,7 +137,7 @@ pub fn emit_first_block_wrapped(
         || !ctx
             .first_writer
             .as_ref()
-            .is_some_and(|first_writer| first_writer.starts_with_block(parser))
+            .is_some_and(|first_writer| first_writer.starts_with_blockquote(parser))
         || !block_runs_are_single_line(content.trim_end_matches('\n'))
         || !crate::converter::utility::escaping::opens_block(content.trim_start())
     {
