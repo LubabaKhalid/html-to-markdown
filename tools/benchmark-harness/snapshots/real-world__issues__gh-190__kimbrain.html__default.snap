@@ -136,7 +136,6 @@ if __name__ == '__main__':
     main()
 ```
 
-   
 **C++ 의 ROS 스타일**  
 C++의 코드 스타일은 Google
 C++ Style Guide를 사용하고 있으며, ROS의 특성에 따라 일부를 수정해서
@@ -719,12 +718,6 @@ class my_subscriber(Node):
 
 ![](https://blog.kakaocdn.net/dna/4WPuq/btseqmW2f6g/AAAAAAAAAAAAAAAAAAAAAJBC6cWkOVRWtiectd4XEAIzN3EzEk_5QWsD6PUXnN9Z/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&expires=1769871599&allow_ip=&allow_referer=&signature=kPCNTv81JIM3%2FnLXft8z%2FPm3Cp0%3D)
 
-   
-   
-   
-   
-   
-   
 **생각해볼 문제**  
 **turtlesim을 한 번 움직여 봅시다. 거북이가 간단하게 오른쪽으로 1초간
 이동했다가 왼쪽으로 1초간 이동하는 topic을 발행해봅시다.**  
