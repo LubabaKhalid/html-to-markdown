@@ -4,15 +4,8 @@ declare(strict_types=1);
 
 namespace HtmlToMarkdown;
 
-/**
- * Callback interface for visitor traversal and transformation.
- *
- * Implement this interface and pass your implementation to the configured options bridge field
- * to customize visitor callbacks.
- *
- * Override only the methods you need.
- */
-interface HtmlVisitorInterface
+/** Core element visitor callbacks. ~keep */
+interface HtmlVisitorCoreInterface
 {
     /**
      * Visit text nodes (most frequent callback - ~100+ per document).
@@ -173,7 +166,11 @@ interface HtmlVisitorInterface
      * @return VisitResult How to proceed with traversal
      */
     public function visit_blockquote(NodeContext $context, string $_content, int $_depth): VisitResult;
+}
 
+/** Inline formatting and definition-list visitor callbacks. ~keep */
+interface HtmlVisitorFormattingInterface
+{
     /**
      * Visit strong/bold elements `<strong>`, `<b>`.
      *
@@ -311,7 +308,11 @@ interface HtmlVisitorInterface
      * @return VisitResult How to proceed with traversal
      */
     public function visit_definition_list_end(NodeContext $context, string $_output): VisitResult;
+}
 
+/** Form, media, and figure visitor callbacks. ~keep */
+interface HtmlVisitorEmbeddedInterface
+{
     /**
      * Visit form elements `<form>`.
      *
@@ -429,3 +430,16 @@ interface HtmlVisitorInterface
      */
     public function visit_figure_end(NodeContext $context, string $_output): VisitResult;
 }
+
+/**
+ * Callback interface for visitor traversal and transformation. ~keep
+ *
+ * Implement this interface and pass your implementation to the configured options bridge field
+ * to customize visitor callbacks.
+ *
+ * Override only the methods you need.
+ */
+interface HtmlVisitorInterface extends
+    HtmlVisitorCoreInterface,
+    HtmlVisitorFormattingInterface,
+    HtmlVisitorEmbeddedInterface {}
