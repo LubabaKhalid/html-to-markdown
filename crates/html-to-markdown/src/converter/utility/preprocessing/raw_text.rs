@@ -139,12 +139,13 @@ pub fn strip_script_and_style_tags(input: &str) -> Cow<'_, str> {
     let mut output: Option<String> = None;
     let mut svg_depth = 0usize;
 
-    if !bytes.contains(&b'<') {
-        return Cow::Borrowed(input);
-    }
-
     while idx < len {
-        if bytes[idx] == b'<' && idx + 1 < len {
+        let Some(offset) = memchr::memchr(b'<', &bytes[idx..]) else {
+            break;
+        };
+        idx += offset;
+
+        if idx + 1 < len {
             if let Some(new_idx) = track_svg_tag(bytes, idx, &mut svg_depth) {
                 idx = new_idx;
                 continue;
