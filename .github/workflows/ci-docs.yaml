@@ -21,7 +21,8 @@ permissions:
   id-token: write
 
 concurrency:
-  group: ci-docs-${{ github.ref }}
+  # ~keep Pending runs in a ref-wide group are replaced even when cancellation is disabled.
+  group: ci-docs-${{ github.event.pull_request.number || github.sha }}
   cancel-in-progress: false
 
 jobs:
