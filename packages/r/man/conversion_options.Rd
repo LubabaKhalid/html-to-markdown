@@ -2,7 +2,7 @@
 % Please edit documentation in R/options.R
 \name{conversion_options}
 \alias{conversion_options}
-\title{Create a ConversionOptions list for generated bindings}
+\title{Create an options list for generated bindings}
 \usage{
 conversion_options(
   heading_style = NULL,
@@ -44,10 +44,13 @@ conversion_options(
   include_document_structure = NULL,
   extract_images = NULL,
   max_image_size = NULL,
+  max_input_size = NULL,
   capture_svg = NULL,
   infer_dimensions = NULL,
   max_depth = NULL,
   exclude_selectors = NULL,
+  tier_strategy = NULL,
+  base_url = NULL,
   visitor = NULL
 )
 }
@@ -130,15 +133,21 @@ conversion_options(
 
 \item{max_image_size}{Maximum decoded image size in bytes (default 5MB)}
 
+\item{max_input_size}{Maximum accepted HTML input size in bytes}
+
 \item{capture_svg}{Capture SVG elements as images}
 
 \item{infer_dimensions}{Infer image dimensions from data}
 
-\item{max_depth}{Maximum DOM traversal depth. \code{None} means unlimited}
+\item{max_depth}{Maximum DOM traversal depth}
 
 \item{exclude_selectors}{CSS selectors for elements to exclude entirely (element + all content)}
 
-\item{visitor}{(feature-gated) Optional visitor for custom traversal logic}
+\item{tier_strategy}{Which conversion tier to use}
+
+\item{base_url}{Base URL to resolve relative \code{href}/\code{src} destinations against}
+
+\item{visitor}{Optional visitor for custom traversal logic}
 }
 \value{
 A named list suitable for the \code{options} argument of \code{\link[=convert]{convert()}}.

@@ -2,22 +2,32 @@
 % Please edit documentation in R/extendr-wrappers.R
 \name{convert}
 \alias{convert}
-\title{Convert HTML to Markdown, returning a \code{\link{ConversionResult}} with content, metadata, images,}
+\title{Convert HTML to Markdown, Djot, or plain text}
 \usage{
 convert(html, options = ConversionOptions$default())
 }
 \arguments{
 \item{html}{— the HTML string to convert.}
 
-\item{options}{— optional conversion options. Defaults to \code{\link[ConversionOptions:default]{ConversionOptions::default}}.}
+\item{options}{— conversion options. Rust accepts bare \code{\link{ConversionOptions}}, \code{Some(options)}, or \code{None}. Language bindings expose the same option fields through native constructors or optional parameters.}
 }
 \value{
 ConversionResult object (list with class attribute).
 }
 \description{
-and warnings.
+Returns a \code{\link{ConversionResult}} with converted content plus optional metadata,
+document structure, table data, inline images, and warnings depending on the
+enabled features and conversion options.
 }
 \section{Errors}{
 
-Returns an error if HTML parsing fails or if the input contains invalid UTF-8.
+Returns an error if the configured input-size limit is exceeded, HTML parsing fails,
+or the input contains invalid UTF-8.Observability
+
+Emits an \code{html_to_markdown::convert} span at \code{INFO} level with fields \code{input_len},
+\code{output_format}, \code{wrap}, \code{extract_metadata}, \code{extract_images}, and \code{tier_strategy}. These
+field names are part of the public observability contract and are kept stable across
+releases. This crate never installs a \code{tracing} subscriber — attach one in the consuming
+application to observe these spans and events.
 }
+

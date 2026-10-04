@@ -26,3 +26,7 @@ else
 fi
 
 Rscript -e "options(repos = c(CRAN = '${REPO_URL}')); for (pkg in c('devtools', 'testthat', 'rextendr', 'lintr', 'styler', 'covr', 'remotes')) { if (!requireNamespace(pkg, quietly = TRUE)) install.packages(pkg, type = ${INSTALL_TYPE}) }"
+
+# ~keep Roxygen output changes between releases. The committed pages declare 7.3.3, so the
+# freshness gate must render with those exact bytes instead of whatever CRAN serves that day.
+Rscript -e "options(repos = c(CRAN = '${REPO_URL}')); if (packageVersion('roxygen2') != '7.3.3') remotes::install_version('roxygen2', version = '7.3.3', upgrade = 'never')"

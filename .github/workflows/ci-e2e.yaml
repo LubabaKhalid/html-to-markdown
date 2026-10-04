@@ -1363,6 +1363,13 @@ jobs:
         with:
           install-deps-script: scripts/ci/r/install-deps.sh
 
+      - name: Install Task
+        uses: xberg-io/actions/install-task@v1
+
+      - name: Verify R reference pages are fresh
+        run: task r:docs:verify
+        shell: bash
+
       - name: Setup Rust
         uses: xberg-io/actions/setup-rust@v1
 
@@ -1375,9 +1382,6 @@ jobs:
         working-directory: packages/r
         run: ../../scripts/ci/r/run-lintr.sh
         shell: bash
-
-      - name: Install Task
-        uses: xberg-io/actions/install-task@v1
 
       - name: Install alef
         uses: xberg-io/actions/install-alef@v1
