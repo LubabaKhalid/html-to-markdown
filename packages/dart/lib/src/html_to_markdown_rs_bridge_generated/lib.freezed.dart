@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // coverage:ignore-file
-// ignore_for_file: type=lint
+// ignore_for_file: type=lint, type=warning, deprecated_member_use, deprecated_member_use_from_same_package
 // ignore_for_file: unused_element, deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies, annotate_overrides, invalid_annotation_target, unnecessary_question_mark
 
 part of 'lib.dart';
@@ -9,6 +9,7 @@ part of 'lib.dart';
 // FreezedGenerator
 // **************************************************************************
 
+// GENERATED CODE - DO NOT MODIFY BY HAND
 // dart format off
 T _$identity<T>(T value) => value;
 /// @nodoc
@@ -20,7 +21,7 @@ mixin _$AnnotationKind {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is AnnotationKind);
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is AnnotationKind);
 }
 
 
@@ -29,7 +30,7 @@ int get hashCode => runtimeType.hashCode;
 
 @override
 String toString() {
-  return 'AnnotationKind()';
+    return 'AnnotationKind()';
 }
 
 
@@ -227,7 +228,7 @@ class AnnotationKind_Bold extends AnnotationKind {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is AnnotationKind_Bold);
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is AnnotationKind_Bold);
 }
 
 
@@ -236,7 +237,7 @@ int get hashCode => runtimeType.hashCode;
 
 @override
 String toString() {
-  return 'AnnotationKind.bold()';
+    return 'AnnotationKind.bold()';
 }
 
 
@@ -259,7 +260,7 @@ class AnnotationKind_Italic extends AnnotationKind {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is AnnotationKind_Italic);
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is AnnotationKind_Italic);
 }
 
 
@@ -268,7 +269,7 @@ int get hashCode => runtimeType.hashCode;
 
 @override
 String toString() {
-  return 'AnnotationKind.italic()';
+    return 'AnnotationKind.italic()';
 }
 
 
@@ -291,7 +292,7 @@ class AnnotationKind_Underline extends AnnotationKind {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is AnnotationKind_Underline);
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is AnnotationKind_Underline);
 }
 
 
@@ -300,7 +301,7 @@ int get hashCode => runtimeType.hashCode;
 
 @override
 String toString() {
-  return 'AnnotationKind.underline()';
+    return 'AnnotationKind.underline()';
 }
 
 
@@ -323,7 +324,7 @@ class AnnotationKind_Strikethrough extends AnnotationKind {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is AnnotationKind_Strikethrough);
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is AnnotationKind_Strikethrough);
 }
 
 
@@ -332,7 +333,7 @@ int get hashCode => runtimeType.hashCode;
 
 @override
 String toString() {
-  return 'AnnotationKind.strikethrough()';
+    return 'AnnotationKind.strikethrough()';
 }
 
 
@@ -355,7 +356,7 @@ class AnnotationKind_Code extends AnnotationKind {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is AnnotationKind_Code);
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is AnnotationKind_Code);
 }
 
 
@@ -364,7 +365,7 @@ int get hashCode => runtimeType.hashCode;
 
 @override
 String toString() {
-  return 'AnnotationKind.code()';
+    return 'AnnotationKind.code()';
 }
 
 
@@ -387,7 +388,7 @@ class AnnotationKind_Subscript extends AnnotationKind {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is AnnotationKind_Subscript);
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is AnnotationKind_Subscript);
 }
 
 
@@ -396,7 +397,7 @@ int get hashCode => runtimeType.hashCode;
 
 @override
 String toString() {
-  return 'AnnotationKind.subscript()';
+    return 'AnnotationKind.subscript()';
 }
 
 
@@ -419,7 +420,7 @@ class AnnotationKind_Superscript extends AnnotationKind {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is AnnotationKind_Superscript);
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is AnnotationKind_Superscript);
 }
 
 
@@ -428,7 +429,7 @@ int get hashCode => runtimeType.hashCode;
 
 @override
 String toString() {
-  return 'AnnotationKind.superscript()';
+    return 'AnnotationKind.superscript()';
 }
 
 
@@ -451,7 +452,7 @@ class AnnotationKind_Highlight extends AnnotationKind {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is AnnotationKind_Highlight);
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is AnnotationKind_Highlight);
 }
 
 
@@ -460,7 +461,7 @@ int get hashCode => runtimeType.hashCode;
 
 @override
 String toString() {
-  return 'AnnotationKind.highlight()';
+    return 'AnnotationKind.highlight()';
 }
 
 
@@ -499,16 +500,18 @@ $AnnotationKind_LinkCopyWith<AnnotationKind_Link> get copyWith => _$AnnotationKi
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is AnnotationKind_Link&&(identical(other.url, url) || other.url == url)&&(identical(other.title, title) || other.title == title));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is AnnotationKind_Link&&(identical(other.url, url) || other.url == url)&&(identical(other.title, title) || other.title == title));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,url,title);
+int get hashCode {
+    return Object.hash(runtimeType,url,title);
+}
 
 @override
 String toString() {
-  return 'AnnotationKind.link(url: $url, title: $title)';
+    return 'AnnotationKind.link(url: $url, title: $title)';
 }
 
 
@@ -556,7 +559,7 @@ mixin _$ConversionError {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is ConversionError);
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is ConversionError);
 }
 
 
@@ -565,7 +568,7 @@ int get hashCode => runtimeType.hashCode;
 
 @override
 String toString() {
-  return 'ConversionError()';
+    return 'ConversionError()';
 }
 
 
@@ -762,16 +765,18 @@ $ConversionError_ParseErrorCopyWith<ConversionError_ParseError> get copyWith => 
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is ConversionError_ParseError&&(identical(other.field0, field0) || other.field0 == field0));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is ConversionError_ParseError&&(identical(other.field0, field0) || other.field0 == field0));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,field0);
+int get hashCode {
+    return Object.hash(runtimeType,field0);
+}
 
 @override
 String toString() {
-  return 'ConversionError.parseError(field0: $field0)';
+    return 'ConversionError.parseError(field0: $field0)';
 }
 
 
@@ -828,16 +833,18 @@ $ConversionError_SanitizationErrorCopyWith<ConversionError_SanitizationError> ge
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is ConversionError_SanitizationError&&(identical(other.field0, field0) || other.field0 == field0));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is ConversionError_SanitizationError&&(identical(other.field0, field0) || other.field0 == field0));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,field0);
+int get hashCode {
+    return Object.hash(runtimeType,field0);
+}
 
 @override
 String toString() {
-  return 'ConversionError.sanitizationError(field0: $field0)';
+    return 'ConversionError.sanitizationError(field0: $field0)';
 }
 
 
@@ -894,16 +901,18 @@ $ConversionError_ConfigErrorCopyWith<ConversionError_ConfigError> get copyWith =
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is ConversionError_ConfigError&&(identical(other.field0, field0) || other.field0 == field0));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is ConversionError_ConfigError&&(identical(other.field0, field0) || other.field0 == field0));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,field0);
+int get hashCode {
+    return Object.hash(runtimeType,field0);
+}
 
 @override
 String toString() {
-  return 'ConversionError.configError(field0: $field0)';
+    return 'ConversionError.configError(field0: $field0)';
 }
 
 
@@ -960,16 +969,18 @@ $ConversionError_IoErrorCopyWith<ConversionError_IoError> get copyWith => _$Conv
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is ConversionError_IoError&&(identical(other.field0, field0) || other.field0 == field0));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is ConversionError_IoError&&(identical(other.field0, field0) || other.field0 == field0));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,field0);
+int get hashCode {
+    return Object.hash(runtimeType,field0);
+}
 
 @override
 String toString() {
-  return 'ConversionError.ioError(field0: $field0)';
+    return 'ConversionError.ioError(field0: $field0)';
 }
 
 
@@ -1026,16 +1037,18 @@ $ConversionError_PanicCopyWith<ConversionError_Panic> get copyWith => _$Conversi
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is ConversionError_Panic&&(identical(other.field0, field0) || other.field0 == field0));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is ConversionError_Panic&&(identical(other.field0, field0) || other.field0 == field0));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,field0);
+int get hashCode {
+    return Object.hash(runtimeType,field0);
+}
 
 @override
 String toString() {
-  return 'ConversionError.panic(field0: $field0)';
+    return 'ConversionError.panic(field0: $field0)';
 }
 
 
@@ -1092,16 +1105,18 @@ $ConversionError_InvalidInputCopyWith<ConversionError_InvalidInput> get copyWith
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is ConversionError_InvalidInput&&(identical(other.field0, field0) || other.field0 == field0));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is ConversionError_InvalidInput&&(identical(other.field0, field0) || other.field0 == field0));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,field0);
+int get hashCode {
+    return Object.hash(runtimeType,field0);
+}
 
 @override
 String toString() {
-  return 'ConversionError.invalidInput(field0: $field0)';
+    return 'ConversionError.invalidInput(field0: $field0)';
 }
 
 
@@ -1159,16 +1174,18 @@ $ConversionError_InputTooLargeCopyWith<ConversionError_InputTooLarge> get copyWi
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is ConversionError_InputTooLarge&&(identical(other.observedSize, observedSize) || other.observedSize == observedSize)&&(identical(other.maxSize, maxSize) || other.maxSize == maxSize));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is ConversionError_InputTooLarge&&(identical(other.observedSize, observedSize) || other.observedSize == observedSize)&&(identical(other.maxSize, maxSize) || other.maxSize == maxSize));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,observedSize,maxSize);
+int get hashCode {
+    return Object.hash(runtimeType,observedSize,maxSize);
+}
 
 @override
 String toString() {
-  return 'ConversionError.inputTooLarge(observedSize: $observedSize, maxSize: $maxSize)';
+    return 'ConversionError.inputTooLarge(observedSize: $observedSize, maxSize: $maxSize)';
 }
 
 
@@ -1226,16 +1243,18 @@ $ConversionError_OtherCopyWith<ConversionError_Other> get copyWith => _$Conversi
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is ConversionError_Other&&(identical(other.field0, field0) || other.field0 == field0));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is ConversionError_Other&&(identical(other.field0, field0) || other.field0 == field0));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,field0);
+int get hashCode {
+    return Object.hash(runtimeType,field0);
+}
 
 @override
 String toString() {
-  return 'ConversionError.other(field0: $field0)';
+    return 'ConversionError.other(field0: $field0)';
 }
 
 
@@ -1282,7 +1301,7 @@ mixin _$NodeContent {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is NodeContent);
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is NodeContent);
 }
 
 
@@ -1291,7 +1310,7 @@ int get hashCode => runtimeType.hashCode;
 
 @override
 String toString() {
-  return 'NodeContent()';
+    return 'NodeContent()';
 }
 
 
@@ -1521,16 +1540,18 @@ $NodeContent_HeadingCopyWith<NodeContent_Heading> get copyWith => _$NodeContent_
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is NodeContent_Heading&&(identical(other.level, level) || other.level == level)&&(identical(other.text, text) || other.text == text));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is NodeContent_Heading&&(identical(other.level, level) || other.level == level)&&(identical(other.text, text) || other.text == text));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,level,text);
+int get hashCode {
+    return Object.hash(runtimeType,level,text);
+}
 
 @override
 String toString() {
-  return 'NodeContent.heading(level: $level, text: $text)';
+    return 'NodeContent.heading(level: $level, text: $text)';
 }
 
 
@@ -1589,16 +1610,18 @@ $NodeContent_ParagraphCopyWith<NodeContent_Paragraph> get copyWith => _$NodeCont
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is NodeContent_Paragraph&&(identical(other.text, text) || other.text == text));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is NodeContent_Paragraph&&(identical(other.text, text) || other.text == text));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,text);
+int get hashCode {
+    return Object.hash(runtimeType,text);
+}
 
 @override
 String toString() {
-  return 'NodeContent.paragraph(text: $text)';
+    return 'NodeContent.paragraph(text: $text)';
 }
 
 
@@ -1656,16 +1679,18 @@ $NodeContent_ListCopyWith<NodeContent_List> get copyWith => _$NodeContent_ListCo
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is NodeContent_List&&(identical(other.ordered, ordered) || other.ordered == ordered));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is NodeContent_List&&(identical(other.ordered, ordered) || other.ordered == ordered));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,ordered);
+int get hashCode {
+    return Object.hash(runtimeType,ordered);
+}
 
 @override
 String toString() {
-  return 'NodeContent.list(ordered: $ordered)';
+    return 'NodeContent.list(ordered: $ordered)';
 }
 
 
@@ -1723,16 +1748,18 @@ $NodeContent_ListItemCopyWith<NodeContent_ListItem> get copyWith => _$NodeConten
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is NodeContent_ListItem&&(identical(other.text, text) || other.text == text));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is NodeContent_ListItem&&(identical(other.text, text) || other.text == text));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,text);
+int get hashCode {
+    return Object.hash(runtimeType,text);
+}
 
 @override
 String toString() {
-  return 'NodeContent.listItem(text: $text)';
+    return 'NodeContent.listItem(text: $text)';
 }
 
 
@@ -1790,16 +1817,18 @@ $NodeContent_TableCopyWith<NodeContent_Table> get copyWith => _$NodeContent_Tabl
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is NodeContent_Table&&(identical(other.grid, grid) || other.grid == grid));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is NodeContent_Table&&(identical(other.grid, grid) || other.grid == grid));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,grid);
+int get hashCode {
+    return Object.hash(runtimeType,grid);
+}
 
 @override
 String toString() {
-  return 'NodeContent.table(grid: $grid)';
+    return 'NodeContent.table(grid: $grid)';
 }
 
 
@@ -1861,16 +1890,18 @@ $NodeContent_ImageCopyWith<NodeContent_Image> get copyWith => _$NodeContent_Imag
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is NodeContent_Image&&(identical(other.description, description) || other.description == description)&&(identical(other.src, src) || other.src == src)&&(identical(other.imageIndex, imageIndex) || other.imageIndex == imageIndex));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is NodeContent_Image&&(identical(other.description, description) || other.description == description)&&(identical(other.src, src) || other.src == src)&&(identical(other.imageIndex, imageIndex) || other.imageIndex == imageIndex));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,description,src,imageIndex);
+int get hashCode {
+    return Object.hash(runtimeType,description,src,imageIndex);
+}
 
 @override
 String toString() {
-  return 'NodeContent.image(description: $description, src: $src, imageIndex: $imageIndex)';
+    return 'NodeContent.image(description: $description, src: $src, imageIndex: $imageIndex)';
 }
 
 
@@ -1932,16 +1963,18 @@ $NodeContent_CodeCopyWith<NodeContent_Code> get copyWith => _$NodeContent_CodeCo
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is NodeContent_Code&&(identical(other.text, text) || other.text == text)&&(identical(other.language, language) || other.language == language));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is NodeContent_Code&&(identical(other.text, text) || other.text == text)&&(identical(other.language, language) || other.language == language));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,text,language);
+int get hashCode {
+    return Object.hash(runtimeType,text,language);
+}
 
 @override
 String toString() {
-  return 'NodeContent.code(text: $text, language: $language)';
+    return 'NodeContent.code(text: $text, language: $language)';
 }
 
 
@@ -1994,7 +2027,7 @@ class NodeContent_Quote extends NodeContent {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is NodeContent_Quote);
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is NodeContent_Quote);
 }
 
 
@@ -2003,7 +2036,7 @@ int get hashCode => runtimeType.hashCode;
 
 @override
 String toString() {
-  return 'NodeContent.quote()';
+    return 'NodeContent.quote()';
 }
 
 
@@ -2026,7 +2059,7 @@ class NodeContent_DefinitionList extends NodeContent {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is NodeContent_DefinitionList);
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is NodeContent_DefinitionList);
 }
 
 
@@ -2035,7 +2068,7 @@ int get hashCode => runtimeType.hashCode;
 
 @override
 String toString() {
-  return 'NodeContent.definitionList()';
+    return 'NodeContent.definitionList()';
 }
 
 
@@ -2066,16 +2099,18 @@ $NodeContent_DefinitionItemCopyWith<NodeContent_DefinitionItem> get copyWith => 
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is NodeContent_DefinitionItem&&(identical(other.term, term) || other.term == term)&&(identical(other.definition, definition) || other.definition == definition));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is NodeContent_DefinitionItem&&(identical(other.term, term) || other.term == term)&&(identical(other.definition, definition) || other.definition == definition));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,term,definition);
+int get hashCode {
+    return Object.hash(runtimeType,term,definition);
+}
 
 @override
 String toString() {
-  return 'NodeContent.definitionItem(term: $term, definition: $definition)';
+    return 'NodeContent.definitionItem(term: $term, definition: $definition)';
 }
 
 
@@ -2136,16 +2171,18 @@ $NodeContent_RawBlockCopyWith<NodeContent_RawBlock> get copyWith => _$NodeConten
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is NodeContent_RawBlock&&(identical(other.format, format) || other.format == format)&&(identical(other.content, content) || other.content == content));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is NodeContent_RawBlock&&(identical(other.format, format) || other.format == format)&&(identical(other.content, content) || other.content == content));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,format,content);
+int get hashCode {
+    return Object.hash(runtimeType,format,content);
+}
 
 @override
 String toString() {
-  return 'NodeContent.rawBlock(format: $format, content: $content)';
+    return 'NodeContent.rawBlock(format: $format, content: $content)';
 }
 
 
@@ -2188,7 +2225,7 @@ as String,
 
 
 class NodeContent_MetadataBlock extends NodeContent {
-  const NodeContent_MetadataBlock({required final  List<MetadataEntry> entries}): _entries = entries,super._();
+  const NodeContent_MetadataBlock({required  List<MetadataEntry> entries}): _entries = entries,super._();
 
 
 /// Key-value metadata pairs.
@@ -2211,16 +2248,18 @@ $NodeContent_MetadataBlockCopyWith<NodeContent_MetadataBlock> get copyWith => _$
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is NodeContent_MetadataBlock&&const DeepCollectionEquality().equals(other._entries, _entries));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is NodeContent_MetadataBlock&&const DeepCollectionEquality().equals(other.entries, _entries));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(_entries));
+int get hashCode {
+    return Object.hash(runtimeType,const DeepCollectionEquality().hash(_entries));
+}
 
 @override
 String toString() {
-  return 'NodeContent.metadataBlock(entries: $entries)';
+    return 'NodeContent.metadataBlock(entries: $entries)';
 }
 
 
@@ -2282,16 +2321,18 @@ $NodeContent_GroupCopyWith<NodeContent_Group> get copyWith => _$NodeContent_Grou
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is NodeContent_Group&&(identical(other.label, label) || other.label == label)&&(identical(other.headingLevel, headingLevel) || other.headingLevel == headingLevel)&&(identical(other.headingText, headingText) || other.headingText == headingText));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is NodeContent_Group&&(identical(other.label, label) || other.label == label)&&(identical(other.headingLevel, headingLevel) || other.headingLevel == headingLevel)&&(identical(other.headingText, headingText) || other.headingText == headingText));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,label,headingLevel,headingText);
+int get hashCode {
+    return Object.hash(runtimeType,label,headingLevel,headingText);
+}
 
 @override
 String toString() {
-  return 'NodeContent.group(label: $label, headingLevel: $headingLevel, headingText: $headingText)';
+    return 'NodeContent.group(label: $label, headingLevel: $headingLevel, headingText: $headingText)';
 }
 
 
@@ -2340,7 +2381,7 @@ mixin _$VisitResult {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is VisitResult);
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is VisitResult);
 }
 
 
@@ -2349,7 +2390,7 @@ int get hashCode => runtimeType.hashCode;
 
 @override
 String toString() {
-  return 'VisitResult()';
+    return 'VisitResult()';
 }
 
 
@@ -2523,7 +2564,7 @@ class VisitResult_Continue extends VisitResult {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is VisitResult_Continue);
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is VisitResult_Continue);
 }
 
 
@@ -2532,7 +2573,7 @@ int get hashCode => runtimeType.hashCode;
 
 @override
 String toString() {
-  return 'VisitResult.continue_()';
+    return 'VisitResult.continue_()';
 }
 
 
@@ -2560,16 +2601,18 @@ $VisitResult_CustomCopyWith<VisitResult_Custom> get copyWith => _$VisitResult_Cu
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is VisitResult_Custom&&(identical(other.field0, field0) || other.field0 == field0));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is VisitResult_Custom&&(identical(other.field0, field0) || other.field0 == field0));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,field0);
+int get hashCode {
+    return Object.hash(runtimeType,field0);
+}
 
 @override
 String toString() {
-  return 'VisitResult.custom(field0: $field0)';
+    return 'VisitResult.custom(field0: $field0)';
 }
 
 
@@ -2621,7 +2664,7 @@ class VisitResult_Skip extends VisitResult {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is VisitResult_Skip);
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is VisitResult_Skip);
 }
 
 
@@ -2630,7 +2673,7 @@ int get hashCode => runtimeType.hashCode;
 
 @override
 String toString() {
-  return 'VisitResult.skip()';
+    return 'VisitResult.skip()';
 }
 
 
@@ -2653,7 +2696,7 @@ class VisitResult_PreserveHtml extends VisitResult {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is VisitResult_PreserveHtml);
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is VisitResult_PreserveHtml);
 }
 
 
@@ -2662,7 +2705,7 @@ int get hashCode => runtimeType.hashCode;
 
 @override
 String toString() {
-  return 'VisitResult.preserveHtml()';
+    return 'VisitResult.preserveHtml()';
 }
 
 
@@ -2690,16 +2733,18 @@ $VisitResult_ErrorCopyWith<VisitResult_Error> get copyWith => _$VisitResult_Erro
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is VisitResult_Error&&(identical(other.field0, field0) || other.field0 == field0));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is VisitResult_Error&&(identical(other.field0, field0) || other.field0 == field0));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,field0);
+int get hashCode {
+    return Object.hash(runtimeType,field0);
+}
 
 @override
 String toString() {
-  return 'VisitResult.error(field0: $field0)';
+    return 'VisitResult.error(field0: $field0)';
 }
 
 
