@@ -155,38 +155,41 @@ def test_missing_jni_filter_input_is_reported() -> None:
 
 def test_missing_action_script_filter_input_is_reported() -> None:
     workflow = yaml.safe_load(WORKFLOW_PATH.read_text(encoding="utf-8"))
+    delegated = yaml.safe_load(DELEGATED_WORKFLOW_PATH.read_text(encoding="utf-8"))
     alef = tomllib.loads(ALEF_PATH.read_text(encoding="utf-8"))
     changed = copy.deepcopy(workflow)
     filters = yaml.safe_load(_filter_step(changed)["with"]["filters"])
     filters["r"].remove("scripts/ci/r/**")
     _filter_step(changed)["with"]["filters"] = yaml.safe_dump(filters)
 
-    problems = _filter_input_problems(changed, alef)
+    problems = _filter_input_problems(changed, delegated, alef)
 
     assert "test-r: no assigned filter covers scripts/ci/r/install-deps.sh" in problems
 
 
 def test_missing_action_working_directory_filter_input_is_reported() -> None:
     workflow = yaml.safe_load(WORKFLOW_PATH.read_text(encoding="utf-8"))
+    delegated = yaml.safe_load(DELEGATED_WORKFLOW_PATH.read_text(encoding="utf-8"))
     alef = tomllib.loads(ALEF_PATH.read_text(encoding="utf-8"))
     changed = copy.deepcopy(workflow)
     filters = yaml.safe_load(_filter_step(changed)["with"]["filters"])
     filters["ruby"].remove("packages/ruby/**")
     _filter_step(changed)["with"]["filters"] = yaml.safe_dump(filters)
 
-    problems = _filter_input_problems(changed, alef)
+    problems = _filter_input_problems(changed, delegated, alef)
 
     assert "build-ruby: no assigned filter covers packages/ruby" in problems
 
 
 def test_missing_relative_script_filter_input_is_reported() -> None:
     workflow = yaml.safe_load(WORKFLOW_PATH.read_text(encoding="utf-8"))
+    delegated = yaml.safe_load(DELEGATED_WORKFLOW_PATH.read_text(encoding="utf-8"))
     alef = tomllib.loads(ALEF_PATH.read_text(encoding="utf-8"))
     changed = copy.deepcopy(workflow)
     filters = yaml.safe_load(_filter_step(changed)["with"]["filters"])
     filters["ruby"].remove("scripts/ci/ruby/**")
     _filter_step(changed)["with"]["filters"] = yaml.safe_dump(filters)
 
-    problems = _filter_input_problems(changed, alef)
+    problems = _filter_input_problems(changed, delegated, alef)
 
     assert "test-ruby: no assigned filter covers scripts/ci/ruby/run-rspec-unix.sh" in problems
