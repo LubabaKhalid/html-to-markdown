@@ -18,3 +18,19 @@ fn should_keep_a_preserved_custom_element_and_following_heading_inside_the_item(
 
     assert_eq!(actual, "1. a\n\n   <my-el></my-el>\n\n   ## h\n   t\n");
 }
+
+#[test]
+fn should_keep_a_top_level_preserved_custom_element_inline() {
+    let options = ConversionOptions {
+        extract_metadata: false,
+        preserve_tags: vec!["my-el".to_string()],
+        tier_strategy: TierStrategy::Tier2,
+        ..ConversionOptions::default()
+    };
+    let actual = convert("<my-el>x</my-el>z", Some(options))
+        .expect("conversion should succeed")
+        .content
+        .unwrap_or_default();
+
+    assert_eq!(actual, "<my-el>x</my-el>z\n");
+}

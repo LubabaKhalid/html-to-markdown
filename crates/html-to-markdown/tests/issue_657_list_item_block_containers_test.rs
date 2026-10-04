@@ -80,6 +80,22 @@ fn should_preserve_a_menu_tag_when_requested() {
 }
 
 #[test]
+fn should_preserve_a_nested_menu_without_reparenting_its_items() {
+    let options = ConversionOptions {
+        extract_metadata: false,
+        preserve_tags: vec!["menu".to_string()],
+        tier_strategy: TierStrategy::Tier2,
+        ..ConversionOptions::default()
+    };
+    let actual = convert("<ul><li>a<menu><li>x</li></menu>z</li></ul>", Some(options))
+        .expect("conversion should succeed")
+        .content
+        .unwrap_or_default();
+
+    assert_eq!(actual, "- a\n\n  <menu><li>x</li></menu>\n\n  z\n");
+}
+
+#[test]
 fn should_not_treat_a_menu_after_an_implicitly_closed_item_as_nested() {
     let options = ConversionOptions {
         bullets: "*+".to_string(),

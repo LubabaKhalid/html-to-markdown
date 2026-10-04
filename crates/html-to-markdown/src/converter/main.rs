@@ -26,9 +26,9 @@ use crate::converter::preprocessing_helpers::{
 use crate::converter::utility::caching::build_dom_context;
 use crate::converter::utility::content::{is_block_level_element, normalized_tag_name};
 use crate::converter::utility::preprocessing::{
-    normalize_bogus_comment_endings, normalize_menu_elements, normalize_split_closing_tags,
-    normalize_unclosed_list_items, preprocess_html, strip_bogus_comments, strip_hidden_elements,
-    strip_script_and_style_tags,
+    PRESERVED_MENU_ATTRIBUTE, normalize_bogus_comment_endings, normalize_menu_elements, normalize_split_closing_tags,
+    normalize_unclosed_list_items, preprocess_html, restore_preserved_menu_elements, strip_bogus_comments,
+    strip_hidden_elements, strip_script_and_style_tags,
 };
 use crate::converter::utility::serialization::serialize_tag_to_html;
 use crate::options::{NewlineStyle, OutputFormat};
@@ -740,12 +740,19 @@ fn convert_node(
                 return;
             }
 
-            if ctx.preserve_tags.contains(tag_name.as_ref()) {
+            let preserved_menu_placeholder = tag_name == "ul"
+                && ctx.preserve_tags.contains("menu")
+                && tag.attributes().get(PRESERVED_MENU_ATTRIBUTE).is_some();
+            if ctx.preserve_tags.contains(tag_name.as_ref()) || preserved_menu_placeholder {
                 let starts_line = at_line_start(output);
-                let html = serialize_tag_to_html(node_handle, parser);
-                let custom_element_starts_block =
-                    tag_name.contains('-') && !crate::converter::list::utils::line_is_bare_list_marker(output);
-                let opens_html_block = starts_line
+                let mut html = serialize_tag_to_html(node_handle, parser);
+                if preserved_menu_placeholder {
+                    html = restore_preserved_menu_elements(&html).into_owned();
+                }
+                let custom_element_starts_block = ctx.in_list_item
+                    && tag_name.contains('-')
+                    && !crate::converter::list::utils::line_is_bare_list_marker(output);
+                let opens_html_block = (starts_line || (preserved_menu_placeholder && ctx.in_list_item))
                     && !ctx.in_marker_text()
                     && !ctx.in_table_cell
                     && !ctx.convert_as_inline
