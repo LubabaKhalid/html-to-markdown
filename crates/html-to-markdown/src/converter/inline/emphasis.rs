@@ -253,10 +253,12 @@ fn handle_strong(
         let mut content = String::with_capacity(64);
         let children = tag.children();
         {
+            let buffer_ctx = ctx.inline_buffer(output, true);
             let strong_ctx = Context {
                 inline_depth: ctx.inline_depth + 1,
                 in_strong: true,
-                ..ctx.inline_buffer(output, true)
+                inline_buffer_after_hard_break: buffer_ctx.inline_buffer_after_hard_break,
+                ..ctx.clone()
             };
             for child_handle in children.top().iter() {
                 walk_node(
@@ -354,9 +356,11 @@ fn handle_emphasis(
         let mut content = String::with_capacity(64);
         let children = tag.children();
         {
+            let buffer_ctx = ctx.inline_buffer(output, true);
             let em_ctx = Context {
                 inline_depth: ctx.inline_depth + 1,
-                ..ctx.inline_buffer(output, true)
+                inline_buffer_after_hard_break: buffer_ctx.inline_buffer_after_hard_break,
+                ..ctx.clone()
             };
             for child_handle in children.top().iter() {
                 walk_node(child_handle, parser, &mut content, options, &em_ctx, depth + 1, dom_ctx);
