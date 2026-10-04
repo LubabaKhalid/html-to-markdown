@@ -249,7 +249,7 @@ title: "Changelog archive: 3.6.20–3.2.0"
 
 ### Added
 
-- **Tiered HTML-to-Markdown conversion architecture.** Clean HTML inputs now have an opt-in
+- **Tiered HTML to Markdown conversion architecture.** Clean HTML inputs now have an opt-in
   fast path through a Tier-1 single-pass byte scanner (`converter/tier1/`); on anything the
   scanner cannot prove byte-equivalent to the existing Tier-2 DOM walker, it returns a
   structured bail and the dispatcher falls back to Tier-2 (`tl::parse` + `walk_node`)

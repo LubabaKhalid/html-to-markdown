@@ -628,7 +628,7 @@ title: "Changelog archive: 2.14.0–1.x"
 
 ## [2.0.0] - 2025-10-03
 
-### 🚀 Major Rewrite: Rust Backend
+### Major Rewrite: Rust Backend
 
 Version 2.0.0 represents a complete rewrite of html-to-markdown with a high-performance Rust backend, delivering **10-30x performance improvements** while maintaining full backward compatibility through a v1 compatibility layer.
 
@@ -685,7 +685,7 @@ These flags can be safely removed from your commands, or you can leave them for 
 
 #### Core Rust Implementation
 
-- **Complete Rust rewrite** of HTML-to-Markdown conversion engine using `scraper` and `html5ever`
+- **Complete Rust rewrite** of HTML to Markdown conversion engine using `scraper` and `html5ever`
 - **Native Rust CLI** with improved argument parsing and validation
 - **PyO3 Python bindings** for seamless Rust/Python integration
 - **Automatic hOCR table extraction** with built-in heuristics for OCR documents

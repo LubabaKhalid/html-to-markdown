@@ -245,7 +245,7 @@
 
 ### Added
 
-- **Tiered HTML-to-Markdown conversion architecture.** Clean HTML inputs now have an opt-in
+- **Tiered HTML to Markdown conversion architecture.** Clean HTML inputs now have an opt-in
   fast path through a Tier-1 single-pass byte scanner (`converter/tier1/`); on anything the
   scanner cannot prove byte-equivalent to the existing Tier-2 DOM walker, it returns a
   structured bail and the dispatcher falls back to Tier-2 (`tl::parse` + `walk_node`)
@@ -915,4 +915,3 @@
 - **`deny_unknown_fields`** added to serde option structs — invalid JSON fields now produce errors instead of being silently ignored.
 - **Ruby e2e generator** — fixed camelCase→snake_case field name conversion.
 - **WASM test options** — added missing `link_style` field.
-
