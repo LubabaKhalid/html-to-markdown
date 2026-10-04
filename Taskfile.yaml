@@ -183,6 +183,11 @@ tasks:
     cmds:
       - python3 scripts/check_ffi_symbols.py {{.CLI_ARGS}}
 
+  check:quality-warnings:
+    desc: "Fail on unsuppressed poly quality warnings"
+    cmds:
+      - python3 scripts/check_quality_warnings.py
+
   check:ffi-symbols:known:
     desc: "check:ffi-symbols, treating the known-missing allowlist as non-blocking"
     cmds:

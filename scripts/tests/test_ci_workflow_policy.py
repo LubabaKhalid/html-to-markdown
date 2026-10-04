@@ -33,3 +33,10 @@ def test_e2e_result_reports_for_every_push_and_pull_request() -> None:
 
     for event in ("push", "pull_request"):
         assert set(workflow["on"][event]) == {"branches"}
+
+
+def test_lint_runs_the_quality_warning_gate_through_task() -> None:
+    workflow = _workflow("ci-lint.yaml")
+    job = workflow["jobs"]["quality-warnings"]
+
+    assert [step["run"] for step in job["steps"] if "run" in step] == ["task check:quality-warnings"]
