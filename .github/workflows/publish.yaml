@@ -3073,6 +3073,14 @@ jobs:
           token: ${{ steps.app-token.outputs.token }}
           persist-credentials: true
 
+      - name: Check out release recovery tooling
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ github.workflow_sha }}
+          path: .release-tooling
+          sparse-checkout: scripts/ci/swift/finalize_release_manifest.py
+          persist-credentials: false
+
       - uses: actions/download-artifact@v8
         with:
           name: swift-checksum
@@ -3086,20 +3094,13 @@ jobs:
           VERSION="${{ needs.prepare.outputs.version }}"
           CHECKSUM=$(cat swift-checksums/*.checksum | tr -d '[:space:]')
 
-          # ~keep A recovery run checks out the already-substituted release tag, then rebuilds
-          # and replaces the artifact bundle. Accept either the placeholder or one prior
-          # checksum, but require exactly one target so the tag always matches the uploaded bytes.
           if ! [[ "${CHECKSUM}" =~ ^[0-9a-f]{64}$ ]]; then
             echo "::error::Expected a single sha256 checksum, got: '${CHECKSUM}'"
             exit 1
           fi
-
-          matches=$(grep -Ec 'checksum: "(__ALEF_SWIFT_CHECKSUM__|[0-9a-f]{64})"' Package.swift || true)
-          if [ "${matches}" -ne 1 ]; then
-            echo "::error::Package.swift must contain exactly one placeholder or sha256 checksum"
-            exit 1
-          fi
-          sed -E -i "s/checksum: \"(__ALEF_SWIFT_CHECKSUM__|[0-9a-f]{64})\"/checksum: \"${CHECKSUM}\"/" Package.swift
+          git config user.name "xberg-dev-publisher[bot]"
+          git config user.email "291994444+xberg-dev-publisher[bot]@users.noreply.github.com"
+          python3 .release-tooling/scripts/ci/swift/finalize_release_manifest.py "${CHECKSUM}" "${VERSION}"
 
           # ~keep The count above cannot see a placeholder alef renamed. This catches that case.
           if grep -nE '__ALEF_[A-Z0-9_]+__' Package.swift; then
@@ -3120,12 +3121,6 @@ jobs:
           # tag conversion (the lease's expected SHA is the annotated tag object, but the
           # server compares it differently after we replace it with a lightweight tag).
           # Use plain `--force` and retry transient network failures.
-          git config user.name "xberg-dev-publisher[bot]"
-          git config user.email "291994444+xberg-dev-publisher[bot]@users.noreply.github.com"
-          if ! git diff --quiet -- Package.swift; then
-            git add Package.swift
-            git commit -m "chore(release): update Swift checksum for ${VERSION}"
-          fi
           git tag -f "v${VERSION}" HEAD
           for attempt in 1 2 3; do
             if git push origin "v${VERSION}" --force; then

@@ -43,8 +43,10 @@ def test_swift_release_finalizer_refreshes_an_existing_checksum() -> None:
     """Recovery runs must replace the checksum written by an earlier build."""
     workflow = yaml.safe_load((ROOT / ".github/workflows/publish.yaml").read_text())
     steps = workflow["jobs"]["update-swift-package-manifest"]["steps"]
+    tooling = next(step for step in steps if step.get("name") == "Check out release recovery tooling")
     update = next(step for step in steps if step.get("name") == "Update Package.swift with version and checksum")
     script = update["run"]
 
-    assert "(__ALEF_SWIFT_CHECKSUM__|[0-9a-f]{64})" in script
-    assert "if ! git diff --quiet -- Package.swift; then" in script
+    assert tooling["with"]["ref"] == "${{ github.workflow_sha }}"
+    assert tooling["with"]["path"] == ".release-tooling"
+    assert 'python3 .release-tooling/scripts/ci/swift/finalize_release_manifest.py "${CHECKSUM}" "${VERSION}"' in script
