@@ -1,5 +1,5 @@
-/// ~keep Whether the current break is the first content inside an inline buffer at paragraph start.
-fn inline_break_starts_paragraph(state: &Tier1State) -> bool {
+/// ~keep Whether the current break is the first content inside inline buffers at paragraph start.
+fn inline_break_starts_paragraph(state: &Tier1State, buffer_len: usize) -> bool {
     let Some((paragraph_index, paragraph_start)) = state
         .stack
         .iter()
@@ -10,15 +10,40 @@ fn inline_break_starts_paragraph(state: &Tier1State) -> bool {
     else {
         return false;
     };
-    let Some(frame) = state.stack[paragraph_index + 1..].iter().find(|frame| frame.own_buffer) else {
-        return false;
-    };
-    let marker_width = match frame.spec.kind {
-        TagKind::Strong | TagKind::Strikethrough | TagKind::Inserted => 2,
-        TagKind::Emphasis => 1,
+    let mut expected_start = paragraph_start;
+    let mut found_inline_buffer = false;
+    for frame in state.stack[paragraph_index + 1..]
+        .iter()
+        .filter(|frame| frame.own_buffer)
+    {
+        let marker_width = emitted_inline_marker_width(state, frame);
+        if frame.content_start.checked_sub(marker_width) != Some(expected_start) {
+            return false;
+        }
+        expected_start = frame.content_start;
+        found_inline_buffer = true;
+    }
+    found_inline_buffer && expected_start == buffer_len
+}
+
+fn emitted_inline_marker_width(state: &Tier1State, frame: &OpenTag) -> usize {
+    match frame.spec.kind {
+        TagKind::Strong
+            if !state.summary_at_top()
+                && !frame
+                    .prev_escape_ctx
+                    .intersects(EscapeCtx::STRONG | EscapeCtx::CODE | EscapeCtx::PRE) =>
+        {
+            2
+        }
+        TagKind::Emphasis if !frame.prev_escape_ctx.intersects(EscapeCtx::CODE | EscapeCtx::PRE) => 1,
+        TagKind::Strikethrough | TagKind::Inserted
+            if !frame.prev_escape_ctx.intersects(EscapeCtx::CODE | EscapeCtx::PRE) =>
+        {
+            2
+        }
         _ => 0,
-    };
-    frame.content_start.saturating_sub(marker_width) == paragraph_start
+    }
 }
 
 /// Emit a void element (no closing tag).
@@ -183,7 +208,8 @@ fn emit_regular_line_break(state: &mut Tier1State, options: &ConversionOptions) 
         .rev()
         .find(|frame| matches!(frame.spec.kind, TagKind::Paragraph))
         .map(|frame| frame.content_start);
-    let starts_in_inline_buffer = inline_break_starts_paragraph(state);
+    let buffer_len = state.cell_or_output_mut().len();
+    let starts_in_inline_buffer = inline_break_starts_paragraph(state, buffer_len);
     let dest = state.cell_or_output_mut();
     if paragraph_start != Some(dest.len()) && !starts_in_inline_buffer {
         crate::converter::main_helpers::trim_trailing_whitespace(dest);
