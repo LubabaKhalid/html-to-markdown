@@ -53,18 +53,20 @@ fn apply_metadata_entry(doc: &mut DocumentMetadata, raw_key: String, value: Stri
         "description" => doc.description = Some(value),
         "author" | "creator" | "publisher" => set_if_empty(&mut doc.author, value),
         key if key.starts_with("og-") => {
-            doc.open_graph.insert(key[3..].replace('-', "_"), value);
+            doc.open_graph
+                .insert(key.trim_start_matches("og-").replace('-', "_"), value);
         }
         key if key.starts_with("twitter-") => {
-            doc.twitter_card.insert(key[8..].replace('-', "_"), value);
+            doc.twitter_card
+                .insert(key.trim_start_matches("twitter-").replace('-', "_"), value);
         }
         key if key.starts_with("dc-") || key.starts_with("dc.") => {
-            apply_dc_field(doc, key.trim_start_matches("dc-").trim_start_matches("dc."), value);
+            apply_dc_field(doc, key.trim_start_matches("dc.").trim_start_matches("dc-"), value);
         }
         key if key.starts_with("dcterms-") || key.starts_with("dcterms.") => {
             apply_dcterms_field(
                 doc,
-                key.trim_start_matches("dcterms-").trim_start_matches("dcterms."),
+                key.trim_start_matches("dcterms.").trim_start_matches("dcterms-"),
                 value,
             );
         }
@@ -251,6 +253,33 @@ mod tests {
 
         assert_eq!(doc.open_graph.get("title"), Some(&"OG Title".to_string()));
         assert_eq!(doc.open_graph.get("description"), Some(&"OG Description".to_string()));
+    }
+
+    #[test]
+    fn should_strip_repeated_open_graph_and_twitter_prefixes() {
+        let mut head_metadata = BTreeMap::new();
+        head_metadata.insert("meta-og-og-title".to_string(), "OG Title".to_string());
+        head_metadata.insert("meta-twitter-twitter-card".to_string(), "summary".to_string());
+
+        let doc = extract_document_metadata(head_metadata, None, None);
+
+        assert_eq!(doc.open_graph.get("title").map(String::as_str), Some("OG Title"));
+        assert_eq!(doc.twitter_card.get("card").map(String::as_str), Some("summary"));
+    }
+
+    #[test]
+    fn should_strip_mixed_dublin_core_prefixes_in_legacy_order() {
+        let mut head_metadata = BTreeMap::new();
+        head_metadata.insert("meta-dc.dc-title".to_string(), "DC Title".to_string());
+        head_metadata.insert(
+            "meta-dcterms.dcterms-description".to_string(),
+            "DCTERMS Description".to_string(),
+        );
+
+        let doc = extract_document_metadata(head_metadata, None, None);
+
+        assert_eq!(doc.title.as_deref(), Some("DC Title"));
+        assert_eq!(doc.description.as_deref(), Some("DCTERMS Description"));
     }
 
     #[test]
