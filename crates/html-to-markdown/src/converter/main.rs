@@ -20,9 +20,7 @@ use crate::converter::main_helpers::{
     trim_line_end_whitespace, trim_trailing_whitespace,
 };
 use crate::converter::plain_text::extract_plain_text;
-use crate::converter::preprocessing_helpers::{
-    has_inline_block_misnest, is_page_header, should_drop_for_preprocessing,
-};
+use crate::converter::preprocessing_helpers::{is_page_header, should_drop_for_preprocessing};
 use crate::converter::utility::caching::build_dom_context;
 use crate::converter::utility::content::{is_block_level_element, normalized_tag_name};
 use crate::converter::utility::preprocessing::{
@@ -39,6 +37,9 @@ use crate::options::ConversionOptions;
 
 use crate::converter::context::{Context, ContextParameters, InlineCollectorHandle};
 use crate::types::structure_collector::StructureCollectorHandle;
+
+mod parse;
+use self::parse::{ParseOutcome, parse_for_conversion};
 
 type ConversionOutput = (
     String,
@@ -76,17 +77,22 @@ pub fn convert_html_impl(
         base_url,
         document_base_href,
     } = parameters;
-    let preprocessed = prepare_html(html, options)?;
+    let preserve_menu = options.preserve_tags.iter().any(|tag| tag.eq_ignore_ascii_case("menu"));
+    let mut preprocessed = prepare_html(html, preserve_menu);
+    let mut attempted_misnest_repair = false;
+    let dom = loop {
+        let repaired = match parse_for_conversion(&preprocessed, preserve_menu, &mut attempted_misnest_repair)? {
+            ParseOutcome::Ready(dom) => break dom,
+            ParseOutcome::Retry(repaired) => repaired,
+        };
+        preprocessed = repaired;
+    };
     let preprocessed_len = preprocessed.len();
-    let dom = tl::parse(&preprocessed, tl::ParserOptions::default())
-        .map_err(|_| crate::error::ConversionError::ParseError("Failed to parse HTML".to_string()))?;
     trace_parse_complete(&dom, preprocessed_len);
     let parser = dom.parser();
     let mut output = String::with_capacity(preprocessed_len.saturating_add(preprocessed_len / 4));
     let dom_ctx = build_dom_context(&dom, parser, preprocessed_len);
-
     let is_plain_text = options.output_format == OutputFormat::Plain;
-
     let frontmatter = prepare_frontmatter(
         &dom,
         parser,
@@ -355,14 +361,12 @@ fn document_language_and_direction(
     (language, direction)
 }
 
-fn prepare_html(html: &str, options: &ConversionOptions) -> Result<String> {
-    let preserve_menu = options.preserve_tags.iter().any(|tag| tag.eq_ignore_ascii_case("menu"));
+fn prepare_html(html: &str, preserve_menu: bool) -> String {
     let mut preprocessed = preprocess_initial_html(html, preserve_menu);
     if has_custom_element_tags(&preprocessed) {
         preprocessed = repair_custom_elements(preprocessed, preserve_menu);
     }
-    preprocessed = ensure_parseable(preprocessed, preserve_menu)?;
-    Ok(repair_inline_block_misnest(preprocessed, preserve_menu))
+    preprocessed
 }
 
 fn preprocess_initial_html(html: &str, preserve_menu: bool) -> String {
@@ -399,54 +403,6 @@ fn repair_custom_elements(preprocessed: String, preserve_menu: bool) -> String {
     tracing::warn!(
         target: "html_to_markdown::convert",
         "custom element tags detected; re-parsed input with html5ever repair fallback"
-    );
-    preprocess_repaired_html(&repaired, preserve_menu)
-}
-
-fn ensure_parseable(mut preprocessed: String, preserve_menu: bool) -> Result<String> {
-    loop {
-        if tl::parse(&preprocessed, tl::ParserOptions::default()).is_ok() {
-            return Ok(preprocessed);
-        }
-        let Some(repaired) = repair_with_html5ever(&preprocessed) else {
-            tracing::error!(
-                target: "html_to_markdown::convert",
-                "failed to parse HTML; no repair strategy recovered a valid document"
-            );
-            return Err(crate::error::ConversionError::ParseError(
-                "Failed to parse HTML".to_string(),
-            ));
-        };
-        tracing::warn!(
-            target: "html_to_markdown::convert",
-            "primary HTML parser failed on preprocessed input; retrying with html5ever-repaired markup"
-        );
-        preprocessed = preprocess_repaired_html(&repaired, preserve_menu);
-    }
-}
-
-fn repair_inline_block_misnest(preprocessed: String, preserve_menu: bool) -> String {
-    let Ok(dom) = tl::parse(&preprocessed, tl::ParserOptions::default()) else {
-        return preprocessed;
-    };
-    let parser = dom.parser();
-    let dom_ctx = build_dom_context(&dom, parser, preprocessed.len());
-    if !has_inline_block_misnest(&dom_ctx, parser) {
-        drop(dom);
-        return preprocessed;
-    }
-    let repaired = repair_with_html5ever(&preprocessed);
-    drop(dom);
-    let Some(repaired) = repaired else {
-        tracing::warn!(
-            target: "html_to_markdown::convert",
-            "block-level element misnested under an inline ancestor; html5ever repair failed, proceeding with original structure"
-        );
-        return preprocessed;
-    };
-    tracing::warn!(
-        target: "html_to_markdown::convert",
-        "misnested HTML elements detected; re-parsed with html5ever repair"
     );
     preprocess_repaired_html(&repaired, preserve_menu)
 }
