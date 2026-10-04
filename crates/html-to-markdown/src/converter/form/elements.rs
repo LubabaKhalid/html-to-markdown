@@ -12,6 +12,7 @@
 //! In Markdown, forms are typically not fully representable, so the handlers
 //! extract and format the content in a readable manner.
 
+use super::FormContext;
 use super::walk_node;
 use std::borrow::Cow;
 
@@ -29,10 +30,11 @@ fn dispatch_form_visitor(
     tag: &tl::HTMLTag,
     parser: &tl::Parser,
     output: &mut String,
-    ctx: &super::Context,
-    depth: usize,
-    dom_ctx: &super::DomContext,
+    context: FormContext<'_>,
 ) -> bool {
+    let FormContext {
+        ctx, depth, dom_ctx, ..
+    } = context;
     use crate::visitor::{NodeContext, NodeType, VisitResult};
 
     let Some(ref visitor_handle) = ctx.visitor else {
@@ -106,14 +108,17 @@ pub fn handle_form(
     node_handle: &tl::NodeHandle,
     parser: &tl::Parser,
     output: &mut String,
-    options: &crate::options::ConversionOptions,
-    ctx: &super::Context,
-    depth: usize,
-    dom_ctx: &super::DomContext,
+    context: FormContext<'_>,
 ) {
+    let FormContext {
+        options,
+        ctx,
+        depth,
+        dom_ctx,
+    } = context;
     if let Some(tl::Node::Tag(tag)) = node_handle.get(parser) {
         #[cfg(feature = "visitor")]
-        if dispatch_form_visitor(node_handle, tag, parser, output, ctx, depth, dom_ctx) {
+        if dispatch_form_visitor(node_handle, tag, parser, output, context) {
             return;
         }
 
@@ -132,7 +137,7 @@ pub fn handle_form(
             return;
         }
 
-        let mut content = String::new();
+        let mut rendered = String::new();
         let children = tag.children();
         {
             // ~keep The element is written at the start of the line, so inside it a list item
@@ -145,13 +150,13 @@ pub fn handle_form(
                 walk_node(
                     child_handle,
                     parser,
-                    &mut content,
+                    &mut rendered,
                     crate::converter::block::container::HandlerContext::new(options, &block_ctx, depth + 1, dom_ctx),
                 );
             }
         }
 
-        let trimmed = content.trim();
+        let trimmed = rendered.trim();
         if !trimmed.is_empty() {
             if !output.is_empty() && !output.ends_with("\n\n") {
                 output.push_str("\n\n");
@@ -178,11 +183,14 @@ pub fn handle_fieldset(
     node_handle: &tl::NodeHandle,
     parser: &tl::Parser,
     output: &mut String,
-    options: &crate::options::ConversionOptions,
-    ctx: &super::Context,
-    depth: usize,
-    dom_ctx: &super::DomContext,
+    context: FormContext<'_>,
 ) {
+    let FormContext {
+        options,
+        ctx,
+        depth,
+        dom_ctx,
+    } = context;
     crate::converter::block::div::handle(
         node_handle,
         parser,
@@ -206,13 +214,16 @@ pub fn handle_legend(
     node_handle: &tl::NodeHandle,
     parser: &tl::Parser,
     output: &mut String,
-    options: &crate::options::ConversionOptions,
-    ctx: &super::Context,
-    depth: usize,
-    dom_ctx: &super::DomContext,
+    context: FormContext<'_>,
 ) {
+    let FormContext {
+        options,
+        ctx,
+        depth,
+        dom_ctx,
+    } = context;
     if let Some(tl::Node::Tag(tag)) = node_handle.get(parser) {
-        let mut content = String::new();
+        let mut rendered = String::new();
 
         let mut legend_ctx = ctx.inline_buffer(output, !ctx.convert_as_inline);
         if !ctx.convert_as_inline {
@@ -225,13 +236,13 @@ pub fn handle_legend(
                 super::walk_node(
                     child_handle,
                     parser,
-                    &mut content,
+                    &mut rendered,
                     crate::converter::block::container::HandlerContext::new(options, &legend_ctx, depth + 1, dom_ctx),
                 );
             }
         }
 
-        let trimmed = content.trim();
+        let trimmed = rendered.trim();
         if !trimmed.is_empty() {
             if ctx.convert_as_inline {
                 output.push_str(trimmed);
@@ -268,13 +279,16 @@ pub fn handle_label(
     node_handle: &tl::NodeHandle,
     parser: &tl::Parser,
     output: &mut String,
-    options: &crate::options::ConversionOptions,
-    ctx: &super::Context,
-    depth: usize,
-    dom_ctx: &super::DomContext,
+    context: FormContext<'_>,
 ) {
+    let FormContext {
+        options,
+        ctx,
+        depth,
+        dom_ctx,
+    } = context;
     if let Some(tl::Node::Tag(tag)) = node_handle.get(parser) {
-        let mut content = String::new();
+        let mut rendered = String::new();
         let children = tag.children();
         let label_ctx = ctx.inline_buffer(output, false);
         {
@@ -282,13 +296,13 @@ pub fn handle_label(
                 super::walk_node(
                     child_handle,
                     parser,
-                    &mut content,
+                    &mut rendered,
                     crate::converter::block::container::HandlerContext::new(options, &label_ctx, depth + 1, dom_ctx),
                 );
             }
         }
 
-        let trimmed = content.trim();
+        let trimmed = rendered.trim();
         if !trimmed.is_empty() {
             output.push_str(trimmed);
         }
@@ -323,11 +337,11 @@ pub fn handle_input(
     node_handle: &tl::NodeHandle,
     parser: &tl::Parser,
     output: &mut String,
-    _options: &crate::options::ConversionOptions,
-    ctx: &super::Context,
-    depth: usize,
-    dom_ctx: &super::DomContext,
+    context: FormContext<'_>,
 ) {
+    let FormContext {
+        ctx, depth, dom_ctx, ..
+    } = context;
     #[cfg(feature = "visitor")]
     if let Some(ref visitor_handle) = ctx.visitor {
         use crate::visitor::{NodeContext, NodeType, VisitResult};
@@ -404,11 +418,14 @@ pub fn handle_textarea(
     node_handle: &tl::NodeHandle,
     parser: &tl::Parser,
     output: &mut String,
-    options: &crate::options::ConversionOptions,
-    ctx: &super::Context,
-    depth: usize,
-    dom_ctx: &super::DomContext,
+    context: FormContext<'_>,
 ) {
+    let FormContext {
+        options,
+        ctx,
+        depth,
+        dom_ctx,
+    } = context;
     if let Some(tl::Node::Tag(tag)) = node_handle.get(parser) {
         let start_len = output.len();
         let children = tag.children();
@@ -443,11 +460,14 @@ pub fn handle_select(
     node_handle: &tl::NodeHandle,
     parser: &tl::Parser,
     output: &mut String,
-    options: &crate::options::ConversionOptions,
-    ctx: &super::Context,
-    depth: usize,
-    dom_ctx: &super::DomContext,
+    context: FormContext<'_>,
 ) {
+    let FormContext {
+        options,
+        ctx,
+        depth,
+        dom_ctx,
+    } = context;
     if let Some(tl::Node::Tag(tag)) = node_handle.get(parser) {
         let children = tag.children();
         {
@@ -478,11 +498,14 @@ pub fn handle_option(
     node_handle: &tl::NodeHandle,
     parser: &tl::Parser,
     output: &mut String,
-    options: &crate::options::ConversionOptions,
-    ctx: &super::Context,
-    depth: usize,
-    dom_ctx: &super::DomContext,
+    context: FormContext<'_>,
 ) {
+    let FormContext {
+        options,
+        ctx,
+        depth,
+        dom_ctx,
+    } = context;
     if let Some(tl::Node::Tag(tag)) = node_handle.get(parser) {
         let mut text = String::new();
         let children = tag.children();
@@ -518,11 +541,14 @@ pub fn handle_optgroup(
     node_handle: &tl::NodeHandle,
     parser: &tl::Parser,
     output: &mut String,
-    options: &crate::options::ConversionOptions,
-    ctx: &super::Context,
-    depth: usize,
-    dom_ctx: &super::DomContext,
+    context: FormContext<'_>,
 ) {
+    let FormContext {
+        options,
+        ctx,
+        depth,
+        dom_ctx,
+    } = context;
     if let Some(tl::Node::Tag(tag)) = node_handle.get(parser) {
         let label = tag
             .attributes()
@@ -569,11 +595,14 @@ pub fn handle_button(
     node_handle: &tl::NodeHandle,
     parser: &tl::Parser,
     output: &mut String,
-    options: &crate::options::ConversionOptions,
-    ctx: &super::Context,
-    depth: usize,
-    dom_ctx: &super::DomContext,
+    context: FormContext<'_>,
 ) {
+    let FormContext {
+        options,
+        ctx,
+        depth,
+        dom_ctx,
+    } = context;
     if let Some(tl::Node::Tag(tag)) = node_handle.get(parser) {
         #[cfg(feature = "visitor")]
         if let Some(ref visitor_handle) = ctx.visitor {
@@ -654,11 +683,14 @@ pub fn handle_progress(
     node_handle: &tl::NodeHandle,
     parser: &tl::Parser,
     output: &mut String,
-    options: &crate::options::ConversionOptions,
-    ctx: &super::Context,
-    depth: usize,
-    dom_ctx: &super::DomContext,
+    context: FormContext<'_>,
 ) {
+    let FormContext {
+        options,
+        ctx,
+        depth,
+        dom_ctx,
+    } = context;
     if let Some(tl::Node::Tag(tag)) = node_handle.get(parser) {
         let start_len = output.len();
         let children = tag.children();
@@ -693,11 +725,14 @@ pub fn handle_meter(
     node_handle: &tl::NodeHandle,
     parser: &tl::Parser,
     output: &mut String,
-    options: &crate::options::ConversionOptions,
-    ctx: &super::Context,
-    depth: usize,
-    dom_ctx: &super::DomContext,
+    context: FormContext<'_>,
 ) {
+    let FormContext {
+        options,
+        ctx,
+        depth,
+        dom_ctx,
+    } = context;
     if let Some(tl::Node::Tag(tag)) = node_handle.get(parser) {
         let start_len = output.len();
         let children = tag.children();
@@ -732,11 +767,14 @@ pub fn handle_output(
     node_handle: &tl::NodeHandle,
     parser: &tl::Parser,
     output: &mut String,
-    options: &crate::options::ConversionOptions,
-    ctx: &super::Context,
-    depth: usize,
-    dom_ctx: &super::DomContext,
+    context: FormContext<'_>,
 ) {
+    let FormContext {
+        options,
+        ctx,
+        depth,
+        dom_ctx,
+    } = context;
     if let Some(tl::Node::Tag(tag)) = node_handle.get(parser) {
         let start_len = output.len();
         let children = tag.children();
@@ -771,11 +809,14 @@ pub fn handle_datalist(
     node_handle: &tl::NodeHandle,
     parser: &tl::Parser,
     output: &mut String,
-    options: &crate::options::ConversionOptions,
-    ctx: &super::Context,
-    depth: usize,
-    dom_ctx: &super::DomContext,
+    context: FormContext<'_>,
 ) {
+    let FormContext {
+        options,
+        ctx,
+        depth,
+        dom_ctx,
+    } = context;
     if let Some(tl::Node::Tag(tag)) = node_handle.get(parser) {
         let start_len = output.len();
         let children = tag.children();
@@ -804,26 +845,23 @@ pub fn handle(
     node_handle: &tl::NodeHandle,
     parser: &tl::Parser,
     output: &mut String,
-    options: &crate::options::ConversionOptions,
-    ctx: &super::Context,
-    depth: usize,
-    dom_ctx: &super::DomContext,
+    context: FormContext<'_>,
 ) {
     match tag_name {
-        "form" => handle_form(tag_name, node_handle, parser, output, options, ctx, depth, dom_ctx),
-        "fieldset" => handle_fieldset(tag_name, node_handle, parser, output, options, ctx, depth, dom_ctx),
-        "legend" => handle_legend(tag_name, node_handle, parser, output, options, ctx, depth, dom_ctx),
-        "label" => handle_label(tag_name, node_handle, parser, output, options, ctx, depth, dom_ctx),
-        "input" => handle_input(tag_name, node_handle, parser, output, options, ctx, depth, dom_ctx),
-        "textarea" => handle_textarea(tag_name, node_handle, parser, output, options, ctx, depth, dom_ctx),
-        "select" => handle_select(tag_name, node_handle, parser, output, options, ctx, depth, dom_ctx),
-        "option" => handle_option(tag_name, node_handle, parser, output, options, ctx, depth, dom_ctx),
-        "optgroup" => handle_optgroup(tag_name, node_handle, parser, output, options, ctx, depth, dom_ctx),
-        "button" => handle_button(tag_name, node_handle, parser, output, options, ctx, depth, dom_ctx),
-        "progress" => handle_progress(tag_name, node_handle, parser, output, options, ctx, depth, dom_ctx),
-        "meter" => handle_meter(tag_name, node_handle, parser, output, options, ctx, depth, dom_ctx),
-        "output" => handle_output(tag_name, node_handle, parser, output, options, ctx, depth, dom_ctx),
-        "datalist" => handle_datalist(tag_name, node_handle, parser, output, options, ctx, depth, dom_ctx),
+        "form" => handle_form(tag_name, node_handle, parser, output, context),
+        "fieldset" => handle_fieldset(tag_name, node_handle, parser, output, context),
+        "legend" => handle_legend(tag_name, node_handle, parser, output, context),
+        "label" => handle_label(tag_name, node_handle, parser, output, context),
+        "input" => handle_input(tag_name, node_handle, parser, output, context),
+        "textarea" => handle_textarea(tag_name, node_handle, parser, output, context),
+        "select" => handle_select(tag_name, node_handle, parser, output, context),
+        "option" => handle_option(tag_name, node_handle, parser, output, context),
+        "optgroup" => handle_optgroup(tag_name, node_handle, parser, output, context),
+        "button" => handle_button(tag_name, node_handle, parser, output, context),
+        "progress" => handle_progress(tag_name, node_handle, parser, output, context),
+        "meter" => handle_meter(tag_name, node_handle, parser, output, context),
+        "output" => handle_output(tag_name, node_handle, parser, output, context),
+        "datalist" => handle_datalist(tag_name, node_handle, parser, output, context),
         _ => {}
     }
 }

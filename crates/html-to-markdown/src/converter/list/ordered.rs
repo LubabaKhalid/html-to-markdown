@@ -6,33 +6,28 @@
 //! - Loose/tight list detection
 //! - Proper indentation and numbering
 
+use super::ListContext;
 use super::utils::{
     DEFAULT_ORDERED_LIST_START, add_list_leading_separator, add_nested_list_trailing_separator,
     calculate_list_nesting_depth, is_loose_list, parse_ordered_list_start, preceding_same_type_list_separator_comment,
     process_list_children, switched_delimiter,
 };
-use crate::options::ConversionOptions;
 #[cfg(feature = "visitor")]
 use std::borrow::Cow;
 use tl;
-
-type Context = crate::converter::Context;
-type DomContext = crate::converter::DomContext;
 
 /// Handle ordered list element (<ol>).
 ///
 /// Extracts the `start` attribute to set initial counter value,
 /// detects loose/tight list format, and processes list items.
 #[allow(clippy::too_many_arguments)]
-pub fn handle_ol(
-    node_handle: &tl::NodeHandle,
-    parser: &tl::Parser,
-    output: &mut String,
-    options: &ConversionOptions,
-    ctx: &Context,
-    depth: usize,
-    dom_ctx: &DomContext,
-) {
+pub fn handle_ol(node_handle: &tl::NodeHandle, parser: &tl::Parser, output: &mut String, context: ListContext<'_>) {
+    let ListContext {
+        options,
+        ctx,
+        depth,
+        dom_ctx,
+    } = context;
     if !super::utils::has_list_item_child(*node_handle, parser, dom_ctx) {
         crate::converter::block::div::handle(
             node_handle,

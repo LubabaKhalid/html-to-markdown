@@ -6,32 +6,27 @@
 //! - Loose/tight list detection
 //! - Proper indentation
 
+use super::ListContext;
 use super::utils::{
     add_list_leading_separator, add_nested_list_trailing_separator, calculate_list_nesting_depth, is_loose_list,
     preceding_same_type_list_separator_comment, process_list_children,
 };
-use crate::options::ConversionOptions;
 #[cfg(feature = "visitor")]
 use std::borrow::Cow;
 use tl;
-
-type Context = crate::converter::Context;
-type DomContext = crate::converter::DomContext;
 
 /// Handle unordered list element (<ul>).
 ///
 /// Detects loose/tight list format, handles nested bullets,
 /// and processes list items with proper indentation.
 #[allow(clippy::too_many_arguments)]
-pub fn handle_ul(
-    node_handle: &tl::NodeHandle,
-    parser: &tl::Parser,
-    output: &mut String,
-    options: &ConversionOptions,
-    ctx: &Context,
-    depth: usize,
-    dom_ctx: &DomContext,
-) {
+pub fn handle_ul(node_handle: &tl::NodeHandle, parser: &tl::Parser, output: &mut String, context: ListContext<'_>) {
+    let ListContext {
+        options,
+        ctx,
+        depth,
+        dom_ctx,
+    } = context;
     if !super::utils::has_list_item_child(*node_handle, parser, dom_ctx) {
         crate::converter::block::div::handle(
             node_handle,

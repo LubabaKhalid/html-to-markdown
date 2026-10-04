@@ -13,6 +13,14 @@ pub mod ordered;
 pub mod unordered;
 pub mod utils;
 
+#[derive(Clone, Copy)]
+pub struct ListContext<'a> {
+    pub options: &'a crate::options::ConversionOptions,
+    pub ctx: &'a super::Context,
+    pub depth: usize,
+    pub dom_ctx: &'a super::DomContext,
+}
+
 /// Dispatches list element handling to the appropriate handler.
 ///
 /// Returns `true` if the element was handled, `false` otherwise.
@@ -31,34 +39,31 @@ pub fn dispatch_list_handler(
     tag: &tl::HTMLTag,
     parser: &tl::Parser,
     output: &mut String,
-    options: &crate::options::ConversionOptions,
-    ctx: &super::Context,
-    depth: usize,
-    dom_ctx: &super::DomContext,
+    context: ListContext<'_>,
 ) -> bool {
     match tag_name {
         "ol" => {
-            ordered::handle(node_handle, parser, output, options, ctx, depth, dom_ctx);
+            ordered::handle(node_handle, parser, output, context);
             true
         }
         "ul" => {
-            unordered::handle(node_handle, parser, output, options, ctx, depth, dom_ctx);
+            unordered::handle(node_handle, parser, output, context);
             true
         }
         "li" => {
-            item::handle_li(node_handle, tag, parser, output, options, ctx, depth, dom_ctx);
+            item::handle_li(node_handle, tag, parser, output, context);
             true
         }
         "dl" => {
-            definition::handle_dl(node_handle, parser, output, options, ctx, depth, dom_ctx);
+            definition::handle_dl(node_handle, parser, output, context);
             true
         }
         "dt" => {
-            definition::handle_dt(node_handle, parser, output, options, ctx, depth, dom_ctx);
+            definition::handle_dt(node_handle, parser, output, context);
             true
         }
         "dd" => {
-            definition::handle_dd(node_handle, parser, output, options, ctx, depth, dom_ctx);
+            definition::handle_dd(node_handle, parser, output, context);
             true
         }
         _ => false,

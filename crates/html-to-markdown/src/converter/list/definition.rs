@@ -5,26 +5,21 @@
 //! - Definition descriptions (dd)
 //! - Plain block formatting (no Pandoc colon syntax)
 
-use crate::options::ConversionOptions;
+use super::ListContext;
 #[cfg(feature = "visitor")]
 use std::borrow::Cow;
 use tl;
 
-type Context = crate::converter::Context;
-type DomContext = crate::converter::DomContext;
-
 /// Handle definition list element (<dl>).
 ///
 /// Groups dt/dd pairs and formats them with proper Markdown separation.
-pub fn handle_dl(
-    node_handle: &tl::NodeHandle,
-    parser: &tl::Parser,
-    output: &mut String,
-    options: &ConversionOptions,
-    ctx: &Context,
-    depth: usize,
-    dom_ctx: &DomContext,
-) {
+pub fn handle_dl(node_handle: &tl::NodeHandle, parser: &tl::Parser, output: &mut String, context: ListContext<'_>) {
+    let ListContext {
+        options,
+        ctx,
+        depth,
+        dom_ctx,
+    } = context;
     let tag = match node_handle.get(parser) {
         Some(tl::Node::Tag(t)) => t,
         _ => return,
@@ -46,7 +41,7 @@ pub fn handle_dl(
         return;
     }
 
-    let mut content = String::new();
+    let mut rendered = String::new();
     let children = tag.children();
     {
         let dl_ctx = crate::converter::list::utils::nested_block_context(output, ctx, options);
@@ -54,13 +49,13 @@ pub fn handle_dl(
             crate::converter::walk_node(
                 child_handle,
                 parser,
-                &mut content,
+                &mut rendered,
                 crate::converter::block::container::HandlerContext::new(options, &dl_ctx, depth + 1, dom_ctx),
             );
         }
     }
 
-    let trimmed = content.trim();
+    let trimmed = rendered.trim();
     if !trimmed.is_empty() {
         // ~keep Inside a list item the list starts at the item's content column (issue #583).
         if ctx.in_list_item && !ctx.in_table_cell && !output.is_empty() {
@@ -78,33 +73,31 @@ pub fn handle_dl(
 ///
 /// Outputs the term text followed by a newline.
 #[cfg_attr(not(feature = "visitor"), allow(unused_variables))]
-pub fn handle_dt(
-    node_handle: &tl::NodeHandle,
-    parser: &tl::Parser,
-    output: &mut String,
-    options: &ConversionOptions,
-    ctx: &Context,
-    depth: usize,
-    dom_ctx: &DomContext,
-) {
+pub fn handle_dt(node_handle: &tl::NodeHandle, parser: &tl::Parser, output: &mut String, context: ListContext<'_>) {
+    let ListContext {
+        options,
+        ctx,
+        depth,
+        dom_ctx,
+    } = context;
     let tag = match node_handle.get(parser) {
         Some(tl::Node::Tag(t)) => t,
         _ => return,
     };
 
-    let mut content = String::with_capacity(64);
+    let mut rendered = String::with_capacity(64);
     let children = tag.children();
     {
         for child_handle in children.top().iter() {
             crate::converter::walk_node(
                 child_handle,
                 parser,
-                &mut content,
+                &mut rendered,
                 crate::converter::block::container::HandlerContext::new(options, ctx, depth + 1, dom_ctx),
             );
         }
     }
-    let trimmed = content.trim().to_owned();
+    let trimmed = rendered.trim().to_owned();
     if trimmed.is_empty() {
         return;
     }
@@ -166,34 +159,32 @@ pub fn handle_dt(
 ///
 /// Outputs the description as a plain block.
 #[cfg_attr(not(feature = "visitor"), allow(unused_variables))]
-pub fn handle_dd(
-    node_handle: &tl::NodeHandle,
-    parser: &tl::Parser,
-    output: &mut String,
-    options: &ConversionOptions,
-    ctx: &Context,
-    depth: usize,
-    dom_ctx: &DomContext,
-) {
+pub fn handle_dd(node_handle: &tl::NodeHandle, parser: &tl::Parser, output: &mut String, context: ListContext<'_>) {
+    let ListContext {
+        options,
+        ctx,
+        depth,
+        dom_ctx,
+    } = context;
     let tag = match node_handle.get(parser) {
         Some(tl::Node::Tag(t)) => t,
         _ => return,
     };
 
-    let mut content = String::with_capacity(128);
+    let mut rendered = String::with_capacity(128);
     let children = tag.children();
     {
         for child_handle in children.top().iter() {
             crate::converter::walk_node(
                 child_handle,
                 parser,
-                &mut content,
+                &mut rendered,
                 crate::converter::block::container::HandlerContext::new(options, ctx, depth + 1, dom_ctx),
             );
         }
     }
 
-    let trimmed = content.trim().to_owned();
+    let trimmed = rendered.trim().to_owned();
     if trimmed.is_empty() {
         return;
     }

@@ -6,6 +6,7 @@
 //! - Proper bullet/number formatting
 //! - Indentation and spacing
 
+use crate::converter::list::ListContext;
 use crate::converter::list::utils::add_list_leading_separator;
 use crate::converter::main_helpers::effective_max_depth;
 use crate::converter::main_helpers::strip_trailing_backslash_breaks;
@@ -25,29 +26,15 @@ type DomContext = crate::converter::DomContext;
 ///
 /// Processes list item content with support for task lists (checkboxes),
 /// proper indentation, and block-level element detection.
-#[allow(clippy::too_many_arguments)]
 pub fn handle_li(
     node_handle: &tl::NodeHandle,
     tag: &tl::HTMLTag,
     parser: &tl::Parser,
     output: &mut String,
-    options: &ConversionOptions,
-    ctx: &Context,
-    depth: usize,
-    dom_ctx: &DomContext,
+    context: ListContext<'_>,
 ) {
     let mut line_after_text = None;
-    write_li(
-        node_handle,
-        tag,
-        parser,
-        output,
-        options,
-        ctx,
-        depth,
-        dom_ctx,
-        &mut line_after_text,
-    );
+    write_li(node_handle, tag, parser, output, context, &mut line_after_text);
     // ~keep Whether the item has content is known once it is written: a marker line without
     // ~keep content cannot interrupt the text before it either (issue #667).
     if let Some(line_start) = line_after_text {
@@ -61,18 +48,20 @@ pub fn handle_li(
 
 /// Write the list item, and set `line_after_text` to the start of its marker line when that line
 /// follows text inside the list and the check with an item that has content wrote no blank line.
-#[allow(clippy::too_many_arguments)]
 fn write_li(
     node_handle: &tl::NodeHandle,
     tag: &tl::HTMLTag,
     parser: &tl::Parser,
     output: &mut String,
-    options: &ConversionOptions,
-    ctx: &Context,
-    depth: usize,
-    dom_ctx: &DomContext,
+    context: ListContext<'_>,
     line_after_text: &mut Option<usize>,
 ) {
+    let ListContext {
+        options,
+        ctx,
+        depth,
+        dom_ctx,
+    } = context;
     #[allow(clippy::trivially_copy_pass_by_ref)]
     fn find_checkbox<'a>(
         node_handle: &tl::NodeHandle,
@@ -384,9 +373,9 @@ fn write_li(
             Some(TaskFirstContent::Block) => Some(trimmed_task),
             // ~keep An indented code block's first line keeps its indent (issue #634).
             Some(TaskFirstContent::CodeBlock) => {
-                let content = task_text.trim_end();
-                let first = content.len() - content.trim_start().len();
-                Some(&content[content[..first].rfind('\n').map_or(0, |pos| pos + 1)..])
+                let code_content = task_text.trim_end();
+                let first = code_content.len() - code_content.trim_start().len();
+                Some(&code_content[code_content[..first].rfind('\n').map_or(0, |pos| pos + 1)..])
             }
             _ => None,
         };
@@ -484,9 +473,9 @@ fn write_li(
                     && output.is_char_boundary(safe_end)
                 {
                     let rendered = &output[item_start_pos..safe_end];
-                    let content = rendered.trim();
-                    if !content.is_empty() {
-                        sc.borrow_mut().push_list_item(content);
+                    let item_content = rendered.trim();
+                    if !item_content.is_empty() {
+                        sc.borrow_mut().push_list_item(item_content);
                     }
                 }
             }

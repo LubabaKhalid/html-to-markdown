@@ -11,9 +11,9 @@ use std::borrow::Cow;
 use tl::{HTMLTag, NodeHandle, Parser};
 
 use crate::converter::Context;
-use crate::converter::dom_context::DomContext;
 use crate::converter::inline::link::{MarkdownLink, append_markdown_link};
 use crate::converter::main_helpers::tag_name_eq;
+use crate::converter::media::MediaContext;
 use crate::converter::media::first_address;
 use crate::converter::utility::escaping::escape_link_label;
 use crate::converter::utility::preprocessing::sanitize_markdown_url;
@@ -98,11 +98,14 @@ pub fn handle_audio(
     tag: &HTMLTag,
     parser: &Parser,
     output: &mut String,
-    options: &ConversionOptions,
-    ctx: &Context,
-    depth: usize,
-    dom_ctx: &DomContext,
+    context: MediaContext<'_>,
 ) {
+    let MediaContext {
+        options,
+        ctx,
+        depth,
+        dom_ctx,
+    } = context;
     use crate::converter::main::walk_node;
 
     let raw_src = media_element_src(tag, parser, options.inline_data_media);
@@ -200,11 +203,14 @@ pub fn handle_video(
     tag: &HTMLTag,
     parser: &Parser,
     output: &mut String,
-    options: &ConversionOptions,
-    ctx: &Context,
-    depth: usize,
-    dom_ctx: &DomContext,
+    context: MediaContext<'_>,
 ) {
+    let MediaContext {
+        options,
+        ctx,
+        depth,
+        dom_ctx,
+    } = context;
     use crate::converter::main::walk_node;
 
     let raw_src = media_element_src(tag, parser, options.inline_data_media);
@@ -300,11 +306,14 @@ pub fn handle_picture(
     tag: &HTMLTag,
     parser: &Parser,
     output: &mut String,
-    options: &ConversionOptions,
-    ctx: &Context,
-    depth: usize,
-    dom_ctx: &DomContext,
+    context: MediaContext<'_>,
 ) {
+    let MediaContext {
+        options,
+        ctx,
+        depth,
+        dom_ctx,
+    } = context;
     use crate::converter::main::walk_node;
 
     for child_handle in tag.children().top().iter() {
@@ -330,13 +339,16 @@ pub fn handle_picture(
 pub fn handle_iframe(
     node_handle: &NodeHandle,
     tag: &HTMLTag,
-    output: &mut String,
-    options: &ConversionOptions,
-    ctx: &Context,
-    depth: usize,
-    dom_ctx: &DomContext,
     parser: &Parser,
+    output: &mut String,
+    context: MediaContext<'_>,
 ) {
+    let MediaContext {
+        options,
+        ctx,
+        depth,
+        dom_ctx,
+    } = context;
     let raw_src = crate::converter::utility::attributes::decoded_attribute(tag, "src").unwrap_or(Cow::Borrowed(""));
     let base_resolved_src = ctx.resolve_url(&raw_src);
     let src = sanitize_markdown_url(base_resolved_src.as_deref().unwrap_or(&raw_src)).into_owned();

@@ -189,10 +189,12 @@ impl TagDispatcher<'_, '_> {
                     self.tag,
                     self.parser,
                     self.output,
-                    self.handler.options,
-                    self.handler.ctx,
-                    self.handler.depth,
-                    self.handler.dom_ctx,
+                    crate::converter::list::ListContext {
+                        options: self.handler.options,
+                        ctx: self.handler.ctx,
+                        depth: self.handler.depth,
+                        dom_ctx: self.handler.dom_ctx,
+                    },
                 );
             }
             _ => return None,
@@ -235,10 +237,12 @@ impl TagDispatcher<'_, '_> {
                     self.node_handle,
                     self.parser,
                     self.output,
-                    self.handler.options,
-                    self.handler.ctx,
-                    self.handler.depth,
-                    self.handler.dom_ctx,
+                    crate::converter::media::MediaContext {
+                        options: self.handler.options,
+                        ctx: self.handler.ctx,
+                        depth: self.handler.depth,
+                        dom_ctx: self.handler.dom_ctx,
+                    },
                 );
             }
             "form" | "fieldset" | "legend" | "label" | "input" | "textarea" | "select" | "option" | "optgroup"
@@ -248,10 +252,12 @@ impl TagDispatcher<'_, '_> {
                     self.node_handle,
                     self.parser,
                     self.output,
-                    self.handler.options,
-                    self.handler.ctx,
-                    self.handler.depth,
-                    self.handler.dom_ctx,
+                    crate::converter::form::FormContext {
+                        options: self.handler.options,
+                        ctx: self.handler.ctx,
+                        depth: self.handler.depth,
+                        dom_ctx: self.handler.dom_ctx,
+                    },
                 );
             }
             // ~keep Template content is inert, and noscript does not render in the
