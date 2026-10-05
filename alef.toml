@@ -1,5 +1,5 @@
 [workspace]
-alef_version = "0.103.14"
+alef_version = "0.103.15"
 languages = [
   "python",
   "node",
@@ -251,7 +251,7 @@ abstract = "Fast, lossless HTML to Markdown engine."
 repository-code = "https://github.com/xberg-io/html-to-markdown"
 url = "https://xberg.io"
 license = "MIT"
-date-released = "2026-10-04"
+date-released = "2026-10-05"
 
 [[workspace.citation.authors]]
 family-names = "Hirschfeld"
@@ -361,6 +361,10 @@ exclude = [
   "packages/java/**/*.java",
   "test_apps/csharp/**/*.cs",
   "test_apps/java/**/*.java",
+  # Zig 0.16 is the authoritative formatter for its build graph. Poly's Zig formatter removes
+  # continuation indentation that `zig fmt --check` immediately restores, so the two cannot
+  # share ownership of this generated scaffold. The Zig E2E lane still parses and builds it. ~keep
+  "packages/zig/build.zig",
   # htmbench-promoted calibration pair: serde_json's pretty printer always expands short
   # arrays that poly collapses onto one line, so formatting them is undone by the next
   # `bench:calibrate` promotion and the two fight forever. ~keep
@@ -1241,78 +1245,78 @@ categories = ["smoke", "conversion"]
 
 [crates.e2e.registry.packages.python]
 name = "html-to-markdown"
-version = ">=3.17.0"
+version = ">=3.17.1"
 
 [crates.e2e.registry.packages.node]
 name = "@xberg-io/html-to-markdown"
-version = "^3.17.0"
+version = "^3.17.1"
 
 [crates.e2e.registry.packages.rust]
 name = "html-to-markdown-rs"
-version = "3.17.0"
+version = "3.17.1"
 
 [crates.e2e.registry.packages.go]
 module = "github.com/xberg-io/html-to-markdown/packages/go/v3"
-version = "v3.17.0"
+version = "v3.17.1"
 
 [crates.e2e.registry.packages.java]
 name = "io.xberg:html-to-markdown"
-version = "3.17.0"
+version = "3.17.1"
 
 [crates.e2e.registry.packages.csharp]
 name = "XbergIo.HtmlToMarkdown"
-version = "3.17.0"
+version = "3.17.1"
 
 [crates.e2e.registry.packages.php]
 name = "xberg-io/html-to-markdown"
-version = ">=3.17.0"
+version = ">=3.17.1"
 
 [crates.e2e.registry.packages.ruby]
 name = "html-to-markdown"
-version = "~> 3.17.0"
+version = "~> 3.17.1"
 
 [crates.e2e.registry.packages.elixir]
 name = "html_to_markdown"
-version = "~> 3.17.0"
+version = "~> 3.17.1"
 
 [crates.e2e.registry.packages.wasm]
 name = "@xberg-io/html-to-markdown-wasm"
-version = "^3.17.0"
+version = "^3.17.1"
 
 [crates.e2e.registry.packages.r]
 name = "htmltomarkdown"
-version = "3.17.0"
+version = "3.17.1"
 
 [crates.e2e.registry.packages.c]
 name = "html-to-markdown-rs-ffi"
-version = "3.17.0"
+version = "3.17.1"
 
 [crates.e2e.registry.packages.kotlin_android]
 name = "io.xberg:html-to-markdown-android"
-version = "3.17.0"
+version = "3.17.1"
 
 [crates.e2e.registry.packages.swift]
 name = "HtmlToMarkdown"
-version = "3.17.0"
+version = "3.17.1"
 
 [crates.e2e.registry.packages.dart]
 name = "h2m"
-version = "^3.17.0"
+version = "^3.17.1"
 
 [crates.e2e.registry.packages.zig]
 name = "html_to_markdown"
-version = "3.17.0"
-hash = "html_to_markdown_rs-3.17.0-QtXyW6p0AQARDHIsBKu1XVrpRf5J7ornocJZf2alzaq5"
+version = "3.17.1"
+hash = "html_to_markdown_rs-3.17.1-QtXyW6p0AQARDHIsBKu1XVrpRf5J7ornocJZf2alzaq5"
 
 [crates.e2e.registry.packages.php_ext]
 name = "xberg-io/html-to-markdown"
-version = "3.17.0"
+version = "3.17.1"
 
 [crates.e2e.registry.packages.homebrew]
 tap = "xberg-io/tap"
 cli_formula = "html-to-markdown"
 ffi_formula = "libhtml-to-markdown"
-version = "3.17.0"
+version = "3.17.1"
 
 [crates.e2e.packages.rust]
 path = "../../crates/html-to-markdown"
@@ -1328,7 +1332,7 @@ path = "../../crates/html-to-markdown-node"
 [crates.e2e.packages.go]
 module = "github.com/xberg-io/html-to-markdown/packages/go/v3"
 path = "../../packages/go"
-version = "v3.17.0"
+version = "v3.17.1"
 
 [crates.e2e.packages.php]
 name = "xberg-io/html-to-markdown"

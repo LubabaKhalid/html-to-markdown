@@ -9,6 +9,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.17.1] - 2026-10-05
+
+### Fixed
+
+- Caller-provided `base_url` values now resolve relative URLs without being emitted as document
+  `base` metadata when the source has no `<base href>`
+  ([#743](https://github.com/xberg-io/html-to-markdown/issues/743)).
+
 ## [3.17.0] - 2026-10-04
 
 ### Added

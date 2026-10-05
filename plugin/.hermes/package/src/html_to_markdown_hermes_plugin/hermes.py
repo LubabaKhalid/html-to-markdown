@@ -1,6 +1,6 @@
 # AI-RULEZ :: GENERATED FILE — DO NOT EDIT
 # Content-Hash: blake3:37afa818c3d0b98819c2cbb5a6b3bc7aecb66c6e37a8a1ffa2c410efee24b057
-# Source-Hash: blake3:5cddf22ca2a6726d96d4be622369ebeaea1529a2ececa777eb837ed1053d6c95
+# Source-Hash: blake3:8e7932df685e0487bac27dc9f1f00b7f27145f5ba4960891b86397055239407e
 # Schema-Version: v1
 
 """Hermes adapter for html-to-markdown.
