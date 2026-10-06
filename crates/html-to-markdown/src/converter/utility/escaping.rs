@@ -38,10 +38,32 @@ pub fn escape_link_label(text: &str) -> Cow<'_, str> {
 
 /// Escape raw image-alt text before placing it inside a Markdown image label. ~keep
 pub fn escape_image_alt(text: &str) -> Cow<'_, str> {
-    match crate::text::escape(text, false, false, false, false) {
-        Cow::Borrowed(escaped) => escape_link_label(escaped),
-        Cow::Owned(escaped) => Cow::Owned(escape_link_label(&escaped).into_owned()),
+    if !text.contains("\n\n") {
+        return match crate::text::escape(text, false, false, false, false) {
+            Cow::Borrowed(escaped) => escape_link_label(escaped),
+            Cow::Owned(escaped) => Cow::Owned(escape_link_label(&escaped).into_owned()),
+        };
     }
+
+    let mut normalized = String::with_capacity(text.len() + 8);
+    let mut chars = text.chars().peekable();
+
+    while let Some(ch) = chars.next() {
+        if ch == '\n' && chars.peek() == Some(&'\n') {
+            normalized.push_str("&#10;");
+            chars.next();
+
+            while chars.peek() == Some(&'\n') {
+                normalized.push_str("&#10;");
+                chars.next();
+            }
+        } else {
+            normalized.push(ch);
+        }
+    }
+
+    let escaped = crate::text::escape(&normalized, false, false, false, false);
+    Cow::Owned(escape_link_label(&escaped).into_owned())
 }
 
 /// Escape the brackets in a link label or image alt text that would otherwise terminate it.
@@ -454,6 +476,21 @@ mod tests {
     #[test]
     fn escape_link_label_leaves_an_already_escaped_opening_bracket_unchanged() {
         assert_eq!(escape_link_label("\\[a"), "\\[a");
+    }
+
+    #[test]
+    fn escape_image_alt_encodes_blank_line_as_html_line_feed() {
+        assert_eq!(escape_image_alt("A\n\n B C"), "A&#10; B C");
+    }
+
+    #[test]
+    fn escape_image_alt_encodes_each_additional_blank_line() {
+        assert_eq!(escape_image_alt("A\n\n\nB"), "A&#10;&#10;B");
+    }
+
+    #[test]
+    fn escape_image_alt_preserves_single_newline() {
+        assert_eq!(escape_image_alt("A\nB"), "A\nB");
     }
 
     // ~keep Regression for CommonMark spec examples 642/643: a `<br>`-produced hard
